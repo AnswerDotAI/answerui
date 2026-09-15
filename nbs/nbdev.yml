@@ -1,0 +1,14 @@
+project:
+  output-dir: _docs
+
+website:
+  title: "answerui"
+  site-url: "https://AnswerDotAI.github.io/answerui"
+  description: "A semantic HTML UI framework for FastHTML apps"
+  repo-branch: main
+  repo-url: "https://github.com/AnswerDotAI/answerui"
+
+format-links:
+  - html
+  - format: commonmark
+    text: Markdown

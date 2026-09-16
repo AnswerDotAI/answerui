@@ -2,7 +2,7 @@
 
 Modules:
 
-- `answerui.layout`: Stack, cluster, grid, and document flow"""
+- `answerui.overlays`: Popovers, menus, dialogs, drawers, and tooltips"""
 
 __version__ = "0.0.1"
 
@@ -14,3 +14,7 @@ from .tokens import *
 from .base import *
 from .layout import *
 from .controls import *
+from .surfaces import *
+from .status import *
+from .overlays import *
+from .navigation import *

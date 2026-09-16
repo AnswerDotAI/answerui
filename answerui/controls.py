@@ -16,7 +16,7 @@ from .demo import example
 from .layout import Stack, Cluster
 
 # %% ../nbs/08_controls.ipynb #e7db663f
-Button = hypelt('Button', layer='components', doc='A key: raised at rest, down while active or busy, latched by `aria-pressed`; `secondary` for the lesser action.', css=r"""
+_button_css = r"""
 button {
   --face: var(--v); --_shift: 0px;
   --pad-block: var(--space-2); --pad-inline: var(--space);
@@ -40,7 +40,7 @@ button[secondary] { --face: var(--n-2); color: var(--n2); border-color: var(--n-
 button[secondary]:hover { --face: var(--v-3); }
 button[secondary]:is(:active, [aria-busy=true], [aria-pressed=true]) { --face: var(--n-2); }
 button[secondary][aria-pressed=true] { --face: var(--v-3); color: var(--v2); }
-button:disabled { --face: var(--n-1); color: var(--n); box-shadow: var(--bevel); cursor: not-allowed; }
+button:disabled { --face: var(--n-1); --_shift: 0px; color: var(--n); box-shadow: var(--bevel); cursor: not-allowed; }
 button[secondary]:disabled { --face: var(--n-2); }
 button[aria-pressed=true]:disabled { --face: var(--v-2); color: var(--v); }
 button[aria-busy=true] { cursor: progress; pointer-events: none; }
@@ -49,7 +49,9 @@ button[aria-busy=true]::before {
   border: 2px solid currentColor; border-inline-end-color: transparent; border-radius: var(--radius-full);
   animation: aui-spin calc(var(--motion) * 5) linear infinite;
 }
-""")
+"""
+
+Button = hypelt('Button', layer='components', doc='Raised at rest, down while active or busy, latched by `aria-pressed`; `secondary` for the lesser action.', css=_button_css)
 
 
 # %% ../nbs/08_controls.ipynb #85a54b51
@@ -61,24 +63,26 @@ def _button_example():
 
 
 # %% ../nbs/08_controls.ipynb #739acaf8
-ButtonGroup = hypelt('ButtonGroup', layer='components', doc='A row of keys sharing their edges; a latched neutral key takes the accent wash.', css=r"""
+_button_group_css = r"""
 button-group { display: inline-flex; }
 button-group > button { border-radius: 0; }
 button-group > button:first-child { border-start-start-radius: var(--radius); border-end-start-radius: var(--radius); }
 button-group > button:last-child { border-start-end-radius: var(--radius); border-end-end-radius: var(--radius); }
 button-group > button + button { margin-inline-start: -1px; }
-""")
+"""
+
+ButtonGroup = hypelt('ButtonGroup', layer='components', doc='A row of buttons sharing their edges; a latched secondary button takes the accent wash.', css=_button_group_css)
 
 # %% ../nbs/08_controls.ipynb #208affdd
 @example(ButtonGroup)
 def _button_group_example():
-    return Cluster(ButtonGroup(Button('Day', secondary=True, aria_pressed='false'), Button('Week', secondary=True, aria_pressed='true'), Button('Month', secondary=True, aria_pressed='false')),
+    return Cluster(ButtonGroup(Button('Day', secondary=True, aria_pressed='false'), Button('Week', secondary=True, aria_pressed='true'), Button('Month', secondary=True, aria_pressed='false'), role='radiogroup'),
         ButtonGroup(Button('Bold', secondary=True, aria_pressed='true'), Button('Italic', secondary=True, aria_pressed='false'), Button('Underline', secondary=True, aria_pressed='false', disabled=True)))
 
 # %% ../nbs/08_controls.ipynb #6396d190
 context(':user-invalid, [aria-invalid=true]', 'var(--hue-danger)')
 
-@hypelt(sel='[field]', layer='components', css=r"""
+_field_css = r"""
 [field], [field] > label { display: grid; gap: var(--space-3); font-size: var(--text-1); }
 [field] > label { font-weight: var(--weight1); }
 [field] > small { font-weight: var(--weight); color: var(--n1); }
@@ -95,7 +99,9 @@ context(':user-invalid, [aria-invalid=true]', 'var(--hue-danger)')
 :is(input:not([type=checkbox], [type=radio], [type=range], [type=color]), textarea, select):disabled { --face: var(--n-2); color: var(--n); box-shadow: var(--bevel-in); cursor: not-allowed; }
 ::placeholder { color: var(--n1); }
 textarea { min-block-size: 5rem; resize: vertical; field-sizing: content; }
-""")
+"""
+
+@hypelt(sel='[field]', layer='components', css=_field_css)
 def Field(
     label,        # Label text
     control=None, # The control; defaults to an input
@@ -131,7 +137,7 @@ def _field_example():
         stack=True)
 
 # %% ../nbs/08_controls.ipynb #5758d4d7
-@hypelt(sel='input[role=switch]', layer='components', css=r"""
+_switch_css = r"""
 input[role=switch] { appearance: none; --face: var(--n-3); inline-size: 2.75em; block-size: 1.5em; margin: 0; padding: 2px;
   background: var(--face); border: 1px solid var(--n-1); border-radius: var(--radius-full); box-shadow: var(--bevel-in), var(--sunken);
   display: inline-grid; align-items: center; cursor: pointer;
@@ -143,7 +149,9 @@ input[role=switch]:checked { --face: var(--v); }
 input[role=switch]:checked::before { translate: 1.25em 0; --face: var(--n-3); }
 input[role=switch]:disabled { --face: var(--n-2); box-shadow: var(--bevel-in); cursor: not-allowed; }
 input[role=switch]:disabled::before { --face: var(--n-1); box-shadow: var(--bevel); }
-""")
+"""
+
+@hypelt(sel='input[role=switch]', layer='components', css=_switch_css)
 def Switch(**attrs):
     "A checkbox with the switch role"
     return Input(type='checkbox', role='switch', **attrs)
@@ -154,7 +162,7 @@ def _switch_example():
     return Cluster(Switch(), Switch(checked=True), Switch(disabled=True), Field('Email me about mentions', Switch(checked=True)))
 
 # %% ../nbs/08_controls.ipynb #19d571f7
-@hypelt(sel='input[type=checkbox]:not([role=switch])', layer='components', css=r"""
+_checkbox_css = r"""
 input[type=checkbox]:not([role=switch]), input[type=radio] { appearance: none; --face: var(--n-3); inline-size: 1.15em; block-size: 1.15em; margin: 0;
   background: var(--face); border: 1px solid var(--n-1); border-radius: var(--radius-1); box-shadow: var(--sunken);
   display: inline-grid; place-content: center; cursor: pointer;
@@ -166,18 +174,23 @@ input[type=checkbox]:not([role=switch]):is(:checked, :indeterminate)::before { s
 input[type=checkbox]:not([role=switch]):indeterminate::before { clip-path: none; block-size: .15em; }
 :is(input[type=checkbox]:not([role=switch]), input[type=radio]):disabled { --face: var(--n-2); border-color: var(--n-1); cursor: not-allowed; }
 input[type=checkbox]:not([role=switch]):is(:checked, :indeterminate):disabled { --face: var(--n-1); }
-""")
+"""
+
+@hypelt(sel='input[type=checkbox]:not([role=switch])', layer='components', css=_checkbox_css)
 def Checkbox(**attrs):
     "A checkbox"
     return Input(type='checkbox', **attrs)
 
-@hypelt(sel='input[type=radio]', layer='components', css=r"""
+# %% ../nbs/08_controls.ipynb #6d62523e
+_radio_css = r"""
 input[type=radio] { border-radius: var(--radius-full); }
 input[type=radio]::before { border-radius: var(--radius-full); background: var(--v); }
 input[type=radio]:checked { border-color: var(--v); }
 input[type=radio]:checked::before { scale: 1; }
 input[type=radio]:checked:disabled::before { background: var(--n); }
-""")
+"""
+
+@hypelt(sel='input[type=radio]', layer='components', css=_radio_css)
 def Radio(**attrs):
     "A radio button"
     return Input(type='radio', **attrs)
@@ -192,14 +205,16 @@ Radio.demo = Checkbox.demo
 
 
 # %% ../nbs/08_controls.ipynb #8c8415b9
-@hypelt(sel='input[type=range]', layer='components', on={
+_range_on = {
     ('&', ':load'): r"el.style.setProperty('--val', el.value)",
     ('&', 'input'): r"el.style.setProperty('--val', el.value)",
     ('form', 'reset'): r"""
 await new Promise(r => setTimeout(r, 0));
 for (const input of el.elements)
   if (input.matches('input[type=range]')) input.style.setProperty('--val', input.value);
-"""}, css=r"""
+"""}
+
+_range_css = r"""
 input[type=range] { appearance: none; inline-size: 100%; block-size: 1.5em; margin: 0; background: none; cursor: pointer;
   --track: .6em; --thumb: 1.25em;
   --min: attr(min type(<number>), 0); --max: attr(max type(<number>), 100); --val: attr(value type(<number>), 0);
@@ -216,7 +231,9 @@ input[type=range]:active::-webkit-slider-thumb { box-shadow: var(--bevel-in), va
 input[type=range]:disabled { cursor: not-allowed; }
 input[type=range]:disabled::-webkit-slider-runnable-track { background: linear-gradient(to right, var(--n) var(--p), var(--n-2) 0); }
 input[type=range]:disabled::-webkit-slider-thumb { --face: var(--n-1); box-shadow: var(--bevel); }
-""")
+"""
+
+@hypelt(sel='input[type=range]', layer='components', on=_range_on, css=_range_css)
 def Range(**attrs):
     "A slider"
     return Input(type='range', **attrs)
@@ -224,15 +241,16 @@ def Range(**attrs):
 # %% ../nbs/08_controls.ipynb #03205def
 @example(Range)
 def _range_example():
-    return Form(Range(value=35), Range(value=65, disabled=True), Range(min=0, max=10, value=8), Field('Volume', Range()),
-        Cluster(Button('Reset', type='reset', secondary=True)),
-        stack=True, style='inline-size:16rem')
+    return Stack(Range(value=35), Range(value=65, disabled=True), Range(min=0, max=10, value=8), Field('Volume', Range()),
+        style='inline-size:16rem')
 
 # %% ../nbs/08_controls.ipynb #f48443b5
-Fieldset = hypelt('Fieldset', layer='components', doc='A bordered group of fields under a legend.', css=r"""
+_fieldset_css = r"""
 fieldset { border: 1px solid var(--n-1); border-radius: var(--radius); padding: var(--space); }
 legend { font-weight: var(--weight1); padding-inline: var(--space-2); }
-""")
+"""
+
+Fieldset = hypelt('Fieldset', layer='components', doc='A bordered group of fields under a legend.', css=_fieldset_css)
 
 # %% ../nbs/08_controls.ipynb #883b478c
 @example(Fieldset)

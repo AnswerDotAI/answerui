@@ -11,3 +11,8 @@ website:
       - 06_base.ipynb
       - 07_layout.ipynb
       - 08_controls.ipynb
+      - 09_surfaces.ipynb
+      - 10_status.ipynb
+      - 11_overlays.ipynb
+      - 12_navigation.ipynb
+      - 13_data.ipynb

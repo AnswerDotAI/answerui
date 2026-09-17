@@ -5,12 +5,12 @@ Read this before writing markup for an answerui app, before changing how a page 
 answerui styles semantic HTML. A component is a native tag, or a custom tag where HTML has no element for the concept. A variant or a state is an attribute, and a class does only a utility job. `Button('Save', secondary=True)` renders `<button secondary>`. Every rule, component, and behavior lives in one registry, `reg`, and a page carries them all in two headers:
 
 ```python
-from answerui import *
 from fasthtml.common import *
+from answerui import *
 app = FastHTML(hdrs=reg.hdrs())
 ```
 
-The headers render from the registry per response. A rule registered after the app starts is in the next page.
+Import answerui after FastHTML. It redefines the constructors it styles, and a later `from fasthtml.common import *` puts FastHTML's plain ones back. The headers render from the registry per response. A rule registered after the app starts is in the next page.
 
 ## Building a page
 

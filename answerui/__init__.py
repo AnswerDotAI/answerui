@@ -2,7 +2,7 @@
 
 Modules:
 
-- `answerui.overlays`: Popovers, menus, dialogs, drawers, and tooltips"""
+- `answerui.registry`: Defining hyperelements and collecting their styles and behaviors"""
 
 __version__ = "0.0.1"
 

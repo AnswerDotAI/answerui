@@ -17,17 +17,6 @@ from .overlays import Menu
 from .demo import example
 
 # %% ../nbs/12_navigation.ipynb #f51b5de9
-_app_bar_on = {
-    ('& > [burger]', 'click'): "el.setAttribute('aria-expanded', el.getAttribute('aria-expanded') !== 'true')",
-    ('& > [bar-content] a[href]', 'click'): "el.closest('[app-bar]').querySelector(':scope > [burger]')?.setAttribute('aria-expanded', 'false')",
-    ('&[collapse]', ':load'): r"""
-const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
-new ResizeObserver(() => {
-  el.removeAttribute('collapsed');
-  const below = parseFloat(getComputedStyle(el).getPropertyValue('--collapse-below')) * rem;
-  el.toggleAttribute('collapsed', el.scrollWidth > el.clientWidth || el.clientWidth < below);
-}).observe(el);"""}
-
 _app_bar_css = r"""
 [app-bar] {
   display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space);
@@ -49,27 +38,10 @@ _app_bar_css = r"""
     content: ''; display: block; inline-size: 1.125em; block-size: .875em;
     background: repeating-linear-gradient(currentColor 0 2px, transparent 2px calc(.4375em - 1px)) 0 0 / 100% 100% no-repeat;
   }
-  &[align=center] { nav { margin-inline: auto; } > [end] { margin-inline-start: 0; } }
-  &[align=end] { nav { margin-inline-start: auto; } > [end] { margin-inline-start: 0; } }
-  &[sticky] { position: sticky; inset-block-start: 0; z-index: 1; }
-  &[vivid] { --face: var(--v); color: var(--n-3); nav a[aria-current=page] { background: oklch(from currentColor l c h / .15); color: inherit; } }
-  &[dark] { color-scheme: dark; }
-  &[collapse] {
-    --collapse-below: 48rem; flex-wrap: nowrap;
-    > [bar-content] > *, > [end] { flex-shrink: 0; }
-    nav { flex-wrap: nowrap; }
-    &[collapsed] {
-      flex-wrap: wrap;
-      > [burger] { display: inline-flex; }
-      > [bar-content] { display: none; order: 1; flex-basis: 100%; }
-      &:has(> [burger][aria-expanded=true]) > [bar-content] { display: grid; gap: var(--space-2); }
-      nav { display: grid; margin: 0; }
-    }
-  }
 }
 """
 
-@hypelt(sel='[app-bar]', layer='components', on=_app_bar_on, css=_app_bar_css)
+@hypelt(sel='[app-bar]', layer='components', css=_app_bar_css)
 def AppBar(
     brand,          # Brand content, linked to href
     *c,             # Navigation and other content that collapses with it
@@ -84,6 +56,42 @@ def AppBar(
     burger = Button(type='button', secondary=True, burger=True, aria_controls=id, aria_expanded='false', aria_label='Navigation') if collapse else None
     return Header(A(brand, href=href), content, Cluster(*listify(end), end=True, gap='var(--space-2)'), burger,
         app_bar=True, collapse=collapse, **attrs)
+
+AppBar.variant('align', r"""
+&[align=center] { nav { margin-inline: auto; } > [end] { margin-inline-start: 0; } }
+&[align=end] { nav { margin-inline-start: auto; } > [end] { margin-inline-start: 0; } }
+""", layer='components', doc='Where the links sit in the space after the brand: `center`, or `end` beside the actions.')
+AppBar.variant('sticky', 'position: sticky; inset-block-start: 0; z-index: 1;', layer='components', doc='Stays at the top as the page scrolls.')
+AppBar.variant('vivid', r"""
+--face: var(--v); color: var(--n-3);
+nav a[aria-current=page] { background: oklch(from currentColor l c h / .15); color: inherit; }
+""", layer='components', doc='The brand and links on the accent.')
+AppBar.variant('dark', 'color-scheme: dark;', layer='components', doc='A dark bar whatever the page scheme.')
+
+_collapse_on = {
+    ('& > [burger]', 'click'): "el.setAttribute('aria-expanded', el.getAttribute('aria-expanded') !== 'true')",
+    ('& > [bar-content] a[href]', 'click'): "el.closest('[app-bar]').querySelector(':scope > [burger]')?.setAttribute('aria-expanded', 'false')",
+    ('&', ':load'): r"""
+const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
+new ResizeObserver(() => {
+  el.removeAttribute('collapsed');
+  const below = parseFloat(getComputedStyle(el).getPropertyValue('--collapse-below')) * rem;
+  el.toggleAttribute('collapsed', el.scrollWidth > el.clientWidth || el.clientWidth < below);
+}).observe(el);"""}
+
+AppBar.variant('collapse', r"""
+--collapse-below: 48rem; flex-wrap: nowrap;
+> [bar-content] > *, > [end] { flex-shrink: 0; }
+nav { flex-wrap: nowrap; }
+&[collapsed] {
+  flex-wrap: wrap;
+  > [burger] { display: inline-flex; }
+  > [bar-content] { display: none; order: 1; flex-basis: 100%; }
+  &:has(> [burger][aria-expanded=true]) > [bar-content] { display: grid; gap: var(--space-2); }
+  nav { display: grid; margin: 0; }
+}
+""", on=_collapse_on, layer='components', doc='Folds the content behind a disclosure when the bar is narrower than `--collapse-below` or its content no longer fits; `collapsed` is the state its observer sets.')
+
 
 # %% ../nbs/12_navigation.ipynb #78679da4
 def _links(): return Nav(A('Overview', href='#', aria_current='page'), A('Inventory', href='#'), A('Customers', href='#'), A('Products', href='#'))

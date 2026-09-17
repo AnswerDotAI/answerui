@@ -10,11 +10,11 @@ __all__ = ['TYPROSE']
 # %% ../nbs/06_base.ipynb #9408f75c
 from fastcore.utils import *
 from importlib.resources import files
-from .registry import Rules
-from .tokens import context
+from .registry import reg
+import answerui.tokens  # installs Registry.context
 
 # %% ../nbs/06_base.ipynb #33f584b9
-Rules('reset', r"""
+reg.rule('reset', r"""
 *, *::before, *::after { box-sizing: border-box; }
 :where(body, h1, h2, h3, h4, h5, h6, p, ul, ol, dl, dd, blockquote, figure, figcaption, pre, hr, table) { margin: 0; }
 img, picture, video, canvas, svg { max-inline-size: 100%; block-size: auto; }
@@ -22,8 +22,8 @@ button, input, textarea, select { font: inherit; color: inherit; }
 """, layer='reset', doc='Border-box sizing, no block margins, media constrained, controls inheriting text.')
 
 # %% ../nbs/06_base.ipynb #7024f5fe
-context('mark', 'var(--hue-warning)')
-Rules('document', r"""
+reg.context('mark', 'var(--hue-warning)')
+reg.rule('document', r"""
 :root { accent-color: var(--v); caret-color: var(--v); background: var(--n-3); }
 * { scrollbar-color: var(--n1) transparent; }
 body { color: var(--n2); font: var(--weight) var(--text)/var(--leading) var(--font); container-type: inline-size; }
@@ -51,21 +51,24 @@ tbody tr { border-block-end: 1px solid var(--n-1); }
 mark { background: var(--v-3); color: var(--v2); padding: .1em .2em; border-radius: var(--radius-1); }
 """, layer='base', doc='The page, text, headings, links, code, lists, quotes, tables, rules, and marks on the tokens.')
 
+# %% ../nbs/06_base.ipynb #ac244267
+reg.rule('hidden', '[hidden]:not([hidden=until-found]) { display: none; }', layer='utilities', doc='The hidden attribute wins over any display a component sets.')
+
 # %% ../nbs/06_base.ipynb #191dab74
 TYPROSE = files('answerui').joinpath('css/typrose.css').read_text()
 TYPROSE = re.sub(r'(/\*[^*]*\*/\n)?\.prose-(slate|zinc|neutral|stone|invert) \{[^}]*\}\n*', '', TYPROSE)
-TYPROSE = re.sub(r'\.prose-(\w+)', r'[prose=\1]', TYPROSE)
+TYPROSE = re.sub(r'\.prose-(\w+)', r'[prose="\1"]', TYPROSE)
 TYPROSE = re.sub(r'\.prose\b', '[prose]', TYPROSE)
-Rules('typrose', TYPROSE, layer='base', doc='Prose typography from typrose, on the `prose` attribute.')
+reg.rule('typrose', TYPROSE, layer='base', doc='Prose typography from typrose, on the `prose` attribute.')
 
 # %% ../nbs/06_base.ipynb #369818f2
-Rules('prose', r"""
+reg.rule('prose', r"""
 [prose] {
-  max-inline-size: 65ch;
+  max-inline-size: 65ch; font-size: calc(var(--text) * var(--prose-font-scale));
   --prose-body: var(--n2); --prose-headings: var(--n2); --prose-bold: var(--n2); --prose-quotes: var(--n2); --prose-code: var(--n2);
   --prose-links: var(--v);
   --prose-lead: var(--n1); --prose-counters: var(--n1); --prose-captions: var(--n1);
   --prose-bullets: var(--n-1); --prose-hr: var(--n-1); --prose-quote-borders: var(--n-1); --prose-td-borders: var(--n-1);
   --prose-th-borders: var(--n);
 }
-""", layer='base', doc='typrose colours mapped onto the ladder, and the reading measure.')
+""", layer='base', doc='typrose colours mapped onto the ladder, its size from `--text`, and the reading measure.')

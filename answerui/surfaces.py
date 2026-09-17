@@ -8,7 +8,7 @@ Docs: https://AnswerDotAI.github.io/answerui/surfaces.html.md"""
 __all__ = ['Card', 'Badge', 'Avatar']
 
 # %% ../nbs/09_surfaces.ipynb #42450679
-from .registry import hypelt
+from .registry import reg, hypelt
 from .layout import Stack, Cluster
 from .demo import example
 from fasthtml.common import H3, P, Span, Img
@@ -42,13 +42,14 @@ _badge_css = r"""
   font-size: var(--text-1); font-weight: var(--weight1); line-height: var(--leading-1);
   border-radius: var(--radius-1); background: var(--v-3); color: var(--v2);
 }
-[badge][secondary] { background: var(--n-1); color: var(--n2); }
 """
 
 @hypelt(sel='[badge]', layer='components', css=_badge_css)
 def Badge(*c, **attrs):
     "A small text label, optionally coloured by a severity attribute"
     return Span(*c, badge=True, **attrs)
+
+Badge.variant('secondary', 'background: var(--n-1); color: var(--n2);', layer='components', doc='A neutral label.')
 
 # %% ../nbs/09_surfaces.ipynb #912f503f
 @example(Badge)
@@ -66,10 +67,6 @@ _avatar_css = r"""
   object-fit: cover; background: var(--v-3); color: var(--v2);
   font-size: calc(var(--avatar-size) * .4); font-weight: var(--weight1); line-height: 1;
 }
-button:has(> [avatar]:only-child) {
-  --pad-block: 1px; --pad-inline: 1px; border-radius: var(--radius-full); --face: var(--n-2); border-color: var(--n-1);
-}
-button:disabled > [avatar]:only-child { opacity: .5; }
 """
 
 @hypelt(sel='[avatar]', layer='components', css=_avatar_css)
@@ -84,6 +81,13 @@ def Avatar(
     initials = parts[0][0] if parts else '?'
     if len(parts) > 1: initials += parts[-1][0]
     return Span(initials.upper(), role='img', aria_label=name or 'Unknown', avatar=True, **attrs)
+
+reg.rule('avatar-button', r"""
+button:has(> [avatar]:only-child) {
+  --pad-block: 1px; --pad-inline: 1px; border-radius: var(--radius-full); --face: var(--n-2); border-color: var(--n-1);
+}
+button:disabled > [avatar]:only-child { opacity: .5; }
+""", layer='components', doc='A button whose only content is an avatar is round on the neutral surface, and fades its avatar when disabled.')
 
 # %% ../nbs/09_surfaces.ipynb #58f4956e
 @example(Avatar)

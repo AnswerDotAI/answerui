@@ -11,41 +11,55 @@ __all__ = ['demo_html', 'demo', 'example']
 from fastcore.utils import *
 from fasthtml.common import to_xml, Div, Iframe, Button, Html, Head, Body, Meta, Style, Script
 from fasthtml.core import htmxsrc
-from .registry import build_css
-from .behaviors import build_js
+from .registry import reg, Hyperelement
+import answerui.behaviors  # installs Registry.build_js
 
 # %% ../nbs/02_demo.ipynb #533a2e38
 def demo_html(
-    *fts,     # Markup to render
-    css=None, # Stylesheet for the document; None uses the registry's build_css()
+    *fts,         # Markup to render
+    registry=reg, # Registry whose stylesheet and behavior script the document carries
+    css=None,     # Stylesheet for the document; None uses the registry's build_css()
 ):
     "A standalone document containing markup, CSS, behaviors, and FastHTML's default htmx"
     head = Head(Meta(charset='utf-8'), Meta(name='viewport', content='width=device-width, initial-scale=1'),
-        Style(build_css() if css is None else css), Script(build_js()), htmxsrc)
+        Style(registry.build_css() if css is None else css), Script(registry.build_js()), htmxsrc)
     return to_xml(Html(head, Body(*fts)))
+
 
 # %% ../nbs/02_demo.ipynb #103de975
 _sizer = Script(r"new ResizeObserver(() => frameElement.style.height = document.body.scrollHeight+24+'px').observe(document.body)")
 
 def demo(
-    *fts,        # Markup to render
-    height=None, # Fixed iframe height, e.g. '10rem', for top-layer content the frame can't measure; None follows the content
-    css=None,    # Stylesheet for the document; None uses the registry's build_css()
+    *fts,         # Markup to render
+    registry=reg, # Registry whose stylesheet and behavior script the preview carries
+    css=None,     # Stylesheet for the document; None uses the registry's build_css()
+    height=None,  # Fixed iframe height, e.g. '10rem', for top-layer content the frame can't measure; None follows the content
 ):
     "Render markup in an isolated, replayable notebook preview"
     if height is None: fts += (_sizer,)
     style = f'width:100%;box-sizing:border-box;border:1px solid #e3e3e8;border-radius:8px;height:{height or "auto"};'
-    frame = Iframe(srcdoc=demo_html(*fts, css=css), title='answerui preview', style=style)
+    frame = Iframe(srcdoc=demo_html(*fts, registry=registry, css=css), title='answerui preview', style=style)
     replay = Button('↻', type='button', aria_label='replay', title='replay',
         onclick=r"const f=this.parentElement.nextElementSibling; f.srcdoc=f.srcdoc",
         style='border:0;background:none;font-size:14px;opacity:.6;cursor:pointer;padding:0 4px')
     return Div(Div(replay, style='text-align:right'), frame)
 
+
 # %% ../nbs/02_demo.ipynb #7008abc5
-def example(fn):
-    "Decorate a no-argument markup function to provide fn.demo()"
+def example(h):
+    "Decorate a no-argument markup function as `h.example`, the markup `h.demo()` renders"
     def _attach(f):
-        fn.demo = lambda **kwargs: demo(f(), **kwargs)
+        h.example = f
         return f
     return _attach
+
+@patch
+def demo(
+    self:Hyperelement,
+    css=None,    # Stylesheet for the document; None uses the registry's build_css()
+    height=None, # Fixed iframe height; None follows the content
+):
+    "Render this hyperelement's example with its registry's current styles and behaviors"
+    if not hasattr(self, 'example'): raise ValueError(f'{self.__name__} has no example; attach one with @example({self.__name__})')
+    return demo(self.example(), registry=self.registry, css=css, height=height)
 

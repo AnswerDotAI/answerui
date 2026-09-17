@@ -9,10 +9,10 @@ __all__ = ['Progress', 'Alert', 'Toasts', 'Toast', 'Spinner', 'Skeleton']
 
 # %% ../nbs/10_status.ipynb #1094213c
 from fasthtml.common import Div, Span, H3, P, Label, Template, unqid
-from .registry import hypelt, Rules
+from .registry import hypelt
 from .controls import Button
 from .surfaces import Card
-from .layout import Stack, Cluster
+from .layout import Stack
 from .demo import example
 
 # %% ../nbs/10_status.ipynb #9a13ebff
@@ -23,9 +23,7 @@ _alert_css = r"""
 [alert] > button[dismiss] { flex-shrink: 0; --pad-block: var(--space-3); --pad-inline: var(--space-2); }
 """
 
-_alert_on = {('& > button[dismiss]', 'click'): "el.closest('[alert]').remove()"}
-
-@hypelt(sel='[alert]', layer='components', on=_alert_on, css=_alert_css)
+@hypelt(sel='[alert]', layer='components', css=_alert_css)
 def Alert(
     *c,                # The message and any supporting content
     dismissible=False, # Include a button that removes this alert
@@ -34,6 +32,8 @@ def Alert(
     "An in-page message with optional dismissal"
     close = Button('Dismiss', type='button', secondary=True, dismiss=True) if dismissible else None
     return Div(Stack(*c, gap='var(--space-2)'), close, card=True, alert=True, **attrs)
+
+Alert.rule('dismiss', on={('& > button[dismiss]', 'click'): "el.closest('[alert]').remove()"}, layer='components', doc='The dismiss button removes the alert.')
 
 # %% ../nbs/10_status.ipynb #5752e576
 @example(Alert)
@@ -62,7 +62,7 @@ def Toasts(*c, **attrs):
         aria_relevant='additions text', toasts=True, **attrs)
 
 # %% ../nbs/10_status.ipynb #4b3c797b
-_toast_on = {
+_timer_on = {
     ('&', ':load'): r"""
 if (el._pauseToast) return;
 let left = +el.getAttribute('autodismiss'), started, timer;
@@ -80,8 +80,7 @@ el._resumeToast();""",
     ('&', 'pointerout'): "if (!el.contains(e.relatedTarget)) el._resumeToast?.()",
     ('&', 'focusin'): "el._pauseToast?.()",
     ('&', 'focusout'): "queueMicrotask(() => el._resumeToast?.())",
-    ('&', ':before-cleanup-element'): "if (e.target === el) el._pauseToast?.()",
-    ('& > button[dismiss]', 'click'): "const toast = el.closest('[toast]'); toast._pauseToast?.(); toast.remove()"}
+    ('&', ':before-cleanup-element'): "if (e.target === el) el._pauseToast?.()"}
 
 _toast_css = r"""
 [toast] { display: flex; align-items: flex-start; gap: var(--space);
@@ -94,7 +93,7 @@ _toast_css = r"""
 [toast] > button[dismiss] { flex-shrink: 0; --pad-block: var(--space-3); --pad-inline: var(--space-2); }
 """
 
-@hypelt(sel='[toast]', layer='components', on=_toast_on, css=_toast_css)
+@hypelt(sel='[toast]', layer='components', css=_toast_css)
 def Toast(
     *c,               # The message
     life=5000,        # Unattended milliseconds before removal; None to stay until dismissed
@@ -105,17 +104,18 @@ def Toast(
     close = Button('Dismiss', type='button', secondary=True, dismiss=True) if dismissible else None
     return Div(Stack(*c, gap='var(--space-2)'), close, toast=True, autodismiss=life, **attrs)
 
+Toast.rule('timer', on=_timer_on, layer='components', doc='Removal after `autodismiss` milliseconds unattended; hover or focus pauses the timer, leaving resumes it, and htmx cleanup cancels it.')
+Toast.rule('dismiss', on={('& > button[dismiss]', 'click'): "const toast = el.closest('[toast]'); toast._pauseToast?.(); toast.remove()"}, layer='components', doc='The dismiss button removes the toast at once.')
+
 # %% ../nbs/10_status.ipynb #09576dea
 @example(Toast)
 def _toast_example():
-    Rules('demo-toast-delivery', on={('button[deliver-toast]', 'click'): r"""
-const response = document.getElementById(el.getAttribute('deliver-toast')).innerHTML;
-htmx.swap(el, response, {swapStyle: 'none'});"""}, doc='Deliver the example response through htmx without a server.')
     id = unqid()
     response = Div(Toast('Your changes have been saved.', success=True),
         Toast('The upload failed. Your original file has not changed.', life=None, danger=True),
         hx_swap_oob='beforeend:[toasts]')
-    return Div(Button('Deliver notifications', type='button', secondary=True, deliver_toast=id),
+    return Div(Button('Deliver notifications', type='button', secondary=True,
+        hx_on_click=f"htmx.swap(this, document.getElementById('{id}').innerHTML, {{swapStyle: 'none'}})"),
         Template(response, id=id), Toasts())
 
 # %% ../nbs/10_status.ipynb #1061215e

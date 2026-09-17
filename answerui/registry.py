@@ -104,7 +104,12 @@ class Registry:
         "Remove and return the rule at its full registry key"
         return self.rules.pop(key)
 
-    def __repr__(self): return '\n'.join(f'{name}: {len(rules)} rules' for name,rules in self.layers.items())
+    def __repr__(self): return f'Registry({len(self.rules)} rules, {len(self.elements)} elements)'
+
+    def _repr_markdown_(self):
+        layers = '\n'.join(f'- `{name}`: {len(rules)} rules' for name,rules in self.layers.items())
+        elements = ', '.join(f'`{k}`' for k in self.elements) or 'none'
+        return f'{self!r}\n\nLayers:\n{layers}\n\nElements: {elements}'
 
 reg = Registry()
 
@@ -120,6 +125,7 @@ def build_css(self:Registry):
 
 # %% ../nbs/00_registry.ipynb #3fa0affe
 def _nest(sel, css): return f'{sel} {{\n{css.strip()}\n}}' if css.strip() else ''
+def _generic(*children, **attrs): ...
 
 class Hyperelement:
     "A callable constructor linked to its registered rules and behaviors"
@@ -131,7 +137,7 @@ class Hyperelement:
     def __call__(self, *c, **attrs): return self.fn(*c, **attrs)
 
     @property
-    def __signature__(self): return inspect.signature(self.fn)
+    def __signature__(self): return inspect.signature(_generic if self.generated else self.fn)
 
     @property
     def variants(self):
@@ -147,7 +153,7 @@ class Hyperelement:
 
     def _repr_markdown_(self):
         name = self.__name__
-        sig = '(*children, **attrs)' if self.generated else str(self.__signature__)
+        sig = str(self.__signature__)
         parts = [f'### `{name}{sig}`', self.__doc__, f'Root selector: `{self.sel}`.']
         if self.variants:
             variants = [f'- `{attr}`: {r.doc}' for attr,r in self.variants.items()]

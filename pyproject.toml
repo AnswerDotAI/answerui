@@ -24,6 +24,9 @@ Documentation = "https://AnswerDotAI.github.io/answerui/"
 [project.entry-points.nbdev]
 answerui = "answerui._modidx:d"
 
+[project.entry-points.pyskills]
+answerui = "answerui.skill"
+
 [tool.setuptools.dynamic]
 version = {attr = "answerui.__version__"}
 

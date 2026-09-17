@@ -55,7 +55,7 @@ Button.rule('corners', 'border-radius: 0;')
 A new treatment of a component is a variant. It becomes an attribute the constructor accepts, and `doc(Button)` lists it. Its CSS restates the states it changes, because the base rule's state selectors still apply:
 
 ```python
-Button.variant('quiet', '--face: transparent; box-shadow: none; &:hover { --face: var(--v-3); }', doc='A button that sits in text.')
+Button.variant('quiet', '--face: transparent; color: var(--v); box-shadow: none; &:hover { --face: var(--v-3); }', doc='A button that sits in text.')
 Button('Undo', quiet=True)
 ```
 

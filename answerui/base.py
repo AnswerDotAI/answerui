@@ -56,6 +56,11 @@ mark { background: var(--v-3); color: var(--v2); padding: .1em .2em; border-radi
 # %% ../nbs/06_base.ipynb #ac244267
 reg.rule('hidden', '[hidden]:not([hidden=until-found]) { display: none; }', layer='utilities', doc='The hidden attribute wins over any display a component sets.')
 
+# %% ../nbs/06_base.ipynb #d0d95931
+reg.rule('icons', r'''
+svg:is(:has(> use), [icon]) { inline-size: 1.25em; block-size: 1.25em; vertical-align: -.3em; flex: none; }
+''', layer='base', doc='A sprite icon, or an inline SVG marked `icon`, sized and aligned to the text around it.')
+
 # %% ../nbs/06_base.ipynb #191dab74
 TYPROSE = files('answerui').joinpath('css/typrose.css').read_text()
 TYPROSE = re.sub(r'(/\*[^*]*\*/\n)?\.prose-(slate|zinc|neutral|stone|invert) \{[^}]*\}\n*', '', TYPROSE)

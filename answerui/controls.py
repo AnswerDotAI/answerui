@@ -11,7 +11,7 @@ __all__ = ['Button', 'ButtonGroup', 'Input', 'Textarea', 'Select', 'Fieldset', '
 
 # %% ../nbs/08_controls.ipynb #16a360f9
 from fastcore.utils import *
-from fasthtml.common import Div, Label, Input, Small, Form, Textarea, Select, Option, Legend
+from fasthtml.common import Div, A, Label, Input, Small, Form, Textarea, Select, Option, Legend
 from .registry import reg, hypelt
 import answerui.tokens  # installs Registry.context
 from .demo import example
@@ -19,27 +19,27 @@ from .layout import Stack, Cluster
 
 # %% ../nbs/08_controls.ipynb #e7db663f
 _button_css = r"""
-button {
+:is(button, a[button]) {
   --face: var(--v); --_shift: 0px;
   --pad-block: var(--space-2); --pad-inline: var(--space);
   display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2);
   padding: calc(var(--pad-block) + var(--_shift)) calc(var(--pad-inline) - var(--_shift))
            calc(var(--pad-block) - var(--_shift)) calc(var(--pad-inline) + var(--_shift));
   font-weight: var(--weight1); line-height: var(--leading-1);
-  background: var(--face); color: var(--n-3);
+  background: var(--face); color: var(--n-3); text-decoration: none;
   border: 1px solid transparent; border-radius: var(--radius);
   box-shadow: var(--bevel), var(--raised);
   cursor: pointer;
   transition: box-shadow calc(var(--motion) / 2) var(--ease), padding calc(var(--motion) / 2) var(--ease), background var(--motion) var(--ease);
 }
-button:hover { --face: var(--v1); }
-button:active, button[aria-busy=true], button[aria-pressed=true] {
+:is(button, a[button]):hover { --face: var(--v1); }
+:is(button, a[button]):is(:active, [aria-busy=true], [aria-pressed=true], [aria-expanded=true]) {
   --face: var(--v2); --_shift: calc(1px * var(--relief));
   box-shadow: var(--bevel-in), var(--sunken);
 }
-button:active { transition-duration: calc(var(--motion) / 4); }
-button:disabled { --face: var(--n-1); --_shift: 0px; color: var(--n); box-shadow: var(--bevel); cursor: not-allowed; }
-button[aria-pressed=true]:disabled { --face: var(--v-2); color: var(--v); }
+:is(button, a[button]):active { transition-duration: calc(var(--motion) / 4); }
+:is(button, a[button]):disabled { --face: var(--n-1); --_shift: 0px; color: var(--n); box-shadow: var(--bevel); cursor: not-allowed; }
+:is(button, a[button])[aria-pressed=true]:disabled { --face: var(--v-2); color: var(--v); }
 button[aria-busy=true] { cursor: progress; }
 button[aria-busy=true]::before {
   content: ''; inline-size: 1em; block-size: 1em;
@@ -48,25 +48,36 @@ button[aria-busy=true]::before {
 }
 """
 
-Button = hypelt('Button', layer='components', doc='Raised at rest, down while active or busy, latched by `aria-pressed`; `secondary` for the lesser action.', css=_button_css)
+Button = hypelt('Button', sel='button, a[button]', layer='components', doc='Raised at rest, down while active, busy, or expanded, latched by `aria-pressed`; `secondary` for the lesser action; a link carrying `button` is styled the same way.', css=_button_css)
 
 # %% ../nbs/08_controls.ipynb #1802b6a8
 Button.variant('secondary', r"""
 --face: var(--n-2); color: var(--n2); border-color: var(--n-1);
 &:hover { --face: var(--v-3); }
-&:is(:active, [aria-busy=true], [aria-pressed=true]) { --face: var(--n-2); }
-&[aria-pressed=true] { --face: var(--v-3); color: var(--v2); }
+&:is(:active, [aria-busy=true], [aria-pressed=true], [aria-expanded=true]) { --face: var(--n-2); }
+&:is([aria-pressed=true], [aria-expanded=true]) { --face: var(--v-3); color: var(--v2); }
 &:disabled { --face: var(--n-2); color: var(--n); }
 &[aria-pressed=true]:disabled { --face: var(--v-2); color: var(--v); }
 """, layer='components', doc='The lesser action: the neutral surface with a hairline border, and the accent wash when latched.')
 
+# %% ../nbs/08_controls.ipynb #be7ed1c8
+Button.variant('quiet', r'''
+--face: transparent; color: inherit; border-color: transparent; box-shadow: none;
+&:hover { --face: oklch(from currentColor l c h / .08); }
+&:is(:active, [aria-busy=true], [aria-pressed=true], [aria-expanded=true]) { --face: oklch(from currentColor l c h / .14); --_shift: 0px; box-shadow: none; }
+&:disabled { --face: transparent; color: var(--n); box-shadow: none; }
+''', layer='components', doc='No face, border, or shadow at rest, for an action that should not compete: dismiss, close, and toolbar buttons.')
+
 # %% ../nbs/08_controls.ipynb #85a54b51
 @example(Button)
 def _button_example():
-    return Cluster(Button('Save'), Button('Cancel', secondary=True), Button('Delete', danger=True), Button('Publish', success=True),
-        Button('Locked', disabled=True), Button('Saving', aria_busy='true'), Button('Pinned', aria_pressed='true'), Button('Pinned', secondary=True, aria_pressed='true'),
+    return Cluster(Button('Save'), Button('Cancel', secondary=True), Button('Dismiss', quiet=True), A('Sign up', href='#', button=True), Button('Delete', danger=True), Button('Publish', success=True),
+        Button('Locked', disabled=True), Button('Saving', aria_busy='true'), Button('Pinned', aria_pressed='true'), Button('Pinned', secondary=True, aria_pressed='true'), Button('Pinned', quiet=True, aria_pressed='true'),
         gap='var(--space-2)')
 
+
+# %% ../nbs/08_controls.ipynb #752e6b29
+Button.rule('icon-only', '&:has(> svg:only-child) { --pad-inline: var(--pad-block); }', layer='components', doc='A button whose only child is an svg is square; give it an aria-label.')
 
 # %% ../nbs/08_controls.ipynb #739acaf8
 _button_group_css = r"""

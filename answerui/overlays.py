@@ -10,7 +10,7 @@ Docs: https://AnswerDotAI.github.io/answerui/overlays.html.md"""
 __all__ = ['Dialog', 'Popover', 'Menu', 'Tooltip']
 
 # %% ../nbs/11_overlays.ipynb #cc79711b
-from fasthtml.common import Div, Button, A, P, H2, Hr, FT, unqid
+from fasthtml.common import Div, Button, A, P, Small, H2, Hr, FT, unqid
 from .registry import reg, hypelt
 from .layout import Stack, Cluster
 from .demo import example
@@ -30,18 +30,19 @@ if (e.newState === 'open') {
 } else el._unwatch?.();""",
     ('&', 'toggle', True): r"""
 if (e.target !== el) return;
+if (el._anchor?.matches('[popovertarget], [commandfor]')) el._anchor.setAttribute('aria-expanded', String(el.matches(':popover-open')));
 el._unwatch?.();
 if (!el.matches(':popover-open')) return;
 const anchor = el._anchor;
 const place = () => {
     if (!anchor?.isConnected) { el.hidePopover(); return; }
-    const r = anchor.getBoundingClientRect(), gap = 4, edge = 8;
-    const below = innerHeight - r.bottom - gap - edge, above = r.top - gap - edge;
+    const r = anchor.getBoundingClientRect(), b = (anchor.closest('[anchor]') ?? anchor).getBoundingClientRect(), gap = 4, edge = 8;
+    const below = innerHeight - b.bottom - gap - edge, above = b.top - gap - edge;
     const height = el.scrollHeight + el.offsetHeight - el.clientHeight;
     const up = height > below && above > below;
     el.style.setProperty('--_available-height', Math.max(0, up ? above : below) + 'px');
     const x = getComputedStyle(anchor).direction === 'rtl' ? r.right - el.offsetWidth : r.left;
-    const y = up ? r.top - gap - el.offsetHeight : r.bottom + gap;
+    const y = up ? b.top - gap - el.offsetHeight : b.bottom + gap;
     el.style.left = Math.max(edge, Math.min(x, innerWidth - el.offsetWidth - edge)) + 'px';
     el.style.top = Math.max(edge, Math.min(y, innerHeight - el.offsetHeight - edge)) + 'px';
 };
@@ -123,12 +124,13 @@ _menu_css = r"""
 [menu] > :is(a, button):is(:disabled, [aria-disabled=true]) { color: var(--n1); cursor: default; }
 [menu] > [hidden] { display: none; }
 [menu] > hr { margin-block: var(--space-3); }
+[menu] > :not(a, button, hr) { padding-inline: var(--space-1); }
 """
 
 @hypelt(sel='[popover][menu]', layer='components', css=_menu_css)
 def Menu(
     trigger,  # Label text or a configured Button
-    *items,   # Buttons, links, and Hr separators
+    *items,   # Buttons, links, Hr separators, and other content such as a heading, which aligns with the items
     id=None,  # Panel id; generated when omitted
     **attrs,  # Attributes for the panel
 ):
@@ -147,7 +149,7 @@ def _menu_example():
         Button('Rename', type='button'), Button('Duplicate', type='button', disabled=True),
         Hr(), Button('Delete', type='button', danger=True))
     assert trigger.get('aria-label') == 'Project actions'
-    return Cluster(Menu('Account', A('Profile', href='#'), A('Billing', href='#'),
+    return Cluster(Menu('Account', P('Ada Lovelace'), Small('ada@example.com'), Hr(), A('Profile', href='#'), A('Billing', href='#'),
         Hr(), Button('Sign out', type='button')), trigger, panel)
 
 # %% ../nbs/11_overlays.ipynb #ee3e977b

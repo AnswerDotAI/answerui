@@ -16,7 +16,7 @@ from fastcore.utils import *
 from .registry import hypelt
 from .layout import Cluster
 from .surfaces import Avatar
-from .overlays import Menu
+from .overlays import Dropdown
 from .demo import example
 
 # %% ../nbs/12_navigation.ipynb #f51b5de9
@@ -24,7 +24,7 @@ _navbar_css = r"""
 [navbar] {
   display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space);
   padding: var(--space-2) var(--space);
-  --face: var(--n-2); background: var(--face); color: var(--n2);
+  --face: var(--n-3); background: var(--face); color: var(--n2);
   border-block-end: 1px solid var(--n-1);
   > a:first-child {
     display: flex; align-items: center; gap: var(--space-3); flex-shrink: 0; white-space: nowrap;
@@ -74,6 +74,10 @@ NavBar.variant('dark', 'color-scheme: dark;', layer='components', doc='A dark ba
 _collapse_on = {
     ('& > [burger]', 'click'): "el.setAttribute('aria-expanded', el.getAttribute('aria-expanded') !== 'true')",
     ('& > [bar-content] a[href]', 'click'): "el.closest('[navbar]').querySelector(':scope > [burger]')?.setAttribute('aria-expanded', 'false')",
+    ('body', 'click'): r"for (const b of document.querySelectorAll('[navbar] > [burger][aria-expanded=true]')) if (!b.closest('[navbar]').contains(e.target)) b.setAttribute('aria-expanded', 'false')",
+    ('body', 'keydown'): r"""
+if (e.key !== 'Escape') return;
+for (const b of document.querySelectorAll('[navbar] > [burger][aria-expanded=true]')) { b.setAttribute('aria-expanded', 'false'); b.focus(); }""",
     ('&', ':load'): r"""
 if (el._collapse) return;
 const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
@@ -95,7 +99,7 @@ nav { flex-wrap: nowrap; }
   &:has(> [burger][aria-expanded=true]) > [bar-content] { display: grid; gap: var(--space-2); }
   nav { display: grid; margin: 0; }
 }
-""", on=_collapse_on, layer='components', doc='Folds the content behind a disclosure when the bar is narrower than `--collapse-below` or its content no longer fits; `collapsed` is the state its observer sets.')
+""", on=_collapse_on, layer='components', doc='Folds the content behind a disclosure when the bar is narrower than `--collapse-below` or its content no longer fits; `collapsed` is the state its observer sets. A click outside the bar or Escape closes it.')
 
 # %% ../nbs/12_navigation.ipynb #78679da4
 def _links(): return Nav(A('Overview', href='#', aria_current='page'), A('Inventory', href='#'), A('Customers', href='#'), A('Products', href='#'))
@@ -103,5 +107,5 @@ def _links(): return Nav(A('Overview', href='#', aria_current='page'), A('Invent
 @example(NavBar)
 def _navbar_example():
     return NavBar('Acme', _links(), Div(Input(type='search', placeholder='Search…', aria_label='Search'), role='search'),
-        end=Menu(Button(Avatar('Ada Lovelace', style='--avatar-size: 1.75rem'), aria_label='Account'), A('Profile', href='#'), A('Settings', href='#'), Hr(), Button('Sign out', type='button')),
+        end=Dropdown(Button(Avatar('Ada Lovelace', style='--avatar-size: 1.75rem'), aria_label='Account'), A('Profile', href='#'), A('Settings', href='#'), Hr(), Button('Sign out', type='button')),
         collapse=True)

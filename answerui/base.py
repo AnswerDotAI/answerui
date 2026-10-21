@@ -44,11 +44,19 @@ blockquote { border-inline-start: 3px solid var(--n-1); padding-inline-start: va
 hr { border: 0; border-block-start: 1px solid var(--n-1); }
 small, figcaption { font-size: var(--text-1); }
 figcaption { color: var(--n1); }
-table { border-collapse: collapse; inline-size: 100%; }
-th, td { padding: var(--space-2) var(--space-1); text-align: start; }
-th { font-weight: var(--weight1); color: var(--n1); }
-thead { border-block-end: 1px solid var(--n); }
-tbody tr { border-block-end: 1px solid var(--n-1); }
+table {
+  display: block; inline-size: fit-content; max-inline-size: 100%; overflow-x: auto;
+  border-collapse: separate; border-spacing: 0; border-block: 1px solid var(--n-1);
+  caption { caption-side: bottom; text-align: start; padding: var(--space-2) var(--space); font-size: var(--text-1); color: var(--n1); }
+  :is(th, td) { padding: var(--space-2) var(--space); text-align: start; white-space: nowrap; }
+  thead th {
+    background: var(--n-2); color: var(--n1);
+    font: var(--weight) var(--text-1) var(--font-mono); text-transform: uppercase; letter-spacing: .08em;
+  }
+  tbody tr > * { border-block-start: 1px solid var(--n-1); }
+  tfoot tr > * { border-block-start: 1px solid var(--n); font-weight: var(--weight1); }
+  :is(th, td):is([num], [align=right]) { text-align: end; font-variant-numeric: tabular-nums; }
+}
 :focus-visible { outline: 2px solid var(--v-1); outline-offset: 2px; }
 mark { background: var(--v-3); color: var(--v2); padding: .1em .2em; border-radius: var(--radius-1); }
 """, layer='base', doc='The page, text, headings, links, code, lists, quotes, tables, rules, and marks on the tokens.')
@@ -64,6 +72,7 @@ svg:is(:has(> use), [icon]) { inline-size: 1.25em; block-size: 1.25em; vertical-
 # %% ../nbs/06_base.ipynb #191dab74
 TYPROSE = files('answerui').joinpath('css/typrose.css').read_text()
 TYPROSE = re.sub(r'(/\*[^*]*\*/\n)?\.prose-(slate|zinc|neutral|stone|invert) \{[^}]*\}\n*', '', TYPROSE)
+TYPROSE = re.sub(r'  /\* Table \*/\n[\s\S]*?tfoot td \{[^}]*\}\n', '', TYPROSE)
 TYPROSE = re.sub(r'\.prose-(\w+)', r'[prose="\1"]', TYPROSE)
 TYPROSE = re.sub(r'\.prose\b', '[prose]', TYPROSE)
 reg.rule('typrose', TYPROSE, layer='base', doc='Prose typography from typrose, on the `prose` attribute.')
@@ -75,7 +84,7 @@ reg.rule('prose', r"""
   --prose-body: var(--n2); --prose-headings: var(--n2); --prose-bold: var(--n2); --prose-quotes: var(--n2); --prose-code: var(--n2);
   --prose-links: var(--v);
   --prose-lead: var(--n1); --prose-counters: var(--n1); --prose-captions: var(--n1);
-  --prose-bullets: var(--n-1); --prose-hr: var(--n-1); --prose-quote-borders: var(--n-1); --prose-td-borders: var(--n-1);
-  --prose-th-borders: var(--n);
+  --prose-bullets: var(--n-1); --prose-hr: var(--n-1); --prose-quote-borders: var(--n-1);
+  table { display: table; margin: calc(var(--sp) * 1.5) 0 0; :is(th, td) { white-space: normal; } }
 }
 """, layer='base', doc='typrose colours mapped onto the ladder, its size from `--text`, and the reading measure.')

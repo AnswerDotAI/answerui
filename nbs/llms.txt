@@ -6,7 +6,8 @@
 
 - [answerui.base](https://AnswerDotAI.github.io/answerui/base.html.md): The reset, the document on the tokens, and prose
 - [answerui.behaviors](https://AnswerDotAI.github.io/answerui/behaviors.html.md): The client runtime: delegated event rules that survive htmx swaps
-- [answerui.controls](https://AnswerDotAI.github.io/answerui/controls.html.md): Buttons, button groups, fields, switches, checkboxes, radios, ranges, and fieldsets
+- [answerui.controls](https://AnswerDotAI.github.io/answerui/controls.html.md): Native form controls styled through their own states, raised to press and sunken to type into
+- [answerui.data](https://AnswerDotAI.github.io/answerui/data.html.md): Tables and other displays of structured data
 - [answerui.demo](https://AnswerDotAI.github.io/answerui/demo.html.md): Isolated rendering of markup with current styles and behaviors, for notebooks and docs
 - [answerui.hdrs](https://AnswerDotAI.github.io/answerui/hdrs.html.md): App integration: the headers that carry the registry's assets
 - [answerui.layout](https://AnswerDotAI.github.io/answerui/layout.html.md): Stack, cluster, grid, and document flow

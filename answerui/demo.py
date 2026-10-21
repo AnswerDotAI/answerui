@@ -25,7 +25,7 @@ def demo_html(
     "A standalone document containing markup, CSS, behaviors, and FastHTML's default htmx"
     head = Head(Meta(charset='utf-8'), Meta(name='viewport', content='width=device-width, initial-scale=1'),
         Style(registry.build_css() if css is None else css), Script(registry.build_js()), htmxsrc)
-    return to_xml(Html(head, Body(*fts)))
+    return to_xml(Html(head, Body(*fts, style='min-block-size: auto')))
 
 
 # %% ../nbs/02_demo.ipynb #103de975

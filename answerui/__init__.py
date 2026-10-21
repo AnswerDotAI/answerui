@@ -4,7 +4,8 @@ Modules:
 
 - `answerui.base`: The reset, the document on the tokens, and prose
 - `answerui.behaviors`: The client runtime: delegated event rules that survive htmx swaps
-- `answerui.controls`: Buttons, button groups, fields, switches, checkboxes, radios, ranges, and fieldsets
+- `answerui.controls`: Native form controls styled through their own states, raised to press and sunken to type into
+- `answerui.data`: Tables and other displays of structured data
 - `answerui.demo`: Isolated rendering of markup with current styles and behaviors, for notebooks and docs
 - `answerui.hdrs`: App integration: the headers that carry the registry's assets
 - `answerui.layout`: Stack, cluster, grid, and document flow
@@ -30,3 +31,4 @@ from .surfaces import *
 from .status import *
 from .overlays import *
 from .navigation import *
+from .data import *

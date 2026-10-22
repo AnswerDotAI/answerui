@@ -103,11 +103,13 @@ reg.rule('motion', r"""
   --motion: 150ms;
   --ease: cubic-bezier(.2, 0, 0, 1);
 }
+html { scroll-behavior: smooth; }
 @media (prefers-reduced-motion: reduce) {
   :root { --motion: 0ms; }
+  html { scroll-behavior: auto; }
 }
 @keyframes aui-spin { to { rotate: 1turn; } }
-""", layer='tokens', doc='A shared duration and easing curve, with zero duration under reduced motion, and the spin shared by busy controls.')
+""", layer='tokens', doc='A shared duration and easing curve, and smooth scrolling, all stilled under reduced motion; and the spin shared by busy controls.')
 
 # %% ../nbs/05_tokens.ipynb #92a7c257
 reg.rule('elevation', r"""

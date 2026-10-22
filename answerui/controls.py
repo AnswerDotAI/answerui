@@ -21,7 +21,7 @@ from .layout import Stack, Cluster
 # %% ../nbs/08_controls.ipynb #e7db663f
 _button_css = r"""
 :is(button, a[button]) {
-  --face: var(--v); --_shift: 0px;
+  --face: var(--v); --face-held: var(--v2); --shadow-held: var(--bevel-in), var(--sunken); --_shift: 0px; --busy-delay: 200ms;
   --pad-block: var(--space-2); --pad-inline: var(--space);
   display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2);
   padding: calc(var(--pad-block) + var(--_shift)) calc(var(--pad-inline) - var(--_shift))
@@ -31,21 +31,26 @@ _button_css = r"""
   border: 1px solid transparent; border-radius: var(--radius);
   box-shadow: var(--bevel), var(--raised);
   cursor: pointer;
-  transition: box-shadow calc(var(--motion) / 2) var(--ease), padding calc(var(--motion) / 2) var(--ease), background var(--motion) var(--ease), opacity var(--motion) var(--ease);
+  transition: box-shadow calc(var(--motion) / 2) var(--ease), padding calc(var(--motion) / 2) var(--ease), background var(--motion) var(--ease), opacity var(--motion) var(--ease), -webkit-text-fill-color var(--motion) var(--ease);
 }
 :is(button, a[button]):hover { --face: var(--v1); }
-:is(button, a[button]):is(:active, [aria-busy=true], .htmx-request, [aria-pressed=true], [aria-expanded=true]) {
-  --face: var(--v2); box-shadow: var(--bevel-in), var(--sunken);
-}
+:is(button, a[button]):is(:active, [aria-busy=true], [aria-pressed=true], [aria-expanded=true]) { --face: var(--face-held); box-shadow: var(--shadow-held); }
 :is(button, a[button]):active { --_shift: calc(1px * var(--relief)); transition-duration: calc(var(--motion) / 4); }
 :is(button, a[button]):disabled { opacity: .5; --_shift: 0px; box-shadow: none; cursor: not-allowed; }
-button:is([aria-busy=true], .htmx-request) { position: relative; -webkit-text-fill-color: transparent; }
+button:is([aria-busy=true], .htmx-request) { position: relative; }
+button[aria-busy=true] { -webkit-text-fill-color: transparent; }
+button > svg { transition: opacity var(--motion) var(--ease); }
 button:is([aria-busy=true], .htmx-request) > svg { opacity: 0; }
 button:is([aria-busy=true], .htmx-request)::before {
   content: ''; position: absolute; inset: 0; margin: auto; inline-size: 1.25em; block-size: 1.25em;
   border: 2px solid currentColor; border-inline-end-color: transparent; border-radius: var(--radius-full);
   animation: aui-spin calc(var(--motion) * 5) linear infinite;
 }
+:is(button, a[button]).htmx-request:not([aria-busy=true]) { animation: aui-sink 0s linear var(--busy-delay) both; }
+button.htmx-request:not([aria-busy=true]) > svg { transition-delay: var(--busy-delay); }
+button.htmx-request:not([aria-busy=true])::before { animation: aui-spin calc(var(--motion) * 5) linear infinite, aui-busy-in var(--motion) var(--ease) var(--busy-delay) both; }
+@keyframes aui-sink { to { --face: var(--face-held); box-shadow: var(--shadow-held); -webkit-text-fill-color: transparent; } }
+@keyframes aui-busy-in { from { opacity: 0; } }
 """
 
 Button = hypelt('Button', sel='button, a[button]', layer='components', doc='Raised at rest, down while active, busy, or expanded, latched by `aria-pressed`; `secondary` for the lesser action; a link carrying `button` is styled the same way.', css=_button_css)
@@ -54,7 +59,7 @@ Button = hypelt('Button', sel='button, a[button]', layer='components', doc='Rais
 Button.variant('secondary', r"""
 --face: var(--n-2); color: var(--n2); border-color: var(--n-1);
 &:hover { --face: var(--v-3); }
-&:is(:active, [aria-busy=true], .htmx-request, [aria-pressed=true], [aria-expanded=true]) { --face: var(--n-2); }
+--face-held: var(--n-2);
 &:is([aria-pressed=true], [aria-expanded=true]) { --face: var(--v-3); color: var(--v2); }
 """, layer='components', doc='The lesser action: the neutral surface with a hairline border, and the accent wash when latched.')
 
@@ -62,7 +67,8 @@ Button.variant('secondary', r"""
 Button.variant('quiet', r'''
 --face: transparent; color: inherit; border-color: transparent; box-shadow: none;
 &:hover { --face: oklch(from currentColor l c h / .08); }
-&:is(:active, [aria-busy=true], .htmx-request, [aria-pressed=true], [aria-expanded=true]) { --face: oklch(from currentColor l c h / .14); --_shift: 0px; box-shadow: none; }
+--face-held: oklch(from currentColor l c h / .14); --shadow-held: none;
+&:active { --_shift: 0px; }
 ''', layer='components', doc='No face, border, or shadow at rest, for an action that should not compete: dismiss, close, and toolbar buttons.')
 
 # %% ../nbs/08_controls.ipynb #85a54b51
@@ -174,7 +180,8 @@ inline-size: 100%; justify-content: start; text-align: start;
 color: inherit; font: inherit; cursor: text;
 border: 1px dashed var(--n); box-shadow: none;
 &:hover { --face: oklch(from currentColor l c h / .08); }
-&:is(:active, [aria-busy=true], .htmx-request, [aria-pressed=true], [aria-expanded=true]) { --face: oklch(from currentColor l c h / .14); --_shift: 0px; box-shadow: none; }
+--face-held: oklch(from currentColor l c h / .14); --shadow-held: none;
+&:active { --_shift: 0px; }
 ''', layer='components', doc='A value drawn as the dashed ghost of the well it becomes; click to edit, and the app swaps the form in.')
 
 # %% ../nbs/08_controls.ipynb #6396d190
@@ -182,8 +189,8 @@ _field_css = r"""
 [field], [field] > label { display: grid; gap: var(--space-3); font-size: var(--text-1); }
 [field] > label { font-weight: var(--weight1); }
 [field] > small { font-weight: var(--weight); color: var(--n1); }
-[field] > small[danger] { color: var(--v2); }
-[field] > label:has(> :is([type=checkbox], [type=radio])) { grid-template-columns: auto 1fr; align-items: center; gap: var(--space-2); font-weight: var(--weight); }
+small[danger] { color: var(--v2); }
+[field] > label:has(> :is([type=checkbox], [type=radio])) { grid-template-columns: auto 1fr; justify-self: start; align-items: center; gap: var(--space-2); font-weight: var(--weight); }
 [field]:has(:disabled) > label { color: var(--n); }
 """
 
@@ -207,6 +214,20 @@ def Field(
         control(aria_describedby=' '.join(filter(None, ids)))
     return Div(Label(*([control, label] if boxed else [label, control])), *descriptions, field=True, **attrs)
 
+
+# %% ../nbs/08_controls.ipynb #48d898b5
+Field.rule('validity', on={
+    ('& :is(input, select, textarea)', 'focusout'): r"""
+const f = el.closest('[field]'); let m = f.querySelector(':scope > small[validation]');
+if (!el.matches(':user-invalid')) { m?.remove(); return }
+if (!m) { m = document.createElement('small'); m.setAttribute('validation', ''); m.setAttribute('danger', ''); f.append(m) }
+m.textContent = el.validationMessage""",
+    ('& :is(input, select, textarea)', 'input'): "if (el.validity.valid) el.closest('[field]').querySelector(':scope > small[validation]')?.remove()",
+}, layer='components', doc="Once the user leaves a control invalid, the browser's own validation message appears under the field; it goes when the value is valid again.")
+
+# %% ../nbs/08_controls.ipynb #f12ffe76
+reg.rule('form-validation', sel='form', on={('& :is(input, select, textarea)', 'input'): r"for (const m of el.form.querySelectorAll('small[validation]')) if (!m.closest('[field]')) m.remove()"},
+    layer='components', doc='A validation message a form came back with, a `small` marked `validation` outside any field, clears once the user edits a control, since it described the values that were sent.')
 
 # %% ../nbs/08_controls.ipynb #98f28199
 @example(Field)

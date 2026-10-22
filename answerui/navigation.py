@@ -13,7 +13,7 @@ __all__ = ['NavBar']
 from fasthtml.common import Header, Nav, A, Div, Button, Input, Hr, unqid
 from fasthtml.svg import Svg, Line
 from fastcore.utils import *
-from .registry import hypelt
+from .registry import hypelt, reg
 from .layout import Cluster
 from .surfaces import Avatar
 from .overlays import Dropdown
@@ -64,7 +64,10 @@ NavBar.variant('align', r"""
 &[align=center] { nav { margin-inline: auto; } > [end] { margin-inline-start: 0; } }
 &[align=end] { nav { margin-inline-start: auto; } > [end] { margin-inline-start: 0; } }
 """, layer='components', doc='Where the links sit in the space after the brand: `center`, or `end` beside the actions.')
-NavBar.variant('sticky', 'position: sticky; inset-block-start: 0; z-index: 1;', layer='components', doc='Stays at the top as the page scrolls.')
+NavBar.variant('sticky', 'position: sticky; inset-block-start: 0; z-index: 1;', layer='components', doc='Stays at the top as the page scrolls, and keeps a scrolled-to anchor from landing under it.',
+    on={('&', ':load'): r'''const set = () => document.documentElement.style.setProperty('--navbar-size', el.getBoundingClientRect().height + 'px');
+set(); new ResizeObserver(set).observe(el)'''})
+reg.rule('anchors', 'html { scroll-padding-block-start: calc(var(--navbar-size, 0px) + var(--space)); }', layer='components', doc='A scrolled-to anchor stops below the sticky navbar, with a little space.')
 NavBar.variant('vivid', r"""
 --face: var(--v); color: var(--n-3);
 nav a[aria-current=page] { background: oklch(from currentColor l c h / .15); color: inherit; }

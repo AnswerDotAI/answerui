@@ -18,7 +18,7 @@ from .demo import example
 # %% ../nbs/13_data.ipynb #ac5f7b09
 _frame_css = r'''
 [frame] {
-  --face: var(--n-3); background: var(--face); overflow-x: auto;
+  --face: var(--n-3); background: var(--face); overflow-x: auto; contain: inline-size;
   border: 1px solid var(--n-1); border-radius: var(--radius); box-shadow: var(--raised);
   > table { display: table; inline-size: 100%; border-block: 0; }
 }

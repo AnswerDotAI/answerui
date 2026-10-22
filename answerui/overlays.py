@@ -38,14 +38,15 @@ const anchor = el._anchor;
 const place = () => {
     if (!anchor?.isConnected) { el.hidePopover(); return; }
     const r = anchor.getBoundingClientRect(), b = (anchor.closest('[anchor]') ?? anchor).getBoundingClientRect(), gap = 4, edge = 8;
-    const below = innerHeight - b.bottom - gap - edge, above = b.top - gap - edge;
+    const vw = document.documentElement.getBoundingClientRect().width, vh = document.documentElement.clientHeight;
+    const below = vh - b.bottom - gap - edge, above = b.top - gap - edge;
     const height = el.scrollHeight + el.offsetHeight - el.clientHeight;
     const up = height > below && above > below;
     el.style.setProperty('--_available-height', Math.max(0, up ? above : below) + 'px');
     const x = getComputedStyle(anchor).direction === 'rtl' ? r.right - el.offsetWidth : r.left;
     const y = up ? b.top - gap - el.offsetHeight : b.bottom + gap;
-    el.style.left = Math.max(edge, Math.min(x, innerWidth - el.offsetWidth - edge)) + 'px';
-    el.style.top = Math.max(edge, Math.min(y, innerHeight - el.offsetHeight - edge)) + 'px';
+    el.style.left = Math.max(edge, Math.min(x, vw - el.offsetWidth - edge)) + 'px';
+    el.style.top = Math.max(edge, Math.min(y, vh - el.offsetHeight - edge)) + 'px';
 };
 if (anchor) {
     place();
@@ -76,7 +77,7 @@ def Popover(*c, popover='auto', **attrs):
     "A floating panel positioned beside the button that opens it"
     return Div(*c, popover=popover, anchored=True, **attrs)
 
-Popover.rule('placement', on=_popover_on, layer='components', doc='Remembers the button that opened the panel, places the panel beside it, and follows scrolling and resizing until it closes.')
+Popover.rule('placement', on=_popover_on, layer='components', doc='Remembers the button that opened the panel, places the panel beside it within the viewport less any scrollbar or its gutter, and follows scrolling and resizing until it closes.')
 
 # %% ../nbs/11_overlays.ipynb #483c7ce2
 @example(Popover)

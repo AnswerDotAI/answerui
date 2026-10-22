@@ -27,6 +27,7 @@ button, input, textarea, select { font: inherit; color: inherit; }
 reg.context('mark', 'var(--hue-warning)')
 reg.rule('document', r"""
 :root { accent-color: var(--v); caret-color: var(--v); background: var(--n-3); }
+html { scrollbar-gutter: stable; }
 * { scrollbar-color: var(--n1) transparent; }
 body { color: var(--n2); font: var(--weight) var(--text)/var(--leading) var(--font); container-type: inline-size; }
 h1, h2, h3, h4, h5, h6 { font-weight: var(--weight1); line-height: var(--leading-1); text-wrap: balance; }

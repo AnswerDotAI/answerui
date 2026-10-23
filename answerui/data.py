@@ -14,6 +14,7 @@ from fasthtml.common import Div, Caption, Thead, Tbody, Tfoot, Tr, Th, Td
 import fasthtml.components as fc
 from .registry import hypelt
 from .demo import example
+import answerui.base  # the base layer this frame extends
 
 # %% ../nbs/13_data.ipynb #ac5f7b09
 _frame_css = r'''

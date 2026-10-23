@@ -14,6 +14,8 @@ from fasthtml.common import Div, Button, A, P, Small, H2, Hr, FT, unqid
 from .registry import reg, hypelt
 from .layout import Stack, Cluster
 from .demo import example
+import answerui.base  # the reset and tokens this styling is written on
+import answerui.controls  # the buttons and menu items the panels hold
 
 
 # %% ../nbs/11_overlays.ipynb #1f52b05f

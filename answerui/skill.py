@@ -6,7 +6,7 @@ answerui styles semantic HTML. A component is a native tag, or a custom tag wher
 
 ```python
 from fasthtml.common import *
-from answerui import *
+from answerui.all import *
 app = FastHTML(hdrs=reg.hdrs())
 ```
 
@@ -80,7 +80,7 @@ Registering a key that exists replaces its definition in place and keeps its pos
 
 ## Checking the result
 
-In a notebook, `Button.demo()` renders the component's example with the registry's current stylesheet and script in an isolated iframe, so a change followed by `demo()` shows the change. `demo(markup)` renders any composition. `height=` fixes the frame for dialogs, popovers, and other top-layer content the frame cannot measure.
+In a notebook, `Button.demo()` renders the component's example with the registry's current stylesheet and script in an isolated iframe, so a change followed by `demo()` shows the change. `demo(markup)` renders any composition. `height=` fixes the frame for dialogs, popovers, and other top-layer content the frame cannot measure. The notebook stores the frame as HTML and the markup as Markdown, and a model reading the dialog sees the markup.
 
 For a measured check, put the same document in Chrome with `fastcdp` and read computed values:
 

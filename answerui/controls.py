@@ -17,6 +17,7 @@ from .registry import reg, hypelt
 import answerui.tokens  # installs Registry.context
 from .demo import example
 from .layout import Stack, Cluster
+import answerui.base  # the reset this styling is written on
 
 # %% ../nbs/08_controls.ipynb #e7db663f
 _button_css = r"""

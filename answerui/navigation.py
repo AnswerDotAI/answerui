@@ -18,6 +18,8 @@ from .layout import Cluster
 from .surfaces import Avatar
 from .overlays import Dropdown
 from .demo import example
+import answerui.base  # the reset and tokens this styling is written on
+import answerui.controls  # the controls the example places in the bar
 
 # %% ../nbs/12_navigation.ipynb #f51b5de9
 _navbar_css = r"""

@@ -18,7 +18,7 @@ The registry’s headers carry the stylesheet and the behavior script. They rend
 
 ``` python
 from fasthtml.common import *
-from answerui import *
+from answerui.all import *
 ```
 
 ``` python
@@ -59,7 +59,7 @@ reg.rule('theme', ':root { --hue: 150; --radius: 0; }')
 Button.rule('caps', 'text-transform: uppercase;')
 ```
 
-    Button.caps [app] button
+    Button.caps [app] button, a[button]
 
 A variant is a new treatment declared on the component. It becomes an attribute the constructor accepts and appears in the component’s documentation:
 
@@ -67,7 +67,7 @@ A variant is a new treatment declared on the component. It becomes an attribute 
 Button.variant('cta', '--pad-block: var(--space); --pad-inline: var(--space2); font-size: var(--text1);', doc='The landing page call to action.')
 ```
 
-    Button.cta [app] :is(button)[cta]: The landing page call to action.
+    Button.cta [app] :is(button, a[button])[cta]: The landing page call to action.
 
 ![](index_files/custom.png)
 
@@ -77,19 +77,41 @@ Button
 
 ### `Button(*children, **attrs)`
 
-Raised at rest, down while active or busy, latched by `aria-pressed`; `secondary` for the lesser action.
+Raised at rest, down while active, busy, or expanded, latched by `aria-pressed`; `secondary` for the lesser action; a link carrying `button` is styled the same way.
 
-Root selector: `button`.
+Root selector: `button, a[button]`.
 
 Declared variants:
 - `secondary`: The lesser action: the neutral surface with a hairline border, and the accent wash when latched.
 - `quiet`: No face, border, or shadow at rest, for an action that should not compete: dismiss, close, and toolbar buttons.
+- `editable`: A value drawn as the dashed ghost of the well it becomes; click to edit, and the app swaps the form in.
 - `cta`: The landing page call to action.
 
 Rules:
 - `base` (components)
 - `icon-only` (components): A button whose only child is an svg is square; give it an aria-label.
 - `caps` (app)
+
+## Previews in notebooks
+
+`demo(page)` renders markup in an iframe with the current stylesheet and behaviors. The notebook stores the frame, which holds the whole stylesheet, so a notebook with many previews is large, and every style change rewrites every preview.
+
+To keep frames out of git while keeping them in your working copy, run once in each clone:
+
+``` sh
+answerui-install-hooks
+```
+
+This adds a git clean filter that removes preview frames from notebooks as they are staged. The notebooks on disk keep every preview, and the file still records each preview’s markup. A fresh clone shows previews after the cells run.
+
+To regenerate previews when building docs with nbdev, name the processor in `pyproject.toml`:
+
+``` toml
+[tool.nbdev]
+doc_procs = ["answerui.previews:exec_previews"]
+```
+
+`nbdev-docs` then runs each notebook and renders the previews from the current code.
 
 ## With an LLM
 

@@ -14,6 +14,8 @@ from .registry import reg, hypelt
 from .layout import Stack, Cluster
 from .demo import example
 from fasthtml.common import H3, P, Span, Img
+import answerui.base  # the reset and tokens this styling is written on
+import answerui.controls  # the button rules the avatar button overrides
 
 # %% ../nbs/09_surfaces.ipynb #f7a346f2
 _card_css = r"""

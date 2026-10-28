@@ -19,35 +19,49 @@ from .registry import Registry
 _runtime = r"""(() => {
 const rules = [%s];
 const by = {};
-rules.forEach(r => (by[r.ev + '|' + (r.cap ? 1 : 0)] ??= []).push(r));
+rules.forEach(r => r.evs.forEach(ev => (by[ev + '|' + (r.cap ? 1 : 0)] ??= []).push(r)));
 for (const k in by) {
   const [ev, cap] = k.split('|');
   document.addEventListener(ev, e => {
     const t = e.target;
     if (!(t instanceof Element)) return;
     for (const r of by[k]) {
-      if (r.deep) {
-        if (t.matches(r.sel)) r.fn(t, e);
-        t.querySelectorAll(r.sel).forEach(el => r.fn(el, e));
-      } else {
-        const el = t.closest(r.sel);
-        if (el) r.fn(el, e);
-      }
+      const el = t.closest(r.sel);
+      if (el) r.fn(el, e);
     }
   }, {capture: cap === '1'});
 }
+const init = rules.filter(r => r.init);
+if (init.length) htmx.onLoad(root => {
+  const e = new Event('init');
+  for (const r of init) {
+    if (root.matches(r.sel)) r.fn(root, e);
+    root.querySelectorAll(r.sel).forEach(el => r.fn(el, e));
+  }
+});
 })();"""
 
 # %% ../nbs/01_behaviors.ipynb #10fe79ef
+_cleanup = ['htmx:before-cleanup-element', 'htmx:before:cleanup', 'htmx-before-cleanup']
+
 def _event(ev):
-    "The DOM event name: a leading `:` is the htmx shorthand"
-    return 'htmx'+ev if ev.startswith(':') else ev
+    "The canonical event name: a leading `:` is the htmx shorthand, and every spelling of an htmx event becomes `htmx:` plus its hyphenated name"
+    if ev.startswith(':'): ev = 'htmx'+ev
+    if not ev.startswith(('htmx:', 'htmx-')): return ev
+    return 'htmx:' + re.sub(r'(?<=[a-z])(?=[A-Z])', '-', ev[5:]).lower().replace(':', '-')
+
+def _spellings(ev):
+    "The DOM event names a canonical event fires under: htmx 2's hyphenated alias, htmx 4's colon form, and htmx 4's form under FastHTML's `metaCharacter`"
+    if ev == 'init': return []
+    if ev == 'cleanup': return _cleanup
+    if not ev.startswith('htmx:'): return [ev]
+    name = ev[5:]
+    return uniqueify([ev, 'htmx:'+name.replace('-', ':'), 'htmx-'+name])
 
 def _entry(r):
     ev = _event(r['ev'])
-    deep = ev=='htmx:load'
-    return (f'{{sel: {dumps(r["sel"])}, ev: {dumps(ev)}, cap: {dumps(r["cap"])}, '
-        f'deep: {dumps(deep)}, async fn(el, e) {{ {r["js"]} }}}}')
+    return (f'{{sel: {dumps(r["sel"])}, evs: {dumps(_spellings(ev))}, cap: {dumps(r["cap"])}, '
+        f'init: {dumps(ev=="init")}, async fn(el, e) {{ {r["js"]} }}}}')
 
 
 # %% ../nbs/01_behaviors.ipynb #bb776c31

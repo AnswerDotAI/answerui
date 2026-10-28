@@ -67,7 +67,7 @@ NavBar.variant('align', r"""
 &[align=end] { nav { margin-inline-start: auto; } > [end] { margin-inline-start: 0; } }
 """, layer='components', doc='Where the links sit in the space after the brand: `center`, or `end` beside the actions.')
 NavBar.variant('sticky', 'position: sticky; inset-block-start: 0; z-index: 1;', layer='components', doc='Stays at the top as the page scrolls, and keeps a scrolled-to anchor from landing under it.',
-    on={('&', ':load'): r'''const set = () => document.documentElement.style.setProperty('--navbar-size', el.getBoundingClientRect().height + 'px');
+    on={('&', 'init'): r'''const set = () => document.documentElement.style.setProperty('--navbar-size', el.getBoundingClientRect().height + 'px');
 set(); new ResizeObserver(set).observe(el)'''})
 reg.rule('anchors', 'html { scroll-padding-block-start: calc(var(--navbar-size, 0px) + var(--space)); }', layer='components', doc='A scrolled-to anchor stops below the sticky navbar, with a little space.')
 NavBar.variant('vivid', r"""
@@ -83,7 +83,7 @@ _collapse_on = {
     ('body', 'keydown'): r"""
 if (e.key !== 'Escape') return;
 for (const b of document.querySelectorAll('[navbar] > [burger][aria-expanded=true]')) { b.setAttribute('aria-expanded', 'false'); b.focus(); }""",
-    ('&', ':load'): r"""
+    ('&', 'init'): r"""
 if (el._collapse) return;
 const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
 el._collapse = new ResizeObserver(() => {

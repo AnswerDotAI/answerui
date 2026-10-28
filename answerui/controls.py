@@ -130,7 +130,7 @@ const run = () => {
 };
 e.type === 'reset' ? setTimeout(run) : run();"""
 
-reg.rule('enable', on={('form', 'input'): _enable_js, ('form', 'change'): _enable_js, ('form', 'reset'): _enable_js, ('button[enable]', ':load'): _enable_js},
+reg.rule('enable', on={('form', 'input'): _enable_js, ('form', 'change'): _enable_js, ('form', 'reset'): _enable_js, ('button[enable]', 'init'): _enable_js},
     layer='components', doc="A submit button rendered disabled with `enable='changed'`, `enable='valid'`, or both comes alive when its form has changed, or is valid, and goes back when it is not.")
 
 # %% ../nbs/08_controls.ipynb #018a9574
@@ -326,7 +326,7 @@ def _radio_example():
 # %% ../nbs/08_controls.ipynb #8c8415b9
 _fill = r"const lo = el.min === '' ? 0 : +el.min, hi = el.max === '' ? 100 : +el.max; el.style.setProperty('--p', (hi > lo ? (el.value - lo) / (hi - lo) * 100 : 0) + '%')"
 _range_on = {
-    ('&', ':load'): _fill,
+    ('&', 'init'): _fill,
     ('&', 'input'): _fill,
     ('form', 'reset'): r"""
 await new Promise(r => setTimeout(r, 0));

@@ -11,9 +11,10 @@ __all__ = ['demo_html', 'Preview', 'demo', 'example']
 
 # %% ../nbs/02_demo.ipynb #6ae7b22e
 from fastcore.utils import *
-from fasthtml.common import to_xml, Div, Iframe, Button, Html, Head, Body, Meta, Style, Script
+from fastcore.meta import delegates
+from fasthtml.common import to_xml, Div, Iframe, Button, Html, Head, Body, Style, Script
 from fastcore.xml import highlight
-from fasthtml.core import htmxsrc
+from fasthtml.core import def_hdrs
 from .registry import reg, Hyperelement
 import answerui.behaviors  # installs Registry.build_js
 
@@ -22,10 +23,10 @@ def demo_html(
     *fts,         # Markup to render
     registry=reg, # Registry whose stylesheet and behavior script the document carries
     css=None,     # Stylesheet for the document; None uses the registry's build_css()
+    htmx4=False,  # Use htmx 4 with FastHTML's config, as `fast_app(htmx4=True)` does, instead of htmx 2
 ):
-    "A standalone document containing markup, CSS, behaviors, and FastHTML's default htmx"
-    head = Head(Meta(charset='utf-8'), Meta(name='viewport', content='width=device-width, initial-scale=1'),
-        Style(registry.build_css() if css is None else css), Script(registry.build_js()), htmxsrc)
+    "A standalone document containing markup, CSS, behaviors, and FastHTML's default headers"
+    head = Head(*def_hdrs(htmx4=htmx4, surreal=False), Style(registry.build_css() if css is None else css), Script(registry.build_js()))
     return to_xml(Html(head, Body(*fts, style='min-block-size: auto')))
 
 
@@ -43,11 +44,12 @@ def demo(
     registry=reg, # Registry whose stylesheet and behavior script the preview carries
     css=None,     # Stylesheet for the document; None uses the registry's build_css()
     height=None,  # Fixed iframe height, e.g. '10rem', for top-layer content the frame can't measure; None follows the content
+    htmx4=False,  # Use htmx 4 with FastHTML's config, as `fast_app(htmx4=True)` does, instead of htmx 2
 ):
     "Render markup in an isolated, replayable notebook preview"
     doc = fts if height is not None else fts + (_sizer,)
     style = f'width:100%;box-sizing:border-box;border:1px solid #e3e3e8;border-radius:8px;height:{height or "auto"};'
-    frame = Iframe(srcdoc=demo_html(*doc, registry=registry, css=css), title='answerui preview', style=style)
+    frame = Iframe(srcdoc=demo_html(*doc, registry=registry, css=css, htmx4=htmx4), title='answerui preview', style=style)
     replay = Button('↻', type='button', aria_label='replay', title='replay',
         onclick=r"const f=this.parentElement.nextElementSibling; f.srcdoc=f.srcdoc",
         style='border:0;background:none;font-size:14px;opacity:.6;cursor:pointer;padding:0 4px')
@@ -63,12 +65,9 @@ def example(h):
     return _attach
 
 @patch
-def demo(
-    self:Hyperelement,
-    css=None,    # Stylesheet for the document; None uses the registry's build_css()
-    height=None, # Fixed iframe height; None follows the content
-):
+@delegates(demo, but=['registry'])
+def demo(self:Hyperelement, **kwargs):
     "Render this hyperelement's example with its registry's current styles and behaviors"
     if not hasattr(self, 'example'): raise ValueError(f'{self.__name__} has no example; attach one with @example({self.__name__})')
-    return demo(self.example(), registry=self.registry, css=css, height=height)
+    return demo(self.example(), registry=self.registry, **kwargs)
 

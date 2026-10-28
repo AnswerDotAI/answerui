@@ -59,7 +59,7 @@ if (anchor) {
     el._unwatch = () => { watch.abort(); size.disconnect(); };
 }
 el.style.visibility = '';""",
-    ('&', ':before-cleanup-element'): "if (e.target === el) el._unwatch?.()"}
+    ('&', 'cleanup'): "if (e.target === el) el._unwatch?.()"}
 
 _popover_css = r"""
 [popover][anchored] {
@@ -210,7 +210,7 @@ def _dialog_example():
 
 # %% ../nbs/11_overlays.ipynb #7e401e03
 _tooltip_on = {
-    ('&', ':load'): r"""
+    ('&', 'init'): r"""
 el._tipHide = () => {
     clearTimeout(el._tipTimer);
     el._tipTimer = setTimeout(() => {
@@ -239,7 +239,7 @@ if (e.key !== 'Escape') return;
 const tips = document.querySelectorAll('[role=tooltip]:popover-open');
 if (tips.length) e.preventDefault();
 for (const tip of tips) { clearTimeout(tip._tipTimer); tip.hidePopover(); }""",
-    ('&', ':before-cleanup-element'): "if (e.target === el) clearTimeout(el._tipTimer)"}
+    ('&', 'cleanup'): "if (e.target === el) clearTimeout(el._tipTimer)"}
 
 _tooltip_css = r"""
 [popover][role=tooltip] {

@@ -50,7 +50,7 @@ def _alert_example():
         Alert('The upload failed. Your original file has not changed.', danger=True, dismissible=True))
 
 # %% ../nbs/10_status.ipynb #afc1d55a
-_toasts_on = {('&', ':load'): "if (!el.matches(':popover-open')) el.showPopover()"}
+_toasts_on = {('&', 'init'): "if (!el.matches(':popover-open')) el.showPopover()"}
 _toasts_css = r"""
 [toasts][popover] {
   position: fixed; inset: auto; inset-block-start: var(--space); inset-inline-end: var(--space); margin: 0;
@@ -68,32 +68,16 @@ def Toasts(*c, **attrs):
         aria_relevant='additions text', toasts=True, **attrs)
 
 # %% ../nbs/10_status.ipynb #4b3c797b
-_timer_on = {
-    ('&', ':load'): r"""
-if (el._pauseToast) return;
-let left = +el.getAttribute('autodismiss'), started, timer;
-if (!(left > 0)) return;
-el._pauseToast = () => {
-    if (timer === undefined) return;
-    clearTimeout(timer); timer = undefined; left -= performance.now() - started;
-};
-el._resumeToast = () => {
-    if (timer !== undefined || el.matches(':hover, :focus-within')) return;
-    started = performance.now(); timer = setTimeout(() => el.remove(), left);
-};
-el._resumeToast();""",
-    ('&', 'pointerover'): "el._pauseToast?.()",
-    ('&', 'pointerout'): "if (!el.contains(e.relatedTarget)) el._resumeToast?.()",
-    ('&', 'focusin'): "el._pauseToast?.()",
-    ('&', 'focusout'): "queueMicrotask(() => el._resumeToast?.())",
-    ('&', ':before-cleanup-element'): "if (e.target === el) el._pauseToast?.()"}
-
 _toast_css = r"""
 [toast] { display: flex; align-items: flex-start; gap: var(--space);
   --face: var(--n-2); background: var(--face); color: var(--n2); border: 1px solid var(--n-1);
   border-radius: var(--radius); padding: var(--space-2) var(--space); box-shadow: var(--floating);
   transition: opacity var(--motion) var(--ease), translate var(--motion) var(--ease);
-  @starting-style { opacity: 0; translate: 0 calc(-1 * var(--space-2)); } }
+  @starting-style { opacity: 0; translate: 0 calc(-1 * var(--space-2)); }
+  animation: aui-toast-life var(--life) linear forwards; }
+[toast]:is(:hover, :focus-within) { animation-play-state: paused; }
+/* The lifetime is only a timer, so the keyframes change nothing. Without --life the shorthand is invalid, and the toast has no animation. */
+@keyframes aui-toast-life { to { } }
 [toast]:is([success], [warning], [danger], [info]) { --face: var(--v-3); color: var(--v2); border-color: var(--v-2); }
 [toast] > [stack] { flex: 1; min-inline-size: 0; }
 [toast] > button[dismiss] { flex-shrink: 0; --pad-block: var(--space-3); --pad-inline: var(--space-2); }
@@ -109,11 +93,13 @@ def Toast(
 ):
     "A brief message for the toast region"
     close = Button('Dismiss', type='button', secondary=True, dismiss=True) if dismissible else None
-    toast = Div(Stack(*c, gap='var(--space-2)'), close, toast=True, autodismiss=life, **attrs)
+    if life: attrs['style'] = f'--life: {life}ms; ' + attrs.get('style', '')
+    toast = Div(Stack(*c, gap='var(--space-2)'), close, toast=True, **attrs)
     return Div(toast, hx_swap_oob='beforeend:[toasts]') if oob else toast
 
-Toast.rule('timer', on=_timer_on, layer='components', doc='Removal after `autodismiss` milliseconds unattended; hover or focus pauses the timer, leaving resumes it, and htmx cleanup cancels it.')
-Toast.rule('dismiss', on={('& > button[dismiss]', 'click'): "const toast = el.closest('[toast]'); toast._pauseToast?.(); toast.remove()"}, layer='components', doc='The dismiss button removes the toast at once.')
+Toast.rule('timer', on={('&', 'animationend'): "if (e.animationName === 'aui-toast-life') el.remove()"}, layer='components',
+    doc='Removal when the lifetime set by `life` ends; hover or focus pauses it.')
+Toast.rule('dismiss', on={('& > button[dismiss]', 'click'): "el.closest('[toast]').remove()"}, layer='components', doc='The dismiss button removes the toast at once.')
 
 # %% ../nbs/10_status.ipynb #09576dea
 @example(Toast)

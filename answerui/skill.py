@@ -38,7 +38,7 @@ Colour derives from `--hue`. Two ladders follow it: the neutral ladder from `--n
 
 A component owns its inner space only. Parents space their children with `gap` through the layout containers `stack`, `cluster`, `grid`, and `flow`, and `prose` styles long-form content.
 
-A behavior is a delegated event handler keyed by `(selector, event[, capture])`. It is installed once per document and runs for every matching element, including elements htmx swaps in later. `&` in a selector stands for the component's root selector, and `:load` is short for `htmx:load`.
+A behavior is a delegated event handler keyed by `(selector, event[, capture])`. It is installed once per document and runs for every matching element, including elements htmx swaps in later. `&` in a selector stands for the component's root selector, `init` runs when an element arrives in the document and `cleanup` before htmx removes one, under htmx 2 or 4. A leading `:` is short for `htmx:`, in any of htmx's spellings.
 
 ## Changing the look
 

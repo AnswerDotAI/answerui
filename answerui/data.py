@@ -1,6 +1,6 @@
 """Tables and other displays of structured data
 
-A table is a native `table`, styled by the base layer, and the browser already gives it its structure: a caption, a head, a body, and a foot. This module adds the frame, a raised surface that the table fills and that scrolls sideways when the table is wider than the page.
+A table is a native `table`, styled plainly by the base layer, and the browser already gives it its structure: a caption, a head, a body, and a foot. This module adds the data table: a frame, a raised surface that the table fills and that scrolls sideways when the table is wider than the page, and the head band and single-line cells of a table of figures.
 
 Docs: https://AnswerDotAI.github.io/answerui/data.html.md"""
 
@@ -21,7 +21,10 @@ _frame_css = r'''
 [frame] {
   --face: var(--n-3); background: var(--face); overflow-x: auto; contain: inline-size;
   border: 1px solid var(--n-1); border-radius: var(--radius); box-shadow: var(--raised);
-  > table { display: table; inline-size: 100%; border-block: 0; }
+  > table { inline-size: 100%; }
+  :is(th, td) { white-space: nowrap; }
+  tbody tr:first-child > * { border-block-start: 1px solid var(--n-1); }
+  thead th { background: var(--n-2); color: var(--n1); font: var(--weight) var(--text-1) var(--font-mono); text-transform: uppercase; letter-spacing: .08em; border-block-end: 0; }
 }
 '''
 

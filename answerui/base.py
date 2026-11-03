@@ -26,10 +26,12 @@ button, input, textarea, select { font: inherit; color: inherit; }
 # %% ../nbs/06_base.ipynb #7024f5fe
 reg.context('mark', 'var(--hue-warning)')
 reg.rule('document', r"""
-:root { accent-color: var(--v); caret-color: var(--v); background: var(--n-3); }
-html { scrollbar-gutter: stable; }
+:root { accent-color: var(--v); caret-color: var(--v); background: var(--n-3); --ring: 2px solid var(--v-1); }
+html { scrollbar-gutter: stable; scroll-behavior: smooth; }
 * { scrollbar-color: var(--n1) transparent; }
 body { color: var(--n2); font: var(--weight) var(--text)/var(--leading) var(--font); container-type: inline-size; }
+button, a[button], input:is([type=checkbox], [type=radio], [type=range]) { cursor: pointer; }
+:disabled { cursor: not-allowed; }
 h1, h2, h3, h4, h5, h6 { font-weight: var(--weight1); line-height: var(--leading-1); text-wrap: balance; }
 h1 { font-size: var(--text3); } h2 { font-size: var(--text2); } h3 { font-size: var(--text1); }
 p { text-wrap: pretty; }
@@ -46,21 +48,18 @@ hr { border: 0; border-block-start: 1px solid var(--n-1); }
 small, figcaption { font-size: var(--text-1); }
 figcaption { color: var(--n1); }
 table {
-  display: block; inline-size: fit-content; max-inline-size: 100%; overflow-x: auto;
-  border-collapse: separate; border-spacing: 0; border-block: 1px solid var(--n-1);
+  border-collapse: separate; border-spacing: 0;
   caption { caption-side: bottom; text-align: start; padding: var(--space-2) var(--space); font-size: var(--text-1); color: var(--n1); }
-  :is(th, td) { padding: var(--space-2) var(--space); text-align: start; white-space: nowrap; }
-  thead th {
-    background: var(--n-2); color: var(--n1);
-    font: var(--weight) var(--text-1) var(--font-mono); text-transform: uppercase; letter-spacing: .08em;
-  }
-  tbody tr > * { border-block-start: 1px solid var(--n-1); }
+  :is(th, td) { padding: var(--space-2) var(--space); text-align: start; }
+  thead th { font-weight: var(--weight1); border-block-end: 1px solid var(--n); }
+  tbody tr + tr > * { border-block-start: 1px solid var(--n-1); }
   tfoot tr > * { border-block-start: 1px solid var(--n); font-weight: var(--weight1); }
   :is(th, td):is([num], [align=right]) { text-align: end; font-variant-numeric: tabular-nums; }
 }
-:focus-visible { outline: 2px solid var(--v-1); outline-offset: 2px; }
+:focus-visible { outline: var(--ring); outline-offset: 2px; }
 mark { background: var(--v-3); color: var(--v2); padding: .1em .2em; border-radius: var(--radius-1); }
-""", layer='base', doc='The page, text, headings, links, code, lists, quotes, tables, rules, and marks on the tokens.')
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+""", layer='base', doc='The page, text, headings, links, code, lists, quotes, tables, rules, marks, focus, and cursors on the tokens.')
 
 # %% ../nbs/06_base.ipynb #ac244267
 reg.rule('hidden', '[hidden]:not([hidden=until-found]) { display: none; }', layer='utilities', doc='The hidden attribute wins over any display a component sets.')
@@ -73,7 +72,6 @@ svg:is(:has(> use), [icon]) { inline-size: 1.25em; block-size: 1.25em; vertical-
 # %% ../nbs/06_base.ipynb #191dab74
 TYPROSE = files('answerui').joinpath('css/typrose.css').read_text()
 TYPROSE = re.sub(r'(/\*[^*]*\*/\n)?\.prose-(slate|zinc|neutral|stone|invert) \{[^}]*\}\n*', '', TYPROSE)
-TYPROSE = re.sub(r'  /\* Table \*/\n[\s\S]*?tfoot td \{[^}]*\}\n', '', TYPROSE)
 TYPROSE = re.sub(r'\.prose-(\w+)', r'[prose="\1"]', TYPROSE)
 TYPROSE = re.sub(r'\.prose\b', '[prose]', TYPROSE)
 reg.rule('typrose', TYPROSE, layer='base', doc='Prose typography from typrose, on the `prose` attribute.')
@@ -86,6 +84,6 @@ reg.rule('prose', r"""
   --prose-links: var(--v);
   --prose-lead: var(--n1); --prose-counters: var(--n1); --prose-captions: var(--n1);
   --prose-bullets: var(--n-1); --prose-hr: var(--n-1); --prose-quote-borders: var(--n-1);
-  table { display: table; margin: calc(var(--sp) * 1.5) 0 0; :is(th, td) { white-space: normal; } }
+  --prose-th-borders: var(--n); --prose-td-borders: var(--n-1);
 }
 """, layer='base', doc='typrose colours mapped onto the ladder, its size from `--text`, and the reading measure.')

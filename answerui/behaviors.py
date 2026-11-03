@@ -17,6 +17,7 @@ from .registry import Registry
 
 # %% ../nbs/01_behaviors.ipynb #1bb695c2
 _runtime = r"""(() => {
+%s
 const rules = [%s];
 const by = {};
 rules.forEach(r => r.evs.forEach(ev => (by[ev + '|' + (r.cap ? 1 : 0)] ??= []).push(r)));
@@ -58,10 +59,9 @@ def _spellings(ev):
     name = ev[5:]
     return uniqueify([ev, 'htmx:'+name.replace('-', ':'), 'htmx-'+name])
 
-def _entry(r):
+def _entry(r, fn):
     ev = _event(r['ev'])
-    return (f'{{sel: {dumps(r["sel"])}, evs: {dumps(_spellings(ev))}, cap: {dumps(r["cap"])}, '
-        f'init: {dumps(ev=="init")}, async fn(el, e) {{ {r["js"]} }}}}')
+    return f'{{sel: {dumps(r["sel"])}, evs: {dumps(_spellings(ev))}, cap: {dumps(r["cap"])}, init: {dumps(ev=="init")}, fn: {fn}}}'
 
 
 # %% ../nbs/01_behaviors.ipynb #bb776c31
@@ -75,6 +75,9 @@ def behaviors(self:Registry):
 
 @patch
 def build_js(self:Registry):
-    "The behavior script: the effective behaviors, in the order their identities were first declared"
-    return _runtime % ',\n'.join(_entry(b) for b in self.behaviors().values())
+    "The behavior script: one function per distinct handler, one entry per effective behavior"
+    bs = self.behaviors().values()
+    fns = {js: f'f{i}' for i,js in enumerate(uniqueify([b['js'] for b in bs]))}
+    decls = '\n'.join(f'async function {nm}(el, e) {{ {js} }}' for js,nm in fns.items())
+    return _runtime % (decls, ',\n'.join(_entry(b, fns[b['js']]) for b in bs))
 

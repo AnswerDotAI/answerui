@@ -35,7 +35,7 @@ _navbar_css = r"""
   > [bar-content] { display: contents; }
   nav { display: flex; flex-wrap: wrap; gap: var(--space-3); }
   nav a { display: inline-block; padding: var(--space-3) var(--space-2); border-radius: var(--radius-1); color: inherit; text-decoration: none; }
-  nav a:is(:hover, :focus-visible) { background: oklch(from currentColor l c h / .08); }
+  nav a:is(:hover, :focus-visible) { background: var(--tint); }
   nav a[aria-current=page] { background: var(--v-3); color: var(--v2); }
   > [end] { margin-inline-start: auto; --gap: var(--space-2); }
   > [burger] { display: none; padding: var(--space-3); }
@@ -72,15 +72,16 @@ set(); new ResizeObserver(set).observe(el)'''})
 reg.rule('anchors', 'html { scroll-padding-block-start: calc(var(--navbar-size, 0px) + var(--space)); }', layer='components', doc='A scrolled-to anchor stops below the sticky navbar, with a little space.')
 NavBar.variant('vivid', r"""
 --face: var(--v); color: var(--n-3);
-nav a[aria-current=page] { background: oklch(from currentColor l c h / .15); color: inherit; }
+nav a[aria-current=page] { background: oklch(from var(--tint) l c h / calc(alpha * 2)); color: inherit; }
 """, layer='components', doc='The brand and links on the accent.')
 NavBar.variant('dark', 'color-scheme: dark;', layer='components', doc='A dark bar whatever the page scheme.')
 
 _collapse_on = {
     ('& > [burger]', 'click'): "el.setAttribute('aria-expanded', el.getAttribute('aria-expanded') !== 'true')",
     ('& > [bar-content] a[href]', 'click'): "el.closest('[navbar]').querySelector(':scope > [burger]')?.setAttribute('aria-expanded', 'false')",
-    ('body', 'click'): r"for (const b of document.querySelectorAll('[navbar] > [burger][aria-expanded=true]')) if (!b.closest('[navbar]').contains(e.target)) b.setAttribute('aria-expanded', 'false')",
-    ('body', 'keydown'): r"""
+    ('& [popover]', 'beforetoggle', True): "if (e.newState === 'open') el.closest('[navbar]').querySelector(':scope > [burger]')?.setAttribute('aria-expanded', 'false')",
+    (':root', 'click'): r"for (const b of document.querySelectorAll('[navbar] > [burger][aria-expanded=true]')) if (!b.closest('[navbar]').contains(e.target)) b.setAttribute('aria-expanded', 'false')",
+    (':root', 'keydown'): r"""
 if (e.key !== 'Escape') return;
 for (const b of document.querySelectorAll('[navbar] > [burger][aria-expanded=true]')) { b.setAttribute('aria-expanded', 'false'); b.focus(); }""",
     ('&', 'init'): r"""

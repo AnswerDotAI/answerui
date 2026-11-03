@@ -44,6 +44,7 @@ def demo(
     registry=reg, # Registry whose stylesheet and behavior script the preview carries
     css=None,     # Stylesheet for the document; None uses the registry's build_css()
     height=None,  # Fixed iframe height, e.g. '10rem', for top-layer content the frame can't measure; None follows the content
+    width=None,   # Fixed iframe width, e.g. '24rem', to preview a narrow viewport; None fills the cell
     htmx4=False,  # Use htmx 4 with FastHTML's config, as `fast_app(htmx4=True)` does, instead of htmx 2
 ):
     "Render markup in an isolated, replayable notebook preview"
@@ -53,7 +54,7 @@ def demo(
     replay = Button('↻', type='button', aria_label='replay', title='replay',
         onclick=r"const f=this.parentElement.nextElementSibling; f.srcdoc=f.srcdoc",
         style='border:0;background:none;font-size:14px;opacity:.6;cursor:pointer;padding:0 4px')
-    return Preview(fts, Div(Div(replay, style='text-align:right'), frame, answerui_preview=True))
+    return Preview(fts, Div(Div(replay, style='text-align:right'), frame, answerui_preview=True, style=f'width:{width or "100%"}'))
 
 
 # %% ../nbs/02_demo.ipynb #7008abc5

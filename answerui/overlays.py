@@ -10,7 +10,7 @@ Docs: https://AnswerDotAI.github.io/answerui/overlays.html.md"""
 __all__ = ['Dialog', 'Popover', 'Dropdown', 'Tooltip']
 
 # %% ../nbs/11_overlays.ipynb #cc79711b
-from fasthtml.common import Div, Button, A, P, Small, H2, Hr, FT, unqid
+from fasthtml.common import Div, Span, Button, A, P, Small, H2, Hr, FT, unqid
 from .registry import reg, hypelt
 from .layout import Stack, Cluster
 from .demo import example
@@ -19,21 +19,20 @@ import answerui.controls  # the buttons and menu items the panels hold
 
 
 # %% ../nbs/11_overlays.ipynb #1f52b05f
+_fallback = "if (CSS.supports('position-area', 'center')) return;\n"
 _popover_on = {
-    ('button[popovertarget], button[commandfor]', 'click'): r"""
+    ('button[popovertarget], button[commandfor]', 'click'): _fallback + r"""
 const id = el.getAttribute('popovertarget') || el.getAttribute('commandfor');
 const panel = document.getElementById(id);
 if (panel?.matches('[popover][anchored]')) panel._anchor = el;""",
-    ('&', 'beforetoggle', True): r"""
+    ('&', 'beforetoggle', True): _fallback + r"""
 if (e.target !== el) return;
 if (e.newState === 'open') {
     if (e.source) el._anchor = e.source;
     el.style.visibility = 'hidden';
 } else el._unwatch?.();""",
-    ('&', 'toggle', True): r"""
+    ('&', 'toggle', True): _fallback + r"""
 if (e.target !== el) return;
-const opener = el._anchor, invoked = opener && [opener.getAttribute('popovertarget'), opener.getAttribute('commandfor')].includes(el.id);
-if (invoked) opener.setAttribute('aria-expanded', String(el.matches(':popover-open')));
 el._unwatch?.();
 if (!el.matches(':popover-open')) return;
 const anchor = el._anchor;
@@ -59,19 +58,21 @@ if (anchor) {
     el._unwatch = () => { watch.abort(); size.disconnect(); };
 }
 el.style.visibility = '';""",
-    ('&', 'cleanup'): "if (e.target === el) el._unwatch?.()"}
+    ('&', 'cleanup'): _fallback + "if (e.target === el) el._unwatch?.()"}
 
 _popover_css = r"""
 [popover][anchored] {
   --face: var(--n-2); background: var(--face); color: var(--n2);
   border: 1px solid var(--n-1); border-radius: var(--radius); padding: var(--space); box-shadow: var(--floating);
-  position: fixed; inset: auto; margin: 0; max-inline-size: calc(100vw - 1rem); overflow: auto;
-  max-block-size: var(--_available-height, calc(100dvh - 1rem));
-  opacity: 0;
-  transition: opacity var(--motion) var(--ease), display var(--motion) allow-discrete, overlay var(--motion) allow-discrete;
+  position: fixed; inset: auto; margin: 0; max-inline-size: calc(100vw - 2 * var(--space)); overflow: auto;
+  position-area: block-end span-inline-end; position-try-fallbacks: flip-block, flip-inline, flip-block flip-inline; position-try-order: most-block-size;
+  margin-block-start: 4px; max-block-size: calc(100% - 12px);
 }
-[popover][anchored]:not(:popover-open) { display: none; }
-[popover][anchored]:popover-open { opacity: 1; @starting-style { opacity: 0; } }
+[anchor] { anchor-name: --anchor; }
+[anchor] [popover][anchored] { inset-block-start: anchor(--anchor bottom); }
+@supports not (position-area: center) {
+  [popover][anchored] { margin: 0; max-block-size: var(--_available-height, calc(100dvh - 2 * var(--space))); }
+}
 """
 
 @hypelt(sel='[popover][anchored]', layer='components', css=_popover_css)
@@ -79,7 +80,20 @@ def Popover(*c, popover='auto', **attrs):
     "A floating panel positioned beside the button that opens it"
     return Div(*c, popover=popover, anchored=True, **attrs)
 
-Popover.rule('placement', on=_popover_on, layer='components', doc='Remembers the button that opened the panel, places the panel beside it within the viewport less any scrollbar or its gutter, and follows scrolling and resizing until it closes.')
+Popover.rule('expanded', on={('[popover]', 'toggle', True): r"""
+if (e.target !== el) return;
+for (const b of document.querySelectorAll(`[popovertarget="${CSS.escape(el.id)}"]:not([popovertargetaction=hide]), [commandfor="${CSS.escape(el.id)}"]:is([command=toggle-popover], [command=show-popover])`)) b.setAttribute('aria-expanded', String(el.matches(':popover-open')));"""},
+    layer='components', doc='Every button that opens or toggles the panel carries `aria-expanded` while it is open.')
+Popover.rule('placement', on=_popover_on, layer='components', doc='In an engine without anchor positioning: remembers the button that opened the panel, places the panel beside it within the viewport, and follows scrolling and resizing until it closes.')
+
+# %% ../nbs/11_overlays.ipynb #a924da10
+reg.rule('fade', r'''
+:is(dialog, [popover][anchored]), dialog::backdrop {
+  opacity: 0;
+  transition: opacity var(--motion) var(--ease), translate var(--motion) var(--ease), display var(--motion) allow-discrete, overlay var(--motion) allow-discrete;
+}
+:is(dialog[open], [popover][anchored]:popover-open), dialog[open]::backdrop { opacity: 1; @starting-style { opacity: 0; } }
+''', layer='components', doc='Dialogs, their backdrops, and anchored popovers fade over `--motion`, staying in the top layer until the fade ends.')
 
 # %% ../nbs/11_overlays.ipynb #483c7ce2
 @example(Popover)
@@ -89,32 +103,10 @@ def _popover_example():
         Popover(P("A workspace holds a team's projects, members, and billing."), id=id, style='max-inline-size: 18rem'))
 
 # %% ../nbs/11_overlays.ipynb #698fc804
-_dropdown_keys = {
-    ('&', 'toggle', True): r"""
-if (e.target !== el || !el.matches(':popover-open')) return;
-[...el.querySelectorAll('a[href], button:not(:disabled)')]
-    .find(x => x.getAttribute('aria-disabled') !== 'true' && x.getClientRects().length && getComputedStyle(x).visibility === 'visible')?.focus();""",
-    ('&', 'keydown'): r"""
-if (!['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(e.key)) return;
-const items = [...el.querySelectorAll('a[href], button:not(:disabled)')]
-    .filter(x => x.getAttribute('aria-disabled') !== 'true' && x.getClientRects().length && getComputedStyle(x).visibility === 'visible');
-if (!items.length) return;
-e.preventDefault();
-const i = items.indexOf(document.activeElement);
-const next = e.key === 'Home' ? 0 : e.key === 'End' ? items.length - 1
-    : (i + (e.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length;
-items[next].focus();"""}
-
-_dropdown_choose = {
-    ('& > [aria-disabled=true]', 'click', True): "e.preventDefault(); e.stopImmediatePropagation()",
-    ('&', 'click'): r"""
-const item = e.target.closest('a[href], button');
-if (!item || !el.contains(item)) return;
-if (item.matches(':disabled, [aria-disabled=true]')) { e.preventDefault(); return; }
-el.hidePopover();"""}
+_dropdown_disabled = {('& > [aria-disabled=true]', 'click', True): "e.preventDefault(); e.stopImmediatePropagation()"}
 
 _dropdown_css = r"""
-[popover][dropdown] { min-inline-size: min(12rem, calc(100vw - 1rem)); padding: var(--space-3); }
+[popover][dropdown] { min-inline-size: min(12rem, calc(100vw - 2 * var(--space))); padding: var(--space-3); }
 [popover][dropdown]:popover-open { display: grid; align-content: start; block-size: max-content; }
 [dropdown] > :is(a, button) {
   display: block; inline-size: 100%; text-align: start; padding: var(--space-2) var(--space-1);
@@ -126,7 +118,6 @@ _dropdown_css = r"""
 }
 [dropdown] > :is(a, button)[danger]:not(:disabled, [aria-disabled=true]) { color: var(--v); }
 [dropdown] > :is(a, button):is(:disabled, [aria-disabled=true]) { color: var(--n1); cursor: default; }
-[dropdown] > [hidden] { display: none; }
 [dropdown] > hr { margin-block: var(--space-3); }
 [dropdown] > :not(a, button, hr) { padding-inline: var(--space-1); }
 """
@@ -141,10 +132,16 @@ def Dropdown(
     "A button and its popover of ordinary links and actions"
     id = id or unqid()
     if not isinstance(trigger, FT) or trigger.tag != 'button': trigger = Button(trigger, secondary=True)
+    acts = [c for c in items if isinstance(c, FT) and c.tag in ('a', 'button')]
+    for c in acts:
+        if c.tag == 'button' and 'popovertarget' not in c.attrs: c(popovertarget=id, popovertargetaction='hide')
+    live = [c for c in acts if (c.get('href') if c.tag == 'a' else not c.get('disabled')) and c.get('aria-disabled') != 'true' and not c.get('hidden')]
+    if live: live[0](autofocus=True)
     return trigger(type='button', popovertarget=id), Popover(*items, dropdown=True, id=id, **attrs)
 
-Dropdown.rule('keys', on=_dropdown_keys, layer='components', doc='Opening focuses the first item; the arrow keys, Home, and End move between enabled, visible items.')
-Dropdown.rule('choose', on=_dropdown_choose, layer='components', doc='Choosing an item closes the dropdown; an item marked aria-disabled does nothing.')
+Dropdown.rule('disabled', on=_dropdown_disabled, layer='components', doc='An item marked aria-disabled does nothing.')
+Dropdown.rule('choose', on={('& > a[href]', 'click'): "el.closest('[popover]').hidePopover()"}, layer='components',
+    doc='Following a link closes the dropdown; a button closes it natively through popovertargetaction.')
 
 # %% ../nbs/11_overlays.ipynb #516efdb7
 @example(Dropdown)
@@ -174,14 +171,10 @@ dialog {
   --face: var(--n-2); background: var(--face); color: var(--n2);
   border: 1px solid var(--n-1); border-radius: var(--radius1); padding: var(--space1); box-shadow: var(--floating);
   inline-size: min(32rem, calc(100% - 2 * var(--space)));
-  opacity: 0; translate: 0 var(--space-2);
-  transition: opacity var(--motion) var(--ease), translate var(--motion) var(--ease), display var(--motion) allow-discrete, overlay var(--motion) allow-discrete;
+  translate: 0 var(--space-2);
 }
-dialog[open] { opacity: 1; translate: none; @starting-style { opacity: 0; translate: 0 var(--space-2); } }
-dialog::backdrop { background: oklch(from var(--n2) l c h / .4); opacity: 0;
-  transition: opacity var(--motion) var(--ease), display var(--motion) allow-discrete, overlay var(--motion) allow-discrete; }
-dialog[open]::backdrop { opacity: 1; @starting-style { opacity: 0; } }
-dialog:not([open]) { display: none; }
+dialog[open] { translate: none; @starting-style { translate: 0 var(--space-2); } }
+dialog::backdrop { background: oklch(from var(--n2) l c h / .4); }
 """)
 Dialog.variant('drawer', r"""
 --_slide: 100%; --drawer-size: 24rem; inset: 0; inset-inline-start: auto;
@@ -209,60 +202,37 @@ def _dialog_example():
             id=id, aria_labelledby=title))
 
 # %% ../nbs/11_overlays.ipynb #7e401e03
-_tooltip_on = {
-    ('&', 'init'): r"""
-el._tipHide = () => {
-    clearTimeout(el._tipTimer);
-    el._tipTimer = setTimeout(() => {
-        if (!el.matches(':popover-open') || el.matches(':hover')) return;
-        if (el._anchor?.matches(':hover, :focus-within')) return;
-        el.hidePopover();
-    }, 150);
-};
-el._tipShow = anchor => {
-    clearTimeout(el._tipTimer); el._anchor = anchor;
-    if (el.matches(':popover-open')) return;
-    const others = [...document.querySelectorAll('[role=tooltip]:popover-open')];
-    for (const t of others) { clearTimeout(t._tipTimer); t.style.transition = 'none'; t.hidePopover(); }
-    if (others.length) el.style.transition = 'none';
-    el.showPopover();
-    requestAnimationFrame(() => { for (const t of [...others, el]) t.style.transition = ''; });
-};""",
-    ('[tooltip]', 'pointerover'): "if (!el.contains(e.relatedTarget)) document.getElementById(el.getAttribute('tooltip'))._tipShow?.(el)",
-    ('[tooltip]', 'focusin'): "document.getElementById(el.getAttribute('tooltip'))._tipShow?.(el)",
-    ('[tooltip]', 'pointerout'): "if (!el.contains(e.relatedTarget)) document.getElementById(el.getAttribute('tooltip'))._tipHide?.()",
-    ('[tooltip]', 'focusout'): "document.getElementById(el.getAttribute('tooltip'))._tipHide?.()",
-    ('&', 'pointerover'): "clearTimeout(el._tipTimer)",
-    ('&', 'pointerout'): "if (!el.contains(e.relatedTarget)) el._tipHide?.()",
-    ('body', 'keydown'): r"""
-if (e.key !== 'Escape') return;
-const tips = document.querySelectorAll('[role=tooltip]:popover-open');
-if (tips.length) e.preventDefault();
-for (const tip of tips) { clearTimeout(tip._tipTimer); tip.hidePopover(); }""",
-    ('&', 'cleanup'): "if (e.target === el) clearTimeout(el._tipTimer)"}
-
 _tooltip_css = r"""
-[popover][role=tooltip] {
+[tooltip] { display: inline-block; position: relative; }
+[tooltip] > [role=tooltip] {
   --face: var(--n2); background: var(--face); color: var(--n-3); border: 0;
   padding: var(--space-3) var(--space-2); border-radius: var(--radius-1);
-  inline-size: max-content; max-inline-size: min(20rem, calc(100vw - 1rem)); overflow-wrap: anywhere;
+  inline-size: max-content; max-inline-size: min(20rem, calc(100vw - 2 * var(--space))); overflow-wrap: anywhere;
   font-size: var(--text-1); font-weight: var(--weight); line-height: var(--leading);
+  position: fixed; inset: auto; position-area: block-start; position-try-fallbacks: flip-block; margin-block-end: 4px; z-index: 1;
+  visibility: hidden; opacity: 0;
+  transition: opacity var(--motion) var(--ease) 150ms, visibility 0s linear calc(var(--motion) + 150ms);
+}
+[tooltip]:is(:hover, :has(:focus-visible)) > [role=tooltip] { visibility: visible; opacity: 1; transition: none; }
+:root:has([tooltip]:is(:hover, :has(:focus-visible))) [tooltip]:not(:hover, :has(:focus-visible)) > [role=tooltip] { transition: none; }
+@supports not (position-area: center) {
+  [tooltip] > [role=tooltip] { position: absolute; inset: auto auto 100% 0; }
 }
 """
 
-@hypelt(sel='[role=tooltip]', layer='components', css=_tooltip_css)
+@hypelt(sel='[tooltip]', layer='components', css=_tooltip_css)
 def Tooltip(
     trigger, # A control with its own accessible name
     text,    # Supplementary, non-interactive content
     id=None, # Description id; generated when omitted
     **attrs, # Attributes for the description
 ):
-    "A control and its supplementary description, shown on hover or focus"
+    "A control and its supplementary description, shown on hover or keyboard focus"
     id = id or unqid()
     describedby = ' '.join(filter(None, [trigger.get('aria-describedby'), id]))
-    return trigger(tooltip=id, aria_describedby=describedby), Popover(text, popover='manual', role='tooltip', id=id, **attrs)
-
-Tooltip.rule('show', on=_tooltip_on, layer='components', doc='Shows on hover or focus of the control, hides after a short delay once both are gone, swaps at once between controls, and closes on Escape.')
+    trigger(aria_describedby=describedby, style=' '.join(filter(None, [trigger.get('style'), f'anchor-name: --{id};'])))
+    tip = Div(text, role='tooltip', id=id, **attrs)(style=' '.join(filter(None, [attrs.get('style'), f'position-anchor: --{id};'])))
+    return Span(trigger, tip, tooltip=True)
 
 
 # %% ../nbs/11_overlays.ipynb #c9c2bdd5

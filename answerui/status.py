@@ -14,19 +14,28 @@ __all__ = ['toasts_key', 'Progress', 'Alert', 'Toasts', 'Toast', 'add_toast', 'p
 from fasthtml.common import Div, Span, H3, P, Label, Template, unqid
 from fastcore.xml import FT
 from fasthtml.core import FtResponse
-from .registry import hypelt
+from .registry import reg, hypelt
 from .controls import Button
 from .surfaces import Card
 from .layout import Stack
 from .demo import example
 import answerui.base  # the reset and tokens this styling is written on
 
+# %% ../nbs/10_status.ipynb #6043392a
+reg.rule('notice', r"""
+:is([alert], [toast]) { display: flex; align-items: flex-start; gap: var(--space); }
+:is([alert], [toast]) > [stack] { flex: 1; min-inline-size: 0; }
+:is([alert], [toast]) > button[dismiss] { flex-shrink: 0; --pad-block: var(--space-3); --pad-inline: var(--space-2); }
+""", layer='components', doc='The row shared by alerts and toasts: the message beside its dismiss button.')
+
+def _notice(c, dismissible, **attrs):
+    "A stack of content beside an optional dismiss button"
+    close = Button('Dismiss', type='button', secondary=True, dismiss=True) if dismissible else None
+    return Div(Stack(*c, gap='var(--space-2)'), close, **attrs)
+
 # %% ../nbs/10_status.ipynb #9a13ebff
 _alert_css = r"""
-[alert] { display: flex; align-items: flex-start; gap: var(--space);
-  background: var(--v-3); color: var(--v2); border-color: var(--v-2); }
-[alert] > [stack] { flex: 1; min-inline-size: 0; }
-[alert] > button[dismiss] { flex-shrink: 0; --pad-block: var(--space-3); --pad-inline: var(--space-2); }
+[alert] { background: var(--v-3); color: var(--v2); border-color: var(--v-2); }
 """
 
 @hypelt(sel='[alert]', layer='components', css=_alert_css)
@@ -36,8 +45,7 @@ def Alert(
     **attrs,           # Attributes for the containing div, including severity and role
 ):
     "An in-page message with optional dismissal"
-    close = Button('Dismiss', type='button', secondary=True, dismiss=True) if dismissible else None
-    return Div(Stack(*c, gap='var(--space-2)'), close, card=True, alert=True, **attrs)
+    return _notice(c, dismissible, card=True, alert=True, **attrs)
 
 Alert.rule('dismiss', on={('& > button[dismiss]', 'click'): "el.closest('[alert]').remove()"}, layer='components', doc='The dismiss button removes the alert.')
 
@@ -69,36 +77,31 @@ def Toasts(*c, **attrs):
 
 # %% ../nbs/10_status.ipynb #4b3c797b
 _toast_css = r"""
-[toast] { display: flex; align-items: flex-start; gap: var(--space);
+[toast] {
   --face: var(--n-2); background: var(--face); color: var(--n2); border: 1px solid var(--n-1);
   border-radius: var(--radius); padding: var(--space-2) var(--space); box-shadow: var(--floating);
   transition: opacity var(--motion) var(--ease), translate var(--motion) var(--ease);
   @starting-style { opacity: 0; translate: 0 calc(-1 * var(--space-2)); }
   animation: aui-toast-life var(--life) linear forwards; }
 [toast]:is(:hover, :focus-within) { animation-play-state: paused; }
-/* The lifetime is only a timer, so the keyframes change nothing. Without --life the shorthand is invalid, and the toast has no animation. */
-@keyframes aui-toast-life { to { } }
+/* The lifetime is a timer that ends by hiding the toast. Without --life the shorthand is invalid, and the toast has no animation. */
+@keyframes aui-toast-life { to { display: none; } }
 [toast]:is([success], [warning], [danger], [info]) { --face: var(--v-3); color: var(--v2); border-color: var(--v-2); }
-[toast] > [stack] { flex: 1; min-inline-size: 0; }
-[toast] > button[dismiss] { flex-shrink: 0; --pad-block: var(--space-3); --pad-inline: var(--space-2); }
 """
 
 @hypelt(sel='[toast]', layer='components', css=_toast_css)
 def Toast(
     *c,               # The message
-    life=5000,        # Unattended milliseconds before removal; None to stay until dismissed
+    life=5000,        # Unattended milliseconds before it hides; None to stay until dismissed
     dismissible=True, # Include a dismiss button
     oob=False,        # Wrap for out-of-band delivery into the page's region, beside a fragment
     **attrs,          # Attributes for the message, including severity
 ):
     "A brief message for the toast region"
-    close = Button('Dismiss', type='button', secondary=True, dismiss=True) if dismissible else None
     if life: attrs['style'] = f'--life: {life}ms; ' + attrs.get('style', '')
-    toast = Div(Stack(*c, gap='var(--space-2)'), close, toast=True, **attrs)
+    toast = _notice(c, dismissible, toast=True, **attrs)
     return Div(toast, hx_swap_oob='beforeend:[toasts]') if oob else toast
 
-Toast.rule('timer', on={('&', 'animationend'): "if (e.animationName === 'aui-toast-life') el.remove()"}, layer='components',
-    doc='Removal when the lifetime set by `life` ends; hover or focus pauses it.')
 Toast.rule('dismiss', on={('& > button[dismiss]', 'click'): "el.closest('[toast]').remove()"}, layer='components', doc='The dismiss button removes the toast at once.')
 
 # %% ../nbs/10_status.ipynb #09576dea

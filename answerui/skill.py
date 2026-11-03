@@ -10,7 +10,7 @@ from answerui.all import *
 app = FastHTML(hdrs=reg.hdrs())
 ```
 
-Import answerui after FastHTML. It redefines the constructors it styles, and a later `from fasthtml.common import *` puts FastHTML's plain ones back. The headers render from the registry per response. A rule registered after the app starts is in the next page.
+Import answerui after FastHTML. It redefines the constructors it styles, and a later `from fasthtml.common import *` puts FastHTML's plain ones back. The headers render from the registry per response. A rule registered after the app starts is in the next page. `reg.serve(app)` instead serves the same assets from URLs named by a hash of their content, which the browser caches, and a changed rule reaches the next page as a new URL.
 
 ## Building a page
 

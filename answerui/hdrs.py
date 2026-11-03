@@ -11,9 +11,11 @@ __all__ = []
 
 # %% ../nbs/03_hdrs.ipynb #cfc40afc
 from fastcore.utils import *
-from fasthtml.common import Style, Script
+from fasthtml.common import Style, Script, Link
 from .registry import Registry
 import answerui.behaviors  # installs Registry.build_js
+import hashlib
+from starlette.responses import Response
 
 # %% ../nbs/03_hdrs.ipynb #a8b08b14
 class _Lazy:
@@ -25,3 +27,24 @@ def hdrs(self:Registry):
     "Headers for `fast_app(hdrs=...)`: the stylesheet and behavior script, rendered from this registry per response"
     return _Lazy(lambda: Style(self.build_css())), _Lazy(lambda: Script(self.build_js()))
 
+
+# %% ../nbs/03_hdrs.ipynb #8c17128d
+def _digest(s): return hashlib.sha256(s.encode()).hexdigest()[:12]
+
+@patch
+def serve(
+    self:Registry,
+    app,              # The FastHTML app to mount the route on and add the headers to
+    path='/answerui', # URL prefix the assets are served under
+):
+    "Serve the stylesheet and script from `app` under content-hashed names, linked from every page; returns the two headers, for an app that builds its own head"
+    assets = {'css': (self.build_css, 'text/css'), 'js': (self.build_js, 'text/javascript')}
+    @app.get(f'{path}/{{name}}')
+    def asset(name: str):
+        build, mime = assets.get(name.rsplit('.', 1)[-1], (None, None))
+        if not build: return Response(status_code=404)
+        return Response(build(), media_type=mime, headers={'Cache-Control': 'public, max-age=31536000, immutable'})
+    hdrs = (_Lazy(lambda: Link(rel='stylesheet', href=f'{path}/{_digest(self.build_css())}.css')),
+        _Lazy(lambda: Script(src=f'{path}/{_digest(self.build_js())}.js')))
+    app.hdrs = [*app.hdrs, *hdrs]
+    return hdrs

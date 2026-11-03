@@ -26,6 +26,8 @@ app = FastHTML(hdrs=reg.hdrs())
 rt = app.route
 ```
 
+`reg.serve(app)` serves the same assets from URLs named by a hash of their content, which the browser caches. They are still built per response, so a changed rule reaches the next page as a new URL.
+
 A page is native HTML inside layout containers, with a component wherever the platform has no element for the job. Variants and severities are attributes:
 
 ``` python

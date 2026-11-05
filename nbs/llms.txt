@@ -13,7 +13,6 @@
 - [answerui.layout](https://AnswerDotAI.github.io/answerui/layout.html.md): Stack, cluster, grid, and document flow
 - [answerui.navigation](https://AnswerDotAI.github.io/answerui/navigation.html.md): The navbar
 - [answerui.overlays](https://AnswerDotAI.github.io/answerui/overlays.html.md): Popovers, menus, dialogs, drawers, and tooltips
-- [answerui.previews](https://AnswerDotAI.github.io/answerui/previews.html.md): Keeping preview frames out of git and regenerating them for the docs
 - [answerui.registry](https://AnswerDotAI.github.io/answerui/registry.html.md): Defining hyperelements and collecting their styles and behaviors
 - [answerui.skill](https://AnswerDotAI.github.io/answerui/skill.html.md): Style a FastHTML app with answerui: build pages from its components, change how they look through the registry, and check the result
 - [answerui.status](https://AnswerDotAI.github.io/answerui/status.html.md): Feedback, loading, and empty states

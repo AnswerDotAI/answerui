@@ -11,7 +11,6 @@ Modules:
 - `answerui.layout`: Stack, cluster, grid, and document flow
 - `answerui.navigation`: The navbar
 - `answerui.overlays`: Popovers, menus, dialogs, drawers, and tooltips
-- `answerui.previews`: Keeping preview frames out of git and regenerating them for the docs
 - `answerui.registry`: Defining hyperelements and collecting their styles and behaviors
 - `answerui.skill`: Style a FastHTML app with answerui: build pages from its components, change how they look through the registry, and check the result
 - `answerui.status`: Feedback, loading, and empty states

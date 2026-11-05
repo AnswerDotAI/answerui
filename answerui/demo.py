@@ -37,7 +37,7 @@ class Preview:
     "A rendered preview: the frame as HTML for the page, the markup as Markdown for the notebook file and the model"
     def __init__(self, fts, frame): store_attr()
     def __repr__(self): return to_xml(self.fts)
-    def _repr_mimebundle_(self, include=None, exclude=None): return {'text/html': to_xml(self.frame), 'text/markdown': highlight(self.fts)}
+    def _repr_mimebundle_(self, include=None, exclude=None): return {'text/html': to_xml(self.frame), 'text/markdown': highlight(self.fts)}, {'nbdev': {'strip': ['text/html']}}
 
 def demo(
     *fts,         # Markup to render

@@ -96,24 +96,16 @@ Rules:
 
 ## Previews in notebooks
 
-`demo(page)` renders markup in an iframe with the current stylesheet and behaviors. The notebook stores the frame, which holds the whole stylesheet, so a notebook with many previews is large, and every style change rewrites every preview.
+`demo(page)` renders markup in an iframe with the current stylesheet and behaviors. It returns a preview with two representations: the frame as HTML, and the markup as Markdown. The frame holds the whole stylesheet. Stored in a notebook, it would make a file with many previews large and rewrite every preview on each style change. The preview therefore marks its HTML with nbdev’s `strip` flag. `nbdev-clean` drops the frame and keeps the Markdown, so the committed notebook records what each preview showed. A fresh clone shows the frames again after the cells run.
 
-To keep frames out of git while keeping them in your working copy, run once in each clone:
-
-``` sh
-answerui-install-hooks
-```
-
-This adds a git clean filter that removes preview frames from notebooks as they are staged. The notebooks on disk keep every preview, and the file still records each preview’s markup. A fresh clone shows previews after the cells run.
-
-To regenerate previews when building docs with nbdev, name the processor in `pyproject.toml`:
+For the docs, set `exec_all` in `pyproject.toml`:
 
 ``` toml
 [tool.nbdev]
-doc_procs = ["answerui.previews:exec_previews"]
+exec_all = true
 ```
 
-`nbdev-docs` then runs each notebook and renders the previews from the current code.
+`nbdev-docs` then runs every notebook and renders each preview from the current code.
 
 ## With an LLM
 

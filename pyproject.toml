@@ -18,11 +18,7 @@ classifiers = [
 dependencies = ["python-fasthtml"]
 
 [project.optional-dependencies]
-dev = ["nbdev", "numpy", "scipy", "matplotlib", "pandas"]
-
-[project.scripts]
-answerui-clean = "answerui.previews:answerui_clean"
-answerui-install-hooks = "answerui.previews:answerui_install_hooks"
+dev = ["nbdev>=3.3.29", "numpy", "scipy", "matplotlib", "pandas"]
 
 [project.urls]
 Repository = "https://github.com/AnswerDotAI/answerui"
@@ -45,4 +41,4 @@ include = ["answerui"]
 answerui = ["css/*.css", "css/*.LICENSE"]
 
 [tool.nbdev]
-doc_procs = ["answerui.previews:exec_previews"]
+exec_all = true

@@ -18,7 +18,7 @@ classifiers = [
 dependencies = ["python-fasthtml"]
 
 [project.optional-dependencies]
-dev = ["nbdev"]
+dev = ["nbdev", "numpy", "scipy", "matplotlib", "pandas"]
 
 [project.scripts]
 answerui-clean = "answerui.previews:answerui_clean"

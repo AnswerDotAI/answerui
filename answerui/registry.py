@@ -80,7 +80,7 @@ class RuleView(Mapping):
 class Registry:
     "Named rules and hyperelements, shared by the asset builders"
     def __init__(self):
-        self.rules, self.elements = {}, {}
+        self.rules, self.elements, self.version = {}, {}, 0
         self.layers = {name: RuleView(self, layer=name) for name in LAYERS}
 
     def rule(
@@ -98,11 +98,14 @@ class Registry:
         r = Rule(key, css, on=on, sel=sel, layer=layer, doc=doc, variant=variant)
         if r.key in self.rules: self.rules[r.key].__dict__.update(vars(r))
         else: self.rules[r.key] = r
+        self.version += 1
         return self.rules[r.key]
 
     def remove(self, key):
         "Remove and return the rule at its full registry key"
-        return self.rules.pop(key)
+        r = self.rules.pop(key)
+        self.version += 1
+        return r
 
     def __repr__(self): return f'Registry({len(self.rules)} rules, {len(self.elements)} elements)'
 

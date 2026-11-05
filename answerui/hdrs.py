@@ -1,6 +1,6 @@
 """App integration: the headers that carry the registry's assets
 
-An app integrates answerui by passing its headers to `FastHTML` (or `fast_app`). However, the registry can change after that call, so the headers can't be built once at construction time; they have to be rendered fresh for each response.
+An app integrates answerui by passing its headers to `FastHTML` (or `fast_app`). The registry can change after that call, so the headers are lazy: each response renders them from the current state of the registry.
 
 Docs: https://AnswerDotAI.github.io/answerui/hdrs.html.md"""
 
@@ -17,6 +17,18 @@ import answerui.behaviors  # installs Registry.build_js
 import hashlib
 from starlette.responses import Response
 
+# %% ../nbs/03_hdrs.ipynb #89f8f25a
+def _hash(s): return hashlib.sha256(s.encode()).hexdigest()[:12]
+
+@patch
+def assets(self:Registry):
+    "The stylesheet and script with their content hashes, keyed by extension, built once per registry version"
+    if getattr(self, '_assets_version', None) != self.version:
+        self._assets = {ext: AttrDict(body=body, hash=_hash(body)) for ext,body in (('css', self.build_css()), ('js', self.build_js()))}
+        self._assets_version = self.version
+    return self._assets
+
+
 # %% ../nbs/03_hdrs.ipynb #a8b08b14
 class _Lazy:
     def __init__(self, f): self.f = f
@@ -25,12 +37,10 @@ class _Lazy:
 @patch
 def hdrs(self:Registry):
     "Headers for `fast_app(hdrs=...)`: the stylesheet and behavior script, rendered from this registry per response"
-    return _Lazy(lambda: Style(self.build_css())), _Lazy(lambda: Script(self.build_js()))
+    return _Lazy(lambda: Style(self.assets()['css'].body)), _Lazy(lambda: Script(self.assets()['js'].body))
 
 
 # %% ../nbs/03_hdrs.ipynb #8c17128d
-def _digest(s): return hashlib.sha256(s.encode()).hexdigest()[:12]
-
 @patch
 def serve(
     self:Registry,
@@ -38,13 +48,16 @@ def serve(
     path='/answerui', # URL prefix the assets are served under
 ):
     "Serve the stylesheet and script from `app` under content-hashed names, linked from every page; returns the two headers, for an app that builds its own head"
-    assets = {'css': (self.build_css, 'text/css'), 'js': (self.build_js, 'text/javascript')}
+    served, mimes = {}, {'css': 'text/css', 'js': 'text/javascript'}
+    def link(ext):
+        a = self.assets()[ext]
+        served[f'{a.hash}.{ext}'] = (a.body, mimes[ext])
+        return f'{path}/{a.hash}.{ext}'
     @app.get(f'{path}/{{name}}')
     def asset(name: str):
-        build, mime = assets.get(name.rsplit('.', 1)[-1], (None, None))
-        if not build: return Response(status_code=404)
-        return Response(build(), media_type=mime, headers={'Cache-Control': 'public, max-age=31536000, immutable'})
-    hdrs = (_Lazy(lambda: Link(rel='stylesheet', href=f'{path}/{_digest(self.build_css())}.css')),
-        _Lazy(lambda: Script(src=f'{path}/{_digest(self.build_js())}.js')))
+        if name not in served: return Response(status_code=404)
+        body, mime = served[name]
+        return Response(body, media_type=mime, headers={'Cache-Control': 'public, max-age=31536000, immutable'})
+    hdrs = _Lazy(lambda: Link(rel='stylesheet', href=link('css'))), _Lazy(lambda: Script(src=link('js')))
     app.hdrs = [*app.hdrs, *hdrs]
     return hdrs

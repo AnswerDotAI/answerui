@@ -37,6 +37,7 @@ def context(
 ):
     "Declare `sel` as a colour context whose family derives from `hue`"
     self.contexts[sel] = hue
+    self.version += 1
 
 
 # %% ../nbs/05_tokens.ipynb #27b907a4

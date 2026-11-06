@@ -341,14 +341,18 @@ def Field(
 
 
 # %% ../nbs/08_controls.ipynb #48d898b5
-Field.rule('validity', on={
-    ('& :is(input, select, textarea)', 'focusout'): r"""
+_validity_js = r"""
 const f = el.closest('[field]'); let m = f.querySelector(':scope > small[validation]');
-if (!el.matches(':user-invalid')) { m?.remove(); return }
-if (!m) { m = document.createElement('small'); m.setAttribute('validation', ''); m.setAttribute('danger', ''); f.append(m) }
-m.textContent = el.validationMessage""",
-    ('& :is(input, select, textarea)', 'input'): "if (el.validity.valid) el.closest('[field]').querySelector(':scope > small[validation]')?.remove()",
-}, layer='components', doc="Once the user leaves a control invalid, the browser's own validation message appears under the field; it goes when the value is valid again.")
+const ids = (el.getAttribute('aria-describedby') || '').split(' ').filter(i => i && i !== m?.id);
+const show = e.type === 'invalid' || (e.type === 'focusout' ? el.matches(':user-invalid') : m && !el.validity.valid);
+if (!show) { m?.remove(); ids.length ? el.setAttribute('aria-describedby', ids.join(' ')) : el.removeAttribute('aria-describedby'); return }
+if (!m) { m = document.createElement('small'); m.toggleAttribute('validation', true); m.toggleAttribute('danger', true); m.id = 'validation-' + Math.random().toString(36).slice(2, 8); f.append(m) }
+m.textContent = el.validationMessage; el.setAttribute('aria-describedby', [...ids, m.id].join(' '));
+if (e.type !== 'invalid') return;
+e.preventDefault(); if ([...el.form?.elements ?? [el]].find(c => !c.validity.valid) === el) el.focus();"""
+_ctl = '& :is(input, select, textarea)'
+Field.rule('validity', on={(_ctl, 'focusout'): _validity_js, (_ctl, 'input'): _validity_js, (_ctl, 'invalid', True): _validity_js}, layer='components',
+    doc="When the user leaves a control invalid or tries to submit, the browser's own validation message appears under the field in place of its bubble, listed in the control's `aria-describedby`; both go when the value is valid again.")
 
 # %% ../nbs/08_controls.ipynb #f12ffe76
 reg.rule('form-validation', sel='form', on={('& :is(input, select, textarea)', 'input'): r"for (const m of el.form.querySelectorAll('small[validation]')) if (!m.closest('[field]')) m.remove()"},

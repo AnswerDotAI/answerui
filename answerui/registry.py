@@ -112,7 +112,8 @@ class Registry:
     def _repr_markdown_(self):
         layers = '\n'.join(f'- `{name}`: {len(rules)} rules' for name,rules in self.layers.items())
         elements = ', '.join(f'`{k}`' for k in self.elements) or 'none'
-        return f'{self!r}\n\nLayers:\n{layers}\n\nElements: {elements}'
+        rules = '\n'.join(f'- `{k}` ({r.layer})' + (f': {r.doc}' if r.doc else '') for k,r in self.rules.items() if r.owner is None) or 'none'
+        return f'{self!r}\n\nLayers:\n{layers}\n\nElements: {elements}\n\nRules of no element:\n{rules}'
 
 reg = Registry()
 

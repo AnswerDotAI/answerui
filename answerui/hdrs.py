@@ -1,6 +1,6 @@
 """App integration: the headers that carry the registry's assets
 
-An app integrates answerui by passing its headers to `FastHTML` (or `fast_app`). The registry can change after that call, so the headers are lazy: each response renders them from the current state of the registry.
+An app integrates answerui by passing `reg.hdrs()` and `reg.ftrs()` to `FastHTML` (or `fast_app`). The headers are the stylesheet and the behavior script. The footer is the sprite sheet for icons. The registry can change after that call, so the headers are lazy: each response renders them from the current state of the registry.
 
 Docs: https://AnswerDotAI.github.io/answerui/hdrs.html.md"""
 
@@ -14,6 +14,7 @@ from fastcore.utils import *
 from fasthtml.common import Style, Script, Link
 from .registry import Registry
 import answerui.behaviors  # installs Registry.build_js
+from fastlucide.icons import spritesheet
 import hashlib
 from starlette.responses import Response
 
@@ -40,6 +41,12 @@ def hdrs(self:Registry):
     return _Lazy(lambda: Style(self.assets()['css'].body)), _Lazy(lambda: Script(self.assets()['js'].body))
 
 
+# %% ../nbs/03_hdrs.ipynb #0a31b42e
+@patch
+def ftrs(self:Registry):
+    "Footers for `fast_app(ftrs=...)`: fastlucide's sprite sheet, with every icon that any module has imported"
+    return (spritesheet,)
+
 # %% ../nbs/03_hdrs.ipynb #8c17128d
 @patch
 def serve(
@@ -47,7 +54,7 @@ def serve(
     app,              # The FastHTML app to mount the route on and add the headers to
     path='/answerui', # URL prefix the assets are served under
 ):
-    "Serve the stylesheet and script from `app` under content-hashed names, linked from every page; returns the two headers, for an app that builds its own head"
+    "Serve the stylesheet and script under content-hashed names and add the sprite sheet to `app`; returns the two headers, for an app that builds its own head"
     served, mimes = {}, {'css': 'text/css', 'js': 'text/javascript'}
     def link(ext):
         a = self.assets()[ext]
@@ -59,5 +66,5 @@ def serve(
         body, mime = served[name]
         return Response(body, media_type=mime, headers={'Cache-Control': 'public, max-age=31536000, immutable'})
     hdrs = _Lazy(lambda: Link(rel='stylesheet', href=link('css'))), _Lazy(lambda: Script(src=link('js')))
-    app.hdrs = [*app.hdrs, *hdrs]
+    app.hdrs, app.ftrs = [*app.hdrs, *hdrs], [*app.ftrs, *self.ftrs()]
     return hdrs

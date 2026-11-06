@@ -17,6 +17,7 @@ from fastcore.xml import highlight
 from fasthtml.core import def_hdrs
 from .registry import reg, Hyperelement
 import answerui.behaviors  # installs Registry.build_js
+from fastlucide.icons import spritesheet
 
 # %% ../nbs/02_demo.ipynb #533a2e38
 def demo_html(
@@ -25,9 +26,9 @@ def demo_html(
     css=None,     # Stylesheet for the document; None uses the registry's build_css()
     htmx4=False,  # Use htmx 4 with FastHTML's config, as `fast_app(htmx4=True)` does, instead of htmx 2
 ):
-    "A standalone document containing markup, CSS, behaviors, and FastHTML's default headers"
+    "A standalone document containing markup, CSS, behaviors, the sprite sheet, and FastHTML's default headers"
     head = Head(*def_hdrs(htmx4=htmx4, surreal=False), Style(registry.build_css() if css is None else css), Script(registry.build_js()))
-    return to_xml(Html(head, Body(*fts, style='min-block-size: auto')))
+    return to_xml(Html(head, Body(*fts, spritesheet, style='min-block-size: auto')))
 
 
 # %% ../nbs/02_demo.ipynb #103de975

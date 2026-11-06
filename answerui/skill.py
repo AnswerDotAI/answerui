@@ -2,12 +2,12 @@
 
 Read this before writing markup for an answerui app, before changing how a page or a component looks, and before adding a component.
 
-answerui styles semantic HTML. A component is a native tag, or a custom tag where HTML has no element for the concept. A variant or a state is an attribute, and a class does only a utility job. `Button('Save', secondary=True)` renders `<button secondary>`. Every rule, component, and behavior lives in one registry, `reg`, and a page carries them all in two headers:
+answerui styles semantic HTML. A component is a native tag, or a custom tag where HTML has no element for the concept. A variant or a state is an attribute, and a class does only a utility job. `Button('Save', secondary=True)` renders `<button secondary>`. Every rule, component, and behavior lives in one registry, `reg`. A page includes them through two headers and one footer:
 
 ```python
 from fasthtml.common import *
 from answerui.all import *
-app = FastHTML(hdrs=reg.hdrs())
+app = FastHTML(hdrs=reg.hdrs(), ftrs=reg.ftrs())
 ```
 
 Import answerui after FastHTML. It redefines the constructors it styles, and a later `from fasthtml.common import *` puts FastHTML's plain ones back. The headers render from the registry per response. A rule registered after the app starts is in the next page. `reg.serve(app)` instead serves the same assets from URLs named by a hash of their content, which the browser caches, and a changed rule reaches the next page as a new URL.
@@ -18,7 +18,7 @@ A page is native HTML. Headings, paragraphs, lists, code, and links are styled b
 
 `reg.elements` names every component, `doc(answerui)` lists the modules that define them, and `doc(Button)` describes one. A component's variants are attributes: `Button('Save', secondary=True)`. A link carrying `button` is styled as one: `A('Sign up', href='/signup', button=True)`. A severity is an attribute on any element, and every component inside it takes the colour: `Alert('Saved.', success=True)`, `Badge('3', danger=True)`. A dark island is an element that sets `color-scheme: dark` together with its own `background: var(--n-3)` and `color: var(--n2)`, and the ladders re-derive inside it.
 
-Icons come from fastlucide. Import an icon's constructor and `spritesheet` from `fastlucide.icons`, and render `spritesheet` once in the page body. A sprite icon, or any inline `svg` carrying `icon`, takes the text's colour and size, so pass it no size. A button whose only child is an icon is square. Give it an `aria-label`. `Tooltip(control, text)` returns one inline wrapper holding the control and its description.
+Icons come from fastlucide. Import an icon's constructor from `fastlucide.icons` at module level, and call it where the icon goes: `from fastlucide.icons import Trash_2`, then `Button(Trash_2(), aria_label='Remove')`. The footer from `reg.ftrs()` holds the sprite sheet, with every icon that any module has imported. A sprite icon, or any inline `svg` marked `icon`, takes the colour and size of the text around it, so pass it no size. A button whose only child is an icon is square. Give it an `aria-label`. `Tooltip(control, text)` returns one inline wrapper holding the control and its description.
 
 A toast for the next page is queued in the session: `add_toast(sess, 'Saved.', success=True)`. The page renders the queue in its region, `Toasts(*pop_toasts(sess))`, and `setup_toasts(app)` delivers what a route queued beside a fragment response.
 

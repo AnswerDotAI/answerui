@@ -14,7 +14,7 @@ pip install -e .
 
 ## Use
 
-The registry’s headers carry the stylesheet and the behavior script. They render per response, so a rule registered later is in the next page:
+`reg.hdrs()` gives the stylesheet and the behavior script, and `reg.ftrs()` gives the sprite sheet for icons. Both render per response, so a rule registered later is in the next page:
 
 ``` python
 from fasthtml.common import *
@@ -22,7 +22,7 @@ from answerui.all import *
 ```
 
 ``` python
-app = FastHTML(hdrs=reg.hdrs())
+app = FastHTML(hdrs=reg.hdrs(), ftrs=reg.ftrs())
 rt = app.route
 ```
 

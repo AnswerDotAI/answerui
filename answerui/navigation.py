@@ -11,7 +11,7 @@ __all__ = ['NavBar']
 
 # %% ../nbs/12_navigation.ipynb #4e943eeb
 from fasthtml.common import Header, Nav, A, Div, Button, Input, Hr, unqid
-from fasthtml.svg import Svg, Line
+from fastlucide.icons import Menu
 from fastcore.utils import *
 from .registry import hypelt, reg
 from .layout import Cluster
@@ -42,10 +42,6 @@ _navbar_css = r"""
 }
 """
 
-def _burger():
-    "Three lines, the disclosure glyph"
-    return Svg(*[Line(x1=4, y1=y, x2=20, y2=y) for y in (6, 12, 18)], viewBox='0 0 24 24', fill='none', stroke='currentColor', stroke_width=2, stroke_linecap='round', icon=True, aria_hidden='true')
-
 @hypelt(sel='[navbar]', layer='components', css=_navbar_css)
 def NavBar(
     brand,          # Brand content, linked to href
@@ -58,7 +54,7 @@ def NavBar(
     "The bar at the top of a page: brand, links, and actions"
     id = unqid()
     content = Div(*c, bar_content=True, id=id) if c else None
-    burger = Button(_burger(), type='button', quiet=True, burger=True, aria_controls=id, aria_expanded='false', aria_label='Navigation') if collapse and c else None
+    burger = Button(Menu(aria_hidden='true'), type='button', quiet=True, burger=True, aria_controls=id, aria_expanded='false', aria_label='Navigation') if collapse and c else None
     return Header(A(brand, href=href), content, Cluster(*listify(end), end=True), burger,
         navbar=True, anchor=True, collapse=collapse, **attrs)
 

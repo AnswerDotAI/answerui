@@ -15,7 +15,7 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
 ]
-dependencies = ["python-fasthtml"]
+dependencies = ["python-fasthtml", "fastlucide"]
 
 [project.optional-dependencies]
 dev = ["nbdev>=3.3.29", "numpy", "scipy", "matplotlib", "pandas"]

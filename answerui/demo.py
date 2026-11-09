@@ -12,12 +12,32 @@ __all__ = ['demo_html', 'Preview', 'demo', 'example']
 # %% ../nbs/02_demo.ipynb #6ae7b22e
 from fastcore.utils import *
 from fastcore.meta import delegates
-from fasthtml.common import to_xml, Div, Iframe, Button, Html, Head, Body, Style, Script
+from fasthtml.common import to_xml, Div, Iframe, Button, Html, Head, Body, Style, Script, FT
 from fastcore.xml import highlight
 from fasthtml.core import def_hdrs
 from .registry import reg, Hyperelement
 import answerui.behaviors  # installs Registry.build_js
 from fastlucide.icons import spritesheet
+
+# %% ../nbs/02_demo.ipynb #351e46af
+_verbs = dict(get='hx-get', post='hx-post', put='hx-put', delete='hx-delete', patch='hx-patch', link='href')
+def _as_served(o):
+    "FastHTML's `get`, `post` and friends renamed to their htmx attributes, as a served page would render them"
+    if isinstance(o, (list, tuple)): return [_as_served(c) for c in o]
+    if not isinstance(o, FT): return o
+    for k,v in _verbs.items():
+        if k in o.attrs: o.attrs[v] = o.attrs.pop(k)
+    for c in o.children: _as_served(c)
+    return o
+
+_routes_js = r'''const routes = %s;
+document.addEventListener('htmx:beforeRequest', e => {
+  const r = e.detail.requestConfig, html = routes[`${r.verb.toUpperCase()} ${r.path}`];
+  if (html == null) return;
+  e.preventDefault();
+  const spec = (htmx.closest(e.detail.elt, '[hx-swap]')?.getAttribute('hx-swap') ?? 'innerHTML').split(' ')[0];
+  htmx.swap(e.detail.target, html, {swapStyle: spec});
+});'''
 
 # %% ../nbs/02_demo.ipynb #533a2e38
 def demo_html(
@@ -25,10 +45,12 @@ def demo_html(
     registry=reg, # Registry whose stylesheet and behavior script the document carries
     css=None,     # Stylesheet for the document; None uses the registry's build_css()
     htmx4=False,  # Use htmx 4 with FastHTML's config, as `fast_app(htmx4=True)` does, instead of htmx 2
+    routes=None,  # Canned responses for the document's htmx requests, `{'GET path': markup}`, standing in for a server
 ):
     "A standalone document containing markup, CSS, behaviors, the sprite sheet, and FastHTML's default headers"
     head = Head(*def_hdrs(htmx4=htmx4, surreal=False), Style(registry.build_css() if css is None else css), Script(registry.build_js()))
-    return to_xml(Html(head, Body(*fts, spritesheet, style='min-block-size: auto')))
+    if routes: head = head(Script(_routes_js % dumps({k: to_xml(_as_served(v)) for k,v in routes.items()})))
+    return to_xml(Html(head, Body(*_as_served(fts), spritesheet, style='min-block-size: auto')))
 
 
 # %% ../nbs/02_demo.ipynb #103de975
@@ -47,11 +69,12 @@ def demo(
     height=None,  # Fixed iframe height, e.g. '10rem', for top-layer content the frame can't measure; None follows the content
     width=None,   # Fixed iframe width, e.g. '24rem', to preview a narrow viewport; None fills the cell
     htmx4=False,  # Use htmx 4 with FastHTML's config, as `fast_app(htmx4=True)` does, instead of htmx 2
+    routes=None,  # Canned responses for the preview's htmx requests, `{'GET path': markup}`, standing in for a server
 ):
     "Render markup in an isolated, replayable notebook preview"
     doc = fts if height is not None else fts + (_sizer,)
     style = f'width:100%;box-sizing:border-box;border:1px solid #e3e3e8;border-radius:8px;height:{height or "auto"};'
-    frame = Iframe(srcdoc=demo_html(*doc, registry=registry, css=css, htmx4=htmx4), title='answerui preview', style=style)
+    frame = Iframe(srcdoc=demo_html(*doc, registry=registry, css=css, htmx4=htmx4, routes=routes), title='answerui preview', style=style)
     replay = Button('↻', type='button', aria_label='replay', title='replay',
         onclick=r"const f=this.parentElement.nextElementSibling; f.srcdoc=f.srcdoc",
         style='border:0;background:none;font-size:14px;opacity:.6;cursor:pointer;padding:0 4px')

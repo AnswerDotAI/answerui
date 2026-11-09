@@ -177,7 +177,7 @@ dialog[open] { translate: none; @starting-style { translate: 0 var(--space-2); }
 dialog::backdrop { background: oklch(from var(--n2) l c h / .4); }
 """)
 Dialog.variant('drawer', r"""
---_slide: 100%; --drawer-size: 24rem; inset: 0; inset-inline-start: auto;
+--_slide: 100%; --drawer-size: 24rem; --face: var(--n-3); inset: 0; inset-inline-start: auto; overflow-y: auto;
 block-size: 100dvh; max-block-size: none; inline-size: var(--drawer-size); max-inline-size: none; margin: 0;
 border-radius: 0; border-block: 0; border-inline-end: 0; translate: var(--_slide) 0;
 &:dir(rtl) { --_slide: -100%; }
@@ -185,7 +185,7 @@ border-radius: 0; border-block: 0; border-inline-end: 0; translate: var(--_slide
 &[drawer=start]:dir(rtl) { --_slide: 100%; }
 &[open] { translate: none; @starting-style { translate: var(--_slide) 0; } }
 @media (width < 40rem) { &, &[drawer=start] { inline-size: 100%; border: 0; } }
-""", layer='components', doc='Slides in from the end edge and runs the full height, `--drawer-size` wide, or the whole screen below 40rem; `start` slides in from the other edge.')
+""", layer='components', doc='Slides in from the end edge and runs the full height, `--drawer-size` wide, or the whole screen below 40rem, on the page colour, scrolling when its content is taller; `start` slides in from the other edge.')
 
 # %% ../nbs/11_overlays.ipynb #41c6963e
 Dialog.rule('fill', on={('&', ':after-swap'): "if (e.target !== el && !el.open) el.showModal()"}, layer='components',

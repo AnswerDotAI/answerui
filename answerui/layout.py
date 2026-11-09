@@ -11,7 +11,7 @@ __all__ = ['Stack', 'Cluster', 'Grid', 'Flow']
 
 # %% ../nbs/07_layout.ipynb #ded57221
 from fasthtml.common import Div, H2, H3, P, Code, Small
-from .registry import hypelt
+from .registry import hypelt, reg
 from .demo import example
 import answerui.base  # the reset the spacing assumes, and the tokens it reads
 
@@ -79,6 +79,10 @@ def _grid_example():
         Stack(H3('Inbox'), P('Requests waiting for a first look.'), gap='var(--space-2)'),
         Stack(H3('In progress'), P('Work the team has picked up.'), gap='var(--space-2)'),
         Stack(H3('Done'), P('Completed work, ready to share.'), gap='var(--space-2)'))
+
+# %% ../nbs/07_layout.ipynb #8d30542c
+reg.rule('list', ':is(ul, ol):is([stack], [cluster], [grid]) { list-style: none; padding: 0; margin: 0; }', layer='layout',
+    doc='A list that carries a layout is a layout, not prose: no markers, no indent.')
 
 # %% ../nbs/07_layout.ipynb #8355d595
 @hypelt(sel='[flow]', layer='layout', css=r"""

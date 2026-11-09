@@ -124,9 +124,10 @@ const run = () => {
     const changed = [...f.elements].some(c => c.matches('input:not([type=hidden], [type=submit], [type=button], [type=reset]), select, textarea')
         && (c.type === 'checkbox' || c.type === 'radio' ? c.checked !== c.defaultChecked
             : c.tagName === 'SELECT' ? [...c.options].some(o => o.selected !== o.defaultSelected) : c.value !== c.defaultValue));
+    const valid = [...f.elements].every(c => c.validity.valid);  // not checkValidity(), which fires `invalid` on each control and the validity rule would show its message
     for (const b of f.querySelectorAll('button[enable]')) {
         const wants = b.getAttribute('enable').split(' ');
-        b.disabled = !wants.every(w => w === 'changed' ? changed : w === 'valid' ? f.checkValidity() : true);
+        b.disabled = !wants.every(w => w === 'changed' ? changed : w === 'valid' ? valid : true);
     }
 };
 e.type === 'reset' ? setTimeout(run) : run();"""

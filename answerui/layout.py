@@ -54,6 +54,10 @@ def Cluster(
 def _cluster_example():
     return Cluster(Code('FastHTML'), Code('htmx'), Code('semantic HTML'), Code('CSS'), gap='var(--space-2)')
 
+# %% ../nbs/07_layout.ipynb #173858a6
+Cluster.rule('grow', '& > [grow] { flex: 1; min-inline-size: 0; }', layer='layout', doc='A child marked `grow` takes the width the others leave, so what follows it sits at the end of the row.')
+
+
 # %% ../nbs/07_layout.ipynb #f5f6e17d
 @hypelt(sel='[grid]', layer='layout', css=r"""
 [grid] {

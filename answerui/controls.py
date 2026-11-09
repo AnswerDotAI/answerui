@@ -89,7 +89,7 @@ reg.context(':user-invalid, [aria-invalid=true]', 'var(--hue-danger)')
 
 _text_sel = 'input:is(:not([type]), [type=text], [type=email], [type=password], [type=search], [type=url], [type=tel], [type=number], [type=date], [type=time], [type=datetime-local], [type=month], [type=week])'
 reg.rule('text-controls', rf"""
-:is({_text_sel}, textarea, select) {{
+:is({_text_sel}, textarea, select, [well]) {{
   inline-size: 100%; padding: var(--space-2) var(--space-1);
   --face: var(--n-3); background: var(--face); color: var(--n2);
   border: 1px solid var(--n-1); border-radius: var(--radius); box-shadow: var(--bevel-in), var(--sunken);
@@ -100,7 +100,7 @@ reg.rule('text-controls', rf"""
 ::placeholder {{ color: var(--n1); }}
 input[type=number] {{ appearance: textfield; }}
 input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button {{ appearance: none; margin: 0; }}
-""", layer='components', doc='The well shared by text inputs, textareas, and selects, taking the danger hue when invalid.')
+""", layer='components', doc='The well shared by text inputs, textareas, selects, and any element marked `well`, taking the danger hue when invalid.')
 
 Input = hypelt('Input', sel=_text_sel, layer='components', doc='A text-like input, styled as a well by the text-controls rule.')
 Textarea = hypelt('Textarea', layer='components', css='textarea { min-block-size: 5rem; resize: vertical; field-sizing: content; }',
@@ -430,3 +430,7 @@ def _fieldset_example():
         Field('Email me about mentions', Input(type='checkbox', checked=True)),
         Field('Email me a weekly digest', Input(type='checkbox')),
         stack=True, style='--gap: var(--space-2)')
+
+# %% ../nbs/08_controls.ipynb #ed615aa5
+reg.rule('reveals', on={('input[reveals]', 'change'): r"document.getElementById(el.getAttribute('reveals')).hidden = !el.checked"}, layer='components',
+    doc="A checkbox or switch with `reveals='<id>'` shows that element while checked and hides it while not; render the element `hidden` to match the initial state.")

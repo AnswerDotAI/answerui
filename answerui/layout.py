@@ -84,6 +84,9 @@ def _grid_example():
         Stack(H3('In progress'), P('Work the team has picked up.'), gap='var(--space-2)'),
         Stack(H3('Done'), P('Completed work, ready to share.'), gap='var(--space-2)'))
 
+# %% ../nbs/07_layout.ipynb #71663ee9
+Stack.rule('grow', '& > [grow] { flex: 1; }', layer='layout', doc='A child marked `grow` takes the height the others leave, so what follows it sits at the bottom of the stack.')
+
 # %% ../nbs/07_layout.ipynb #8d30542c
 reg.rule('list', ':is(ul, ol):is([stack], [cluster], [grid]) { list-style: none; padding: 0; margin: 0; }', layer='layout',
     doc='A list that carries a layout is a layout, not prose: no markers, no indent.')

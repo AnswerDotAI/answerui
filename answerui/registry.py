@@ -80,7 +80,7 @@ class RuleView(Mapping):
 class Registry:
     "Named rules and hyperelements, shared by the asset builders"
     def __init__(self):
-        self.rules, self.elements, self.version = {}, {}, 0
+        self.rules, self.elements, self.files, self.version = {}, {}, {}, 0
         self.layers = {name: RuleView(self, layer=name) for name in LAYERS}
 
     def rule(
@@ -106,6 +106,16 @@ class Registry:
         r = self.rules.pop(key)
         self.version += 1
         return r
+
+    def file(
+        self,
+        name, # Name the file is served under
+        path, # Where the file is on disk
+        url,  # A public URL of the same file, which rules use to refer to it
+    ):
+        "Register a file that rules refer to by `url`, returning `url`; `serve` serves the copy at `path` instead"
+        self.files[name] = (Path(path), url)
+        return url
 
     def __repr__(self): return f'Registry({len(self.rules)} rules, {len(self.elements)} elements)'
 

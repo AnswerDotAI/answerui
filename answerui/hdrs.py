@@ -15,7 +15,7 @@ from fasthtml.common import Style, Script, Link
 from .registry import Registry
 import answerui.behaviors  # installs Registry.build_js
 from fastlucide.icons import spritesheet
-import hashlib
+import hashlib, mimetypes
 from starlette.responses import Response
 
 # %% ../nbs/03_hdrs.ipynb #89f8f25a
@@ -56,10 +56,19 @@ def serve(
 ):
     "Serve the stylesheet and script under content-hashed names and add the sprite sheet to `app`; returns the two headers, for an app that builds its own head"
     served, mimes = {}, {'css': 'text/css', 'js': 'text/javascript'}
+    def local(body):
+        "`body` with the URL of each registered file replaced by a served copy of that file"
+        for name,(p,url) in self.files.items():
+            data = p.read_bytes()
+            fname = f'{hashlib.sha256(data).hexdigest()[:12]}-{name}'
+            served[fname] = (data, mimetypes.guess_type(name)[0])
+            body = body.replace(url, f'{path}/{fname}')
+        return body
     def link(ext):
         a = self.assets()[ext]
-        served[f'{a.hash}.{ext}'] = (a.body, mimes[ext])
-        return f'{path}/{a.hash}.{ext}'
+        name = f'{a.hash}.{ext}'
+        if name not in served: served[name] = (local(a.body), mimes[ext])
+        return f'{path}/{name}'
     @app.get(f'{path}/{{name}}')
     def asset(name: str):
         if name not in served: return Response(status_code=404)

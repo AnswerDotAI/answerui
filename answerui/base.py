@@ -32,7 +32,7 @@ html { scrollbar-gutter: stable; scroll-behavior: smooth; }
 body { color: var(--n2); font: var(--weight) var(--text)/var(--leading) var(--font); container-type: inline-size; }
 button, a[button], input:is([type=checkbox], [type=radio], [type=range]) { cursor: pointer; }
 :disabled { cursor: not-allowed; }
-h1, h2, h3, h4, h5, h6 { font-weight: var(--weight1); line-height: var(--leading-1); text-wrap: balance; }
+h1, h2, h3, h4, h5, h6 { font-family: var(--font-heading, inherit); font-weight: var(--weight1); line-height: var(--leading-1); text-wrap: balance; }
 h1 { font-size: var(--text3); } h2 { font-size: var(--text2); } h3 { font-size: var(--text1); }
 p { text-wrap: pretty; }
 a { color: var(--v); }

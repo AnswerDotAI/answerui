@@ -38,7 +38,7 @@ include = ["answerui"]
 
 
 [tool.setuptools.package-data]
-answerui = ["css/*.css", "css/*.LICENSE"]
+answerui = ["css/*.css", "css/*.LICENSE", "fonts/*.woff2", "fonts/*.LICENSE"]
 
 [tool.nbdev]
 exec_all = true

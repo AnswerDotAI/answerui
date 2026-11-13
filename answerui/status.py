@@ -116,7 +116,7 @@ def _toast_example():
         Template(response, id=id), Toasts())
 
 # %% ../nbs/10_status.ipynb #fd43c227
-toasts_key = 'toasts'
+toasts_key = 'aui_toasts'
 
 def add_toast(sess, msg, life=5000, **attrs):
     "Queue `msg` in `sess` for the next page or fragment, with its severity in `attrs`"

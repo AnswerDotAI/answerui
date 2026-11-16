@@ -17,4 +17,4 @@ Modules:
 - `answerui.surfaces`: Containers and small pieces of visual information
 - `answerui.tokens`: The styling surface: colour, space, radius, type, motion, and elevation"""
 
-__version__ = "0.0.1"
+__version__ = "0.0.2"

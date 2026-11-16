@@ -1,6 +1,6 @@
-"""The navbar
+"""The navbar at the top of a page: a brand link, navigation links and actions, with an optional disclosure button for narrow screens
 
-A navbar names the application and offers its main routes. `NavBar` combines a brand link, a `nav` of links, and actions such as search or an account menu.
+A navbar shows the application's name and links to its main routes. `NavBar` combines a brand link, a `nav` of links, and actions such as search or an account menu.
 
 Docs: https://AnswerDotAI.github.io/answerui/navigation.html.md"""
 

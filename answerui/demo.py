@@ -1,6 +1,6 @@
 """Isolated rendering of markup with current styles and behaviors, for notebooks and docs
 
-The registry holds styles and behaviors, and the behavior runtime turns them into JavaScript. To develop a component, we need to see the result and try its interactions. `demo` renders ordinary FastHTML markup in an isolated document with the current assets. The same preview is used both during notebook authoring and when viewing generated docs.
+The registry's `build_css` and `build_js` turn the styles and behaviors it holds into a stylesheet and a script. To develop a component, we need to see the result and try its interactions. `demo` renders ordinary FastHTML markup in an isolated document with the registry's current stylesheet and script. The same preview is used both during notebook authoring and when viewing generated docs.
 
 Docs: https://AnswerDotAI.github.io/answerui/demo.html.md"""
 
@@ -22,7 +22,7 @@ from fastlucide.icons import spritesheet
 # %% ../nbs/02_demo.ipynb #351e46af
 _verbs = dict(get='hx-get', post='hx-post', put='hx-put', delete='hx-delete', patch='hx-patch', link='href')
 def _as_served(o):
-    "FastHTML's `get`, `post` and friends renamed to their htmx attributes, as a served page would render them"
+    "`o` with `get`, `post`, `put`, `delete`, `patch` and `link` attributes renamed to `hx-get`, `hx-post`, `hx-put`, `hx-delete`, `hx-patch` and `href`, as when FastHTML serves a page"
     if isinstance(o, (list, tuple)): return [_as_served(c) for c in o]
     if not isinstance(o, FT): return o
     for k,v in _verbs.items():
@@ -78,12 +78,12 @@ def demo(
     replay = Button('↻', type='button', aria_label='replay', title='replay',
         onclick=r"const f=this.parentElement.nextElementSibling; f.srcdoc=f.srcdoc",
         style='border:0;background:none;font-size:14px;opacity:.6;cursor:pointer;padding:0 4px')
-    return Preview(fts, Div(Div(replay, style='text-align:right'), frame, answerui_preview=True, style=f'width:{width or "100%"}'))
+    return Preview(fts, Div(Div(replay, style='text-align:right'), frame, style=f'width:{width or "100%"}'))
 
 
 # %% ../nbs/02_demo.ipynb #7008abc5
 def example(h):
-    "Decorate a no-argument markup function as `h.example`, the markup `h.demo()` renders"
+    "Decorator that stores a no-argument markup function as `h.example`, for `h.demo()` to render"
     def _attach(f):
         h.example = f
         return f

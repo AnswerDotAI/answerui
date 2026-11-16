@@ -1,6 +1,6 @@
 """Stack, cluster, grid, and document flow
 
-A component owns its internal spacing. Its parent decides how it sits beside other components. Here we define four relationships between children: a vertical stack, a wrapping row, an adaptive grid, and document flow. Each is an attribute that can go on an existing element. The matching constructor adds it to a `Div`, so `Stack(...)` and `Section(..., stack=True)` use the same CSS.
+A component sets its own internal spacing. Its parent's layout sets how it sits beside other components. Here we define four relationships between children: a vertical stack, a wrapping row, an adaptive grid, and document flow. Each is an attribute that can go on an existing element. `Stack(...)` and `Section(..., stack=True)` use the same CSS, because the matching constructor puts the same attribute on a `Div`.
 
 Docs: https://AnswerDotAI.github.io/answerui/layout.html.md"""
 

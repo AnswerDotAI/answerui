@@ -1,6 +1,6 @@
 """Native form controls styled through their own states, raised to press and sunken to type into
 
-Every form control we need is already a native HTML tag, and the browser already keeps track of its state. We style those tags directly, and we style their states through the pseudo-classes (`:disabled`, `:user-invalid`, …) and ARIA attributes (`aria-busy`, `aria-pressed`, …) that the browser provides, rather than tracking anything ourselves. Variants are bare attributes.
+Every form control we need is already a native HTML tag, and the browser already keeps track of its state. We style those tags directly. For their states we use the browser's pseudo-classes, such as `:disabled` and `:user-invalid`, and ARIA attributes, such as `aria-busy` and `aria-pressed`, rather than tracking state ourselves. Variants are attributes with no value, such as `secondary`.
 
 Docs: https://AnswerDotAI.github.io/answerui/controls.html.md"""
 
@@ -82,7 +82,7 @@ def _button_example():
 
 
 # %% ../nbs/08_controls.ipynb #752e6b29
-Button.rule('icon-only', '&:has(> svg:only-child) { --pad-inline: var(--pad-block); }', layer='components', doc='A button whose only child is an svg is square; give it an aria-label.')
+Button.rule('icon-only', '&[aria-label]:has(> svg:only-child) { --pad-inline: var(--pad-block); }', layer='components', doc='A button with an aria-label whose only child element is an svg is square; a button with an icon and a text label keeps the usual padding.')
 
 # %% ../nbs/08_controls.ipynb #bea255a7
 reg.context(':user-invalid, [aria-invalid=true]', 'var(--hue-danger)')
@@ -152,7 +152,7 @@ _group_css = r"""
 
 @hypelt(sel='[group]', layer='components', css=_group_css)
 def Group(*c, **attrs):
-    "A text input and its action sharing an edge; `inset` puts the action inside the well"
+    "A text input and its action sharing an edge; `inset` puts the action inside the input's well"
     return Div(*c, group=True, **attrs)
 
 @hypelt(sel='menu[group]', layer='components')
@@ -190,9 +190,9 @@ const text = el.hasAttribute('copy') ? el.getAttribute('copy') : t?.matches('inp
 if (text == null) return;
 await navigator.clipboard.writeText(text);
 el._label ??= el.getAttribute('aria-label') ?? '';
-el.toggleAttribute('copied', true); el.setAttribute('aria-label', 'Copied');
+el.toggleAttribute('copied', true); if (el._label) el.setAttribute('aria-label', 'Copied');
 clearTimeout(el._copied);
-el._copied = setTimeout(() => { el.removeAttribute('copied'); el._label ? el.setAttribute('aria-label', el._label) : el.removeAttribute('aria-label') }, 1500);"""
+el._copied = setTimeout(() => { el.removeAttribute('copied'); if (el._label) el.setAttribute('aria-label', el._label) }, 1500);"""
 
 _copy_css = r"""
 button:is([copyfor], [copy]) > svg > use:last-child { display: none; }
@@ -207,7 +207,7 @@ def Copy(
     copy=None,    # Fixed text to copy instead of an element's
     **attrs,      # Attributes for the button; `secondary` replaces the default `quiet`
 ):
-    "A quiet button that copies an element's value or text to the clipboard"
+    "A quiet button that copies fixed text, or an element's value or text, to the clipboard"
     if 'secondary' not in attrs: attrs.setdefault('quiet', True)
     if not c: attrs.setdefault('aria_label', 'Copy')
     return Button(CopyIcon(aria_hidden='true') + Check(), *c, type='button', copyfor=copyfor, copy=copy, **attrs)
@@ -217,7 +217,7 @@ def Copy(
 def _copy_example():
     key, cmd = unqid(), unqid()
     return Stack(Group(Input(value='sk-live-4f9c2e7b1a0d', readonly=True, id=key, aria_label='API key'), Copy(copyfor=key), inset=True),
-        Cluster(Code('pip install answerui', id=cmd), Copy('', copyfor=cmd, secondary=True), gap='var(--space-2)'),
+        Cluster(Code('pip install answerui', id=cmd), Copy('Copy', copyfor=cmd, secondary=True), gap='var(--space-2)'),
         style='inline-size: 24rem')
 
 # %% ../nbs/08_controls.ipynb #9840b679
@@ -278,7 +278,7 @@ input[type=checkbox]:not([role=switch]):is(:checked, :indeterminate):disabled { 
 
 @hypelt(sel='input[type=checkbox]:not([role=switch])', layer='components', css=_checkbox_css)
 def Checkbox(**attrs):
-    "A checkbox; the choice-controls rule draws its well"
+    "A checkbox, styled as a small well by the `choice-controls` rule"
     return Input(type='checkbox', **attrs)
 
 
@@ -293,7 +293,7 @@ input[type=radio]:checked:disabled::before { background: var(--n); }
 
 @hypelt(sel='input[type=radio]', layer='components', css=_radio_css)
 def Radio(**attrs):
-    "A radio button; the choice-controls rule draws its well"
+    "A radio button, styled as a small well by the `choice-controls` rule"
     return Input(type='radio', **attrs)
 
 # %% ../nbs/08_controls.ipynb #89e76df1

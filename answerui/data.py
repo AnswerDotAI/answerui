@@ -1,6 +1,6 @@
-"""Tables and other displays of structured data
+"""Tables of structured data
 
-A table is a native `table`, styled plainly by the base layer, and the browser already gives it its structure: a caption, a head, a body, and a foot. This module adds `DataTable`, a table of figures on a raised surface that scrolls sideways when the table is wider than the page, with a head band and single-line cells.
+A plain table needs no component: the base layer styles a native `table` with its `caption`, `thead`, `tbody` and `tfoot`. This module adds `DataTable` for tables of figures. It gives the table a tinted head band and cells that never wrap, on a raised surface that scrolls sideways when the table doesn't fit.
 
 Docs: https://AnswerDotAI.github.io/answerui/data.html.md"""
 
@@ -29,7 +29,7 @@ _datatable_css = r'''
 
 @hypelt(sel='[datatable]', layer='components', css=_datatable_css)
 def DataTable(*c, **attrs):
-    "A table of data on a bordered surface that scrolls sideways when the table is wider than the page; attributes go on the surface"
+    "A table on a bordered surface that scrolls sideways when the table doesn't fit; attributes, such as an id or a variant, go on the surface"
     return Div(Table(*c), datatable=True, **attrs)
 
 

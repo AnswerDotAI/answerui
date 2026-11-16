@@ -1,6 +1,6 @@
-"""App integration: the headers that carry the registry's assets
+"""Headers and footer that put the registry's stylesheet, script and icons into an app's pages, inline or served from content-hashed URLs
 
-An app integrates answerui by passing `reg.hdrs()` and `reg.ftrs()` to `FastHTML` (or `fast_app`). The headers are the stylesheet and the behavior script. The footer is the sprite sheet for icons. The registry can change after that call, so the headers are lazy: each response renders them from the current state of the registry.
+To use answerui in an app, pass `reg.hdrs()` and `reg.ftrs()` to `FastHTML` or `fast_app`. The headers are the stylesheet and the behavior script. The footer is the sprite sheet for icons. The headers are lazy: for each response, FastHTML renders them from the registry's current state, including any rule registered after the app was created.
 
 Docs: https://AnswerDotAI.github.io/answerui/hdrs.html.md"""
 
@@ -19,13 +19,11 @@ import hashlib, mimetypes
 from starlette.responses import Response
 
 # %% ../nbs/03_hdrs.ipynb #89f8f25a
-def _hash(s): return hashlib.sha256(s.encode()).hexdigest()[:12]
-
 @patch
 def assets(self:Registry):
-    "The stylesheet and script with their content hashes, keyed by extension, built once per registry version"
+    "The stylesheet and script, keyed by extension, built once per registry version"
     if getattr(self, '_assets_version', None) != self.version:
-        self._assets = {ext: AttrDict(body=body, hash=_hash(body)) for ext,body in (('css', self.build_css()), ('js', self.build_js()))}
+        self._assets = {'css': self.build_css(), 'js': self.build_js()}
         self._assets_version = self.version
     return self._assets
 
@@ -38,7 +36,7 @@ class _Lazy:
 @patch
 def hdrs(self:Registry):
     "Headers for `fast_app(hdrs=...)`: the stylesheet and behavior script, rendered from this registry per response"
-    return _Lazy(lambda: Style(self.assets()['css'].body)), _Lazy(lambda: Script(self.assets()['js'].body))
+    return _Lazy(lambda: Style(self.assets()['css'])), _Lazy(lambda: Script(self.assets()['js']))
 
 
 # %% ../nbs/03_hdrs.ipynb #0a31b42e
@@ -48,16 +46,18 @@ def ftrs(self:Registry):
     return (spritesheet,)
 
 # %% ../nbs/03_hdrs.ipynb #8c17128d
+def _hash(s): return hashlib.sha256(s.encode()).hexdigest()[:12]
+
 @patch
 def serve(
     self:Registry,
     app,              # The FastHTML app to mount the route on and add the headers to
     path='/answerui', # URL prefix the assets are served under
 ):
-    "Serve the stylesheet and script under content-hashed names and add the sprite sheet to `app`; returns the two headers, for an app that builds its own head"
-    served, mimes = {}, {'css': 'text/css', 'js': 'text/javascript'}
+    "Serve the stylesheet and script under content-hashed names, adding their headers and the sprite sheet to `app`; returns the two headers, for an app that builds its own head"
+    served, names, mimes = {}, {}, {'css': 'text/css', 'js': 'text/javascript'}
     def local(body):
-        "`body` with the URL of each registered file replaced by a served copy of that file"
+        "`body` with each registered file's URL replaced by the URL of its served copy"
         for name,(p,url) in self.files.items():
             data = p.read_bytes()
             fname = f'{hashlib.sha256(data).hexdigest()[:12]}-{name}'
@@ -65,10 +65,12 @@ def serve(
             body = body.replace(url, f'{path}/{fname}')
         return body
     def link(ext):
-        a = self.assets()[ext]
-        name = f'{a.hash}.{ext}'
-        if name not in served: served[name] = (local(a.body), mimes[ext])
-        return f'{path}/{name}'
+        key = ext, self.version
+        if key not in names:
+            body = local(self.assets()[ext])
+            names[key] = name = f'{_hash(body)}.{ext}'
+            served[name] = (body, mimes[ext])
+        return f'{path}/{names[key]}'
     @app.get(f'{path}/{{name}}')
     def asset(name: str):
         for ext in mimes: link(ext)

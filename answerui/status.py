@@ -1,6 +1,6 @@
-"""Feedback, loading, and empty states
+"""Feedback and loading states: alerts, toasts, progress bars, spinners and skeletons
 
-An interface needs to explain what happened, what is still happening, and why there may be nothing to show. These components provide that feedback without taking over the operation itself. The application owns the state; the markup describes it.
+An interface needs to explain what happened and what is still happening. These components show that feedback but don't run the operation. The application owns the state; the markup describes it.
 
 Docs: https://AnswerDotAI.github.io/answerui/status.html.md"""
 
@@ -119,25 +119,25 @@ def _toast_example():
 toasts_key = 'aui_toasts'
 
 def add_toast(sess, msg, life=5000, **attrs):
-    "Queue `msg` in `sess` for the next page or fragment, with its severity in `attrs`"
+    "Queue `msg` in session `sess` for the next page or fragment, with its severity in `attrs`"
     sess.setdefault(toasts_key, []).append((msg, life, attrs))
 
 def pop_toasts(sess):
-    "The queued toasts as `Toast`s, clearing the queue"
+    "The toasts queued in session `sess`, as `Toast`s, clearing the queue"
     return [Toast(m, life=l, **a) for m,l,a in sess.pop(toasts_key, [])]
 
 def toasts_oob(sess):
-    "The queued toasts in an out-of-band wrapper, for delivery beside a fragment; None when nothing is queued"
+    "The toasts queued in session `sess`, in an out-of-band wrapper for delivery beside a fragment, clearing the queue; None when nothing is queued"
     toasts = pop_toasts(sess)
     return Div(*toasts, hx_swap_oob='beforeend:[toasts]') if toasts else None
 
 # %% ../nbs/10_status.ipynb #a20020e5
 def toast_after(resp, req, sess):
-    "FastHTML `after` hook: a markup response, or none, carries the queued toasts out of band"
+    "FastHTML `after` hook that adds the queued toasts out of band to a markup or empty response"
     if sess.get(toasts_key) and (not resp or isinstance(resp, (tuple, FT, FtResponse))): req.injects.append(toasts_oob(sess))
 
 def setup_toasts(app):
-    "Deliver queued toasts beside every markup response of `app`"
+    "Deliver queued toasts out of band with every markup or empty response of `app`"
     app.after.append(toast_after)
 
 # %% ../nbs/10_status.ipynb #1061215e

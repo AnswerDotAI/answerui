@@ -20,7 +20,7 @@ LAYERS = ('reset','tokens','base','layout','components','app','utilities')
 
 # %% ../nbs/00_registry.ipynb #da2ec151
 def _behaviors(on, sel):
-    "Behavior records with `&` replaced by `sel`, wrapped in `:is()` so a selector list stays grouped"
+    "Behavior records with each `&` in a selector replaced by `:is(sel)`, to keep a selector list grouped"
     res = []
     for (selector, event, *capture), js in (on or {}).items():
         if '&' in selector:
@@ -78,7 +78,7 @@ class RuleView(Mapping):
     def __repr__(self): return '\n'.join(repr(r) for r in self.values()) or '(no rules)'
 
 class Registry:
-    "Named rules and hyperelements, shared by the asset builders"
+    "Named rules and hyperelements, from which a page's stylesheet and script are built"
     def __init__(self):
         self.rules, self.elements, self.files, self.version = {}, {}, {}, 0
         self.layers = {name: RuleView(self, layer=name) for name in LAYERS}
@@ -113,7 +113,7 @@ class Registry:
         path, # Where the file is on disk
         url,  # A public URL of the same file, which rules use to refer to it
     ):
-        "Register a file that rules refer to by `url`, returning `url`; `serve` serves the copy at `path` instead"
+        "Register a file that rules refer to by `url`, and return `url`. `Registry.serve` serves a copy of the file at `path` and replaces `url` with that copy's URL in the stylesheet and script"
         self.files[name] = (Path(path), url)
         return url
 

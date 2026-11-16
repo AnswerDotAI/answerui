@@ -1,8 +1,8 @@
-"""The client runtime: delegated event rules that survive htmx swaps
+"""The client runtime: delegated event handlers that keep working across htmx swaps
 
-The registry stores a component's behaviors as records: a selector, an event, a handler body. Here we turn those into running code in the browser. Wiring a listener onto each element as it appears would work for a static page, but in a FastHTML app elements arrive continuously as htmx swaps in fragments, so per-element wiring would mean re-initialising after every swap.
+The registry stores a component's behaviors as records: a selector, an event, a capture flag and a handler body. Here we turn those records into code that runs in the browser. Attaching a listener to each element as it appears works for a static page. In a FastHTML app, where htmx keeps swapping in new elements, per-element listeners would have to be attached again after every swap.
 
-Instead we delegate: every event becomes one document-level listener which, when its event fires anywhere on the page, checks whether the target sits inside an element matching the rule's selector. Matching happens at event time against the live DOM, so elements swapped in later behave the same as those in the original page, with no per-element state and no mutation observer. The rule set is plain data, emitted fresh on each page render, which also lets a hyperelement be redefined in a live notebook.
+Instead we delegate: one listener on the document handles each event. When the event fires anywhere on the page, the listener checks whether the target is inside an element that matches a rule's selector. Because the listener checks the live DOM each time the event fires, elements swapped in later behave like those in the original page, with no per-element state and no mutation observer. A hyperelement redefined in a live notebook takes effect at the next page render, because the rules are plain data generated again on each render.
 
 Docs: https://AnswerDotAI.github.io/answerui/behaviors.html.md"""
 
@@ -46,13 +46,13 @@ if (init.length) htmx.onLoad(root => {
 _cleanup = ['htmx:before-cleanup-element', 'htmx:before:cleanup', 'htmx-before-cleanup']
 
 def _event(ev):
-    "The canonical event name: a leading `:` is the htmx shorthand, and every spelling of an htmx event becomes `htmx:` plus its hyphenated name"
+    "The canonical event name: a leading `:` stands for `htmx:`, and every spelling of an htmx event becomes `htmx:` plus its hyphenated name"
     if ev.startswith(':'): ev = 'htmx'+ev
     if not ev.startswith(('htmx:', 'htmx-')): return ev
     return 'htmx:' + re.sub(r'(?<=[a-z])(?=[A-Z])', '-', ev[5:]).lower().replace(':', '-')
 
 def _spellings(ev):
-    "The DOM event names a canonical event fires under: htmx 2's hyphenated alias, htmx 4's colon form, and htmx 4's form under FastHTML's `metaCharacter`"
+    "The DOM event names that the runtime listens for to handle canonical event `ev`. For an htmx event, these are htmx 2's hyphenated alias, htmx 4's colon form, and htmx 4's form with every colon replaced by FastHTML's `metaCharacter`"
     if ev == 'init': return []
     if ev == 'cleanup': return _cleanup
     if not ev.startswith('htmx:'): return [ev]

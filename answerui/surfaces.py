@@ -1,6 +1,6 @@
-"""Containers and small pieces of visual information
+"""Cards for grouping content, badges for short labels, and avatars for people and teams
 
-Surfaces group content without prescribing what it contains. A card is a visible boundary around a group of children, using the colour, spacing, and radius tokens already in place. A badge is a short label: a category, a count, or a status. An avatar identifies a person or team, by image or by initials.
+A surface groups content of any kind. A card is a visible boundary around its children, styled with the shared colour, spacing, and radius tokens. A badge is a short label: a category, a count, or a status. An avatar identifies a person or team, by image or by initials.
 
 Docs: https://AnswerDotAI.github.io/answerui/surfaces.html.md"""
 
@@ -50,7 +50,7 @@ _badge_css = r"""
 
 @hypelt(sel='[badge]', layer='components', css=_badge_css)
 def Badge(*c, **attrs):
-    "A small text label, optionally coloured by a severity attribute"
+    "A small text label, optionally coloured by a severity attribute: `danger`, `warning`, `success` or `info`"
     return Span(*c, badge=True, **attrs)
 
 Badge.variant('secondary', 'background: var(--n-1); color: var(--n2);', layer='components', doc='A neutral label.')

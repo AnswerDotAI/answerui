@@ -1,6 +1,6 @@
-"""The reset, the document on the tokens, and prose
+"""The CSS reset, document styles built from the tokens, icon sizing, and prose
 
-The base layer styles native HTML elements on the tokens, so a page written as plain semantic markup is readable before any component is involved. It has three parts: a reset that removes the browser's default styling, document styles for text, links, code, lists, and tables, and typrose for long-form prose. Each registers with `reg.rule` in the `reset` or `base` layer.
+The base layer styles native HTML elements with the tokens, so a page of plain semantic markup is readable without any component. It has four parts: a reset of the browser's default styles; document styles for text, links, code, lists, and tables; icon sizing; and typrose for long-form prose. We register each part's CSS with `reg.rule` in the `reset` or `base` layer, apart from one rule for the `hidden` attribute in the `utilities` layer.
 
 Docs: https://AnswerDotAI.github.io/answerui/base.html.md"""
 

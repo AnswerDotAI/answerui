@@ -1,6 +1,6 @@
 """Popovers, menus, dialogs, drawers, and tooltips
 
-An overlay sits above the page without changing its layout. Popovers provide light dismiss; dialogs make the page behind them inert. We keep those native behaviours, add a shared floating surface, and position popovers beside the control that opened them. Menus and tooltips build on that panel.
+An overlay sits above the page without changing its layout. Popovers close on a click outside them, which the platform calls light dismiss. Modal dialogs make the page behind them inert. We keep those native behaviours, add a shared floating surface, and position popovers beside the control that opened them. Dropdown menus are popovers too. Tooltips use the same anchor positioning, but they are not popovers.
 
 Docs: https://AnswerDotAI.github.io/answerui/overlays.html.md"""
 

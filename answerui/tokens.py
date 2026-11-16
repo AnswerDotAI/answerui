@@ -1,6 +1,6 @@
-"""The styling surface: colour, space, radius, type, motion, and elevation
+"""Design tokens: the shared CSS custom properties for colour, space, radius, type, motion, and elevation
 
-Tokens are the shared values that components use for styling. Changing a token changes all the components that read it. We register each family with `reg.rule` in the `tokens` layer, leaving applications free to override it with ordinary CSS.
+Tokens are the shared values that components use for styling. Changing a token changes all the components that read it. We register each family of tokens with `reg.rule` in the `tokens` layer. An application can override any of them with ordinary CSS.
 
 Docs: https://AnswerDotAI.github.io/answerui/tokens.html.md"""
 
@@ -26,7 +26,7 @@ CONTEXTS = dict(danger=25, warning=75, success=145, info=230)
 # %% ../nbs/05_tokens.ipynb #e25f8898
 @patch(as_prop=True)
 def contexts(self:Registry):
-    "The colour contexts declared on this registry: selector to hue"
+    "The colour contexts declared on this registry, as a dict from selector to hue"
     return self.__dict__.setdefault('_contexts', {})
 
 @patch
@@ -35,7 +35,7 @@ def context(
     sel, # Selector of the context
     hue, # Its hue: a number, or an expression such as `var(--hue-danger)`
 ):
-    "Declare `sel` as a colour context whose family derives from `hue`"
+    "Declare `sel` as a colour context whose palette derives from `hue`"
     self.contexts[sel] = hue
     self.version += 1
 
@@ -90,7 +90,7 @@ def font_face(
     style,  # `normal` or `italic`
     version='5.3.0', # Version of the family's Fontsource package the public URL names
 ):
-    "The `@font-face` rule for one packaged font file, which it registers with `reg`"
+    "Register one packaged font file with `reg.file` and return its `@font-face` rule"
     slug = family.lower().replace(' ', '-')
     name = f'{slug}-latin-{weight}-{style}.woff2'
     url = reg.file(name, files('answerui').joinpath('fonts', name), f'https://cdn.jsdelivr.net/npm/@fontsource/{slug}@{version}/files/{name}')
@@ -144,7 +144,7 @@ _relief = r"""
   --sunken: inset 0 2px 4px var(--_relief-shadow);
 """
 def relief(sel):
-    "The rims and shadows derived from `--face`, declared on `sel`"
+    "A CSS rule that derives rims and shadows from `--face` and `--relief` and declares them on `sel`"
     return f'{sel} {{{_relief}}}\n'
 
 reg.rule('elevation', r"""

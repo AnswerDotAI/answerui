@@ -17,4 +17,4 @@ Modules:
 - `answerui.surfaces`: Cards for grouping content, badges for short labels, and avatars for people and teams
 - `answerui.tokens`: Design tokens: the shared CSS custom properties for colour, space, radius, type, motion, and elevation"""
 
-__version__ = "0.0.3"
+__version__ = "0.0.4"

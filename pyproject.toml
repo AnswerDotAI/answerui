@@ -3,7 +3,7 @@ requires = ["setuptools>=64"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "answerui"
+name = "answerui-py"
 dynamic = ["version"]
 description = "A semantic HTML UI framework for FastHTML apps"
 readme = "README.md"
@@ -36,9 +36,10 @@ version = {attr = "answerui.__version__"}
 [tool.setuptools.packages.find]
 include = ["answerui"]
 
-
 [tool.setuptools.package-data]
 answerui = ["css/*.css", "css/*.LICENSE", "fonts/*.woff2", "fonts/*.LICENSE"]
 
 [tool.nbdev]
 exec_all = true
+lib_path = "answerui"
+

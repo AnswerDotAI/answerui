@@ -71,6 +71,7 @@ def serve(
         return f'{path}/{name}'
     @app.get(f'{path}/{{name}}')
     def asset(name: str):
+        for ext in mimes: link(ext)
         if name not in served: return Response(status_code=404)
         body, mime = served[name]
         return Response(body, media_type=mime, headers={'Cache-Control': 'public, max-age=31536000, immutable'})

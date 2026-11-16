@@ -18,7 +18,7 @@ classifiers = [
 dependencies = ["python-fasthtml", "fastlucide"]
 
 [project.optional-dependencies]
-dev = ["nbdev>=3.3.29", "numpy", "scipy", "matplotlib", "pandas"]
+dev = ["nbdev>=3.3.28", "numpy", "scipy", "matplotlib", "pandas"]
 
 [project.urls]
 Repository = "https://github.com/AnswerDotAI/answerui"

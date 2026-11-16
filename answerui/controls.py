@@ -22,7 +22,7 @@ import answerui.base  # the reset this styling is written on
 
 # %% ../nbs/08_controls.ipynb #e7db663f
 _button_css = r"""
-:is(button, a[button]) {
+& {
   --face: var(--v); --face-held: var(--v2); --shadow-held: var(--bevel-in), var(--sunken); --_shift: 0px; --busy-delay: 200ms;
   --pad-block: var(--space-2); --pad-inline: var(--space);
   display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2);
@@ -34,27 +34,30 @@ _button_css = r"""
   box-shadow: var(--bevel), var(--raised);
   transition: box-shadow calc(var(--motion) / 2) var(--ease), padding calc(var(--motion) / 2) var(--ease), background var(--motion) var(--ease), opacity var(--motion) var(--ease), -webkit-text-fill-color var(--motion) var(--ease);
 }
-:is(button, a[button]):hover { --face: var(--v1); }
-:is(button, a[button]):is(:active, [aria-busy=true], [aria-pressed=true], [aria-expanded=true]) { --face: var(--face-held); box-shadow: var(--shadow-held); }
-:is(button, a[button]):active { --_shift: calc(1px * var(--relief)); transition-duration: calc(var(--motion) / 4); }
-:is(button, a[button]):disabled { opacity: .5; --_shift: 0px; box-shadow: none; }
-button:is([aria-busy=true], .htmx-request) { position: relative; }
-button[aria-busy=true] { -webkit-text-fill-color: transparent; }
-button > svg { transition: opacity var(--motion) var(--ease); }
-button:is([aria-busy=true], .htmx-request) > svg { opacity: 0; }
-button:is([aria-busy=true], .htmx-request)::before {
-  content: ''; position: absolute; inset: 0; margin: auto; inline-size: 1.25em; block-size: 1.25em;
-  border: 2px solid currentColor; border-inline-end-color: transparent; border-radius: var(--radius-full);
-  animation: aui-spin calc(var(--motion) * 5) linear infinite;
-}
-:is(button, a[button]).htmx-request:not([aria-busy=true]) { animation: aui-sink 0s linear var(--busy-delay) both; }
-button.htmx-request:not([aria-busy=true]) > svg { transition-delay: var(--busy-delay); }
-button.htmx-request:not([aria-busy=true])::before { animation: aui-spin calc(var(--motion) * 5) linear infinite, aui-busy-in var(--motion) var(--ease) var(--busy-delay) both; }
-@keyframes aui-sink { to { --face: var(--face-held); box-shadow: var(--shadow-held); -webkit-text-fill-color: transparent; } }
-@keyframes aui-busy-in { from { opacity: 0; } }
+&:hover { --face: var(--v1); }
+&:is(:active, [aria-busy=true], [aria-pressed=true], [aria-expanded=true]) { --face: var(--face-held); box-shadow: var(--shadow-held); }
+&:active { --_shift: calc(1px * var(--relief)); transition-duration: calc(var(--motion) / 4); }
+&:disabled { opacity: .5; --_shift: 0px; box-shadow: none; }
+&.htmx-request:not([aria-busy=true]) { animation: aui-sink 0s linear var(--busy-delay) both; }
 """
 
 Button = hypelt('Button', sel='button, a[button]', layer='components', doc='Raised at rest, down while active, busy, or expanded, latched by `aria-pressed`; `secondary` for the lesser action; a link carrying `button` is styled the same way.', css=_button_css)
+
+reg.rule(r'''
+button {
+  &:is([aria-busy=true], .htmx-request) { position: relative; }
+  &[aria-busy=true] { -webkit-text-fill-color: transparent; }
+  > svg { transition: opacity var(--motion) var(--ease); }
+  &:is([aria-busy=true], .htmx-request) { > svg { opacity: 0; }
+    &::before { content: ''; position: absolute; inset: 0; margin: auto; inline-size: 1.25em; block-size: 1.25em;
+      border: 2px solid currentColor; border-inline-end-color: transparent; border-radius: var(--radius-full);
+      animation: aui-spin calc(var(--motion) * 5) linear infinite; } }
+  &.htmx-request:not([aria-busy=true]) { > svg { transition-delay: var(--busy-delay); }
+    &::before { animation: aui-spin calc(var(--motion) * 5) linear infinite, aui-busy-in var(--motion) var(--ease) var(--busy-delay) both; } }
+}
+@keyframes aui-sink { to { --face: var(--face-held); box-shadow: var(--shadow-held); -webkit-text-fill-color: transparent; } }
+@keyframes aui-busy-in { from { opacity: 0; } }
+''', layer='components')
 
 # %% ../nbs/08_controls.ipynb #1802b6a8
 Button.variant('secondary', r"""
@@ -88,22 +91,21 @@ Button.rule('icon-only', '&[aria-label]:has(> svg:only-child) { --pad-inline: va
 reg.context(':user-invalid, [aria-invalid=true]', 'var(--hue-danger)')
 
 _text_sel = 'input:is(:not([type]), [type=text], [type=email], [type=password], [type=search], [type=url], [type=tel], [type=number], [type=date], [type=time], [type=datetime-local], [type=month], [type=week])'
-reg.rule('text-controls', rf"""
-:is({_text_sel}, textarea, select, [well]) {{
-  inline-size: 100%; padding: var(--space-2) var(--space-1);
+reg.rule(r"""
+:is(%(text_sel)s, textarea, select, [well]) {
+  inline-size: 100%%; padding: var(--space-2) var(--space-1);
   --face: var(--n-3); background: var(--face); color: var(--n2);
   border: 1px solid var(--n-1); border-radius: var(--radius); box-shadow: var(--bevel-in), var(--sunken);
   transition: border-color var(--motion) var(--ease), box-shadow var(--motion) var(--ease);
-}}
-:is(input, textarea, select):is(:user-invalid, [aria-invalid=true]) {{ border-color: var(--v); }}
-:is({_text_sel}, textarea, select):disabled {{ --face: var(--n-2); color: var(--n); box-shadow: var(--bevel-in); }}
-::placeholder {{ color: var(--n1); }}
-input[type=number] {{ appearance: textfield; }}
-input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button {{ appearance: none; margin: 0; }}
-""", layer='components', doc='The well shared by text inputs, textareas, selects, and any element marked `well`, taking the danger hue when invalid.')
+}
+:is(input, textarea, select):is(:user-invalid, [aria-invalid=true]) { border-color: var(--v); }
+:is(%(text_sel)s, textarea, select):disabled { --face: var(--n-2); color: var(--n); box-shadow: var(--bevel-in); }
+::placeholder { color: var(--n1); }
+input[type=number] { appearance: textfield; &::-webkit-inner-spin-button, &::-webkit-outer-spin-button { appearance: none; margin: 0; } }
+""" %dict(text_sel=_text_sel), layer='components', doc='The well shared by text inputs, textareas, selects, and any element marked `well`, taking the danger hue when invalid.')
 
 Input = hypelt('Input', sel=_text_sel, layer='components', doc='A text-like input, styled as a well by the text-controls rule.')
-Textarea = hypelt('Textarea', layer='components', css='textarea { min-block-size: 5rem; resize: vertical; field-sizing: content; }',
+Textarea = hypelt('Textarea', layer='components', css='min-block-size: 5rem; resize: vertical; field-sizing: content;',
     doc='A textarea, styled as a well by the text-controls rule; it grows with its content.')
 Select = hypelt('Select', layer='components', doc='A select, styled as a well by the text-controls rule.')
 
@@ -132,22 +134,22 @@ const run = () => {
 };
 e.type === 'reset' ? setTimeout(run) : run();"""
 
-reg.rule('enable', on={('form:has(button[enable])', 'input'): _enable_js, ('form:has(button[enable])', 'change'): _enable_js, ('form:has(button[enable])', 'reset'): _enable_js, ('button[enable]', 'init'): _enable_js},
+reg.rule(on={('form:has(button[enable])', 'input'): _enable_js, ('form:has(button[enable])', 'change'): _enable_js, ('form:has(button[enable])', 'reset'): _enable_js, ('button[enable]', 'init'): _enable_js},
     layer='components', doc="A submit button rendered disabled with `enable='changed'`, `enable='valid'`, or both comes alive when its form has changed, or is valid, and goes back when it is not.")
 
 # %% ../nbs/08_controls.ipynb #018a9574
 _group_css = r"""
-[group] { display: inline-flex; align-items: stretch; margin: 0; padding: 0; list-style: none; border-radius: var(--radius); --_radius: var(--radius); --_small: var(--radius-1); }
-[group] > li { display: flex; }
-[group] > *, [group] > li > * { --radius: 0; }
-[group] > :first-child, [group] > li:first-child > * { border-start-start-radius: var(--_radius); border-end-start-radius: var(--_radius); }
-[group] > :last-child, [group] > li:last-child > * { border-start-end-radius: var(--_radius); border-end-end-radius: var(--_radius); }
-[group] > * + * { margin-inline-start: -1px; }
-[group]:has(> :is(input, select)) { inline-size: 100%; }
-[group] > :is(input, select) { flex: 1; min-inline-size: 0; }
-[group] > :is(button, a[button]) { flex: none; }
-[group]:has(> :is(input, select):focus-visible) { outline: var(--ring); outline-offset: 2px; }
-[group] > :is(input, select):focus-visible { outline: none; }
+display: inline-flex; align-items: stretch; margin: 0; padding: 0; list-style: none; border-radius: var(--radius); --_radius: var(--radius); --_small: var(--radius-1);
+> li { display: flex; }
+> *, > li > * { --radius: 0; }
+> :first-child, > li:first-child > * { border-start-start-radius: var(--_radius); border-end-start-radius: var(--_radius); }
+> :last-child, > li:last-child > * { border-start-end-radius: var(--_radius); border-end-end-radius: var(--_radius); }
+> * + * { margin-inline-start: -1px; }
+&:has(> :is(input, select)) { inline-size: 100%; }
+> :is(input, select) { flex: 1; min-inline-size: 0; }
+> :is(button, a[button]) { flex: none; }
+&:has(> :is(input, select):focus-visible) { outline: var(--ring); outline-offset: 2px; }
+> :is(input, select):focus-visible { outline: none; }
 """
 
 @hypelt(sel='[group]', layer='components', css=_group_css)
@@ -195,9 +197,9 @@ clearTimeout(el._copied);
 el._copied = setTimeout(() => { el.removeAttribute('copied'); if (el._label) el.setAttribute('aria-label', el._label) }, 1500);"""
 
 _copy_css = r"""
-button:is([copyfor], [copy]) > svg > use:last-child { display: none; }
-button:is([copyfor], [copy])[copied] > svg > use:first-child { display: none; }
-button:is([copyfor], [copy])[copied] > svg > use:last-child { display: inline; }
+> svg > use:last-child { display: none; }
+&[copied] > svg > use:first-child { display: none; }
+&[copied] > svg > use:last-child { display: inline; }
 """
 
 @hypelt(sel='button:is([copyfor], [copy])', layer='components', css=_copy_css, on={('&', 'click'): _copy_js})
@@ -234,17 +236,17 @@ border: 1px dashed var(--n); box-shadow: none;
 
 # %% ../nbs/08_controls.ipynb #5758d4d7
 _switch_css = r"""
-input[role=switch] { appearance: none; --face: var(--n-3); inline-size: 2.75em; block-size: 1.5em; margin: 0; padding: 2px;
-  background: var(--face); border: 1px solid var(--n-1); border-radius: var(--radius-full); box-shadow: var(--bevel-in), var(--sunken);
-  display: inline-grid; align-items: center;
-  transition: background var(--motion) var(--ease), box-shadow var(--motion) var(--ease); }
-input[role=switch]::before { content: ''; --face: var(--n-2); inline-size: calc(1.5em - 6px); block-size: calc(1.5em - 6px); border-radius: var(--radius-full);
+appearance: none; --face: var(--n-3); inline-size: 2.75em; block-size: 1.5em; margin: 0; padding: 2px;
+background: var(--face); border: 1px solid var(--n-1); border-radius: var(--radius-full); box-shadow: var(--bevel-in), var(--sunken);
+display: inline-grid; align-items: center;
+transition: background var(--motion) var(--ease), box-shadow var(--motion) var(--ease);
+&::before { content: ''; --face: var(--n-2); inline-size: calc(1.5em - 6px); block-size: calc(1.5em - 6px); border-radius: var(--radius-full);
   background: var(--face); box-shadow: var(--bevel), var(--raised);
   transition: translate var(--motion) var(--ease), background var(--motion) var(--ease); }
-input[role=switch]:checked { --face: var(--v); }
-input[role=switch]:checked::before { translate: 1.25em 0; --face: var(--n-3); }
-input[role=switch]:disabled { --face: var(--n-2); box-shadow: var(--bevel-in); }
-input[role=switch]:disabled::before { --face: var(--n-1); box-shadow: var(--bevel); }
+&:checked { --face: var(--v); }
+&:checked::before { translate: 1.25em 0; --face: var(--n-3); }
+&:disabled { --face: var(--n-2); box-shadow: var(--bevel-in); }
+&:disabled::before { --face: var(--n-1); box-shadow: var(--bevel); }
 """
 
 @hypelt(sel='input[role=switch]', layer='components', css=_switch_css)
@@ -266,14 +268,14 @@ input[type=checkbox]:not([role=switch]), input[type=radio] { appearance: none; -
 input[type=checkbox]:not([role=switch])::before, input[type=radio]::before { content: ''; inline-size: .6em; block-size: .6em; background: var(--n-3); scale: 0; transition: scale var(--motion) var(--ease); }
 :is(input[type=checkbox]:not([role=switch]), input[type=radio]):disabled { --face: var(--n-2); border-color: var(--n-1); }
 """
-reg.rule('choice-controls', _choice_css, layer='components', doc='The small well and the mark shared by checkboxes and radios.')
+reg.rule(_choice_css, layer='components', doc='The small well and the mark shared by checkboxes and radios.')
 
 _checkbox_css = r"""
-input[type=checkbox]:not([role=switch])::before { clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%); }
-input[type=checkbox]:not([role=switch]):is(:checked, :indeterminate) { --face: var(--v); border-color: var(--v); }
-input[type=checkbox]:not([role=switch]):is(:checked, :indeterminate)::before { scale: 1; }
-input[type=checkbox]:not([role=switch]):indeterminate::before { clip-path: none; block-size: .15em; }
-input[type=checkbox]:not([role=switch]):is(:checked, :indeterminate):disabled { --face: var(--n-1); border-color: var(--n-1); }
+&::before { clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%); }
+&:is(:checked, :indeterminate) { --face: var(--v); border-color: var(--v); }
+&:is(:checked, :indeterminate)::before { scale: 1; }
+&:indeterminate::before { clip-path: none; block-size: .15em; }
+&:is(:checked, :indeterminate):disabled { --face: var(--n-1); border-color: var(--n-1); }
 """
 
 @hypelt(sel='input[type=checkbox]:not([role=switch])', layer='components', css=_checkbox_css)
@@ -284,11 +286,11 @@ def Checkbox(**attrs):
 
 # %% ../nbs/08_controls.ipynb #6d62523e
 _radio_css = r"""
-input[type=radio] { border-radius: var(--radius-full); }
-input[type=radio]::before { border-radius: var(--radius-full); background: var(--v); }
-input[type=radio]:checked { border-color: var(--v); }
-input[type=radio]:checked::before { scale: 1; }
-input[type=radio]:checked:disabled::before { background: var(--n); }
+border-radius: var(--radius-full);
+&::before { border-radius: var(--radius-full); background: var(--v); }
+&:checked { border-color: var(--v); }
+&:checked::before { scale: 1; }
+&:checked:disabled::before { background: var(--n); }
 """
 
 @hypelt(sel='input[type=radio]', layer='components', css=_radio_css)
@@ -319,21 +321,21 @@ for (const range of [...el.elements].filter(i => i.matches('input[type=range]'))
 
 def _range_parts(track, thumb):
     "The track and thumb rules for one engine's pseudo-elements"
-    return relief(f'input[type=range]::{track}, input[type=range]::{thumb}') + rf"""
-input[type=range]::{track} {{ --face: var(--n-3); block-size: var(--track); border-radius: var(--radius-full); border: 1px solid var(--n-1);
-  background: linear-gradient(to right, var(--v) var(--p), var(--face) 0); box-shadow: var(--bevel-in), var(--sunken); }}
-input[type=range]::{thumb} {{ appearance: none; --face: var(--v); inline-size: var(--thumb); block-size: var(--thumb); border-radius: var(--radius-full);
-  background: var(--face); box-shadow: var(--bevel), var(--raised); transition: box-shadow calc(var(--motion) / 2) var(--ease); }}
-input[type=range]:active::{thumb} {{ box-shadow: var(--bevel-in), var(--sunken); }}
-input[type=range]:disabled::{track} {{ background: linear-gradient(to right, var(--n) var(--p), var(--n-2) 0); }}
-input[type=range]:disabled::{thumb} {{ --face: var(--n-1); box-shadow: var(--bevel); }}
-"""
+    return relief('&::%s, &::%s' % (track, thumb)) + r"""
+&::%(track)s { --face: var(--n-3); block-size: var(--track); border-radius: var(--radius-full); border: 1px solid var(--n-1);
+  background: linear-gradient(to right, var(--v) var(--p), var(--face) 0); box-shadow: var(--bevel-in), var(--sunken); }
+&::%(thumb)s { appearance: none; --face: var(--v); inline-size: var(--thumb); block-size: var(--thumb); border-radius: var(--radius-full);
+  background: var(--face); box-shadow: var(--bevel), var(--raised); transition: box-shadow calc(var(--motion) / 2) var(--ease); }
+&:active::%(thumb)s { box-shadow: var(--bevel-in), var(--sunken); }
+&:disabled::%(track)s { background: linear-gradient(to right, var(--n) var(--p), var(--n-2) 0); }
+&:disabled::%(thumb)s { --face: var(--n-1); box-shadow: var(--bevel); }
+""" %dict(track=track, thumb=thumb)
 
 _range_css = r"""
-input[type=range] { appearance: none; inline-size: 100%; block-size: 1.5em; margin: 0; background: none;
-  --track: .6em; --thumb: 1.25em; --p: 0%; }
-input[type=range]::-webkit-slider-thumb { margin-block-start: calc((var(--track) - var(--thumb)) / 2 - 1px); }
-input[type=range]::-moz-range-thumb { border: 0; }
+appearance: none; inline-size: 100%; block-size: 1.5em; margin: 0; background: none;
+--track: .6em; --thumb: 1.25em; --p: 0%;
+&::-webkit-slider-thumb { margin-block-start: calc((var(--track) - var(--thumb)) / 2 - 1px); }
+&::-moz-range-thumb { border: 0; }
 """ + _range_parts('-webkit-slider-runnable-track', '-webkit-slider-thumb') + _range_parts('-moz-range-track', '-moz-range-thumb')
 
 @hypelt(sel='input[type=range]', layer='components', on=_range_on, css=_range_css)
@@ -350,12 +352,11 @@ def _range_example():
 
 # %% ../nbs/08_controls.ipynb #6396d190
 _field_css = r"""
-[field], [field] > label { display: grid; gap: var(--space-3); font-size: var(--text-1); }
-[field] > label { font-weight: var(--weight1); }
-[field] > small { font-weight: var(--weight); color: var(--n1); }
-small[danger] { color: var(--v2); }
-[field] > label:has(> :is([type=checkbox], [type=radio])) { grid-template-columns: auto 1fr; justify-self: start; align-items: center; gap: var(--space-2); font-weight: var(--weight); }
-[field]:has(:disabled) > label { color: var(--n); }
+&, > label { display: grid; gap: var(--space-3); font-size: var(--text-1); }
+> label { font-weight: var(--weight1); }
+> small { font-weight: var(--weight); color: var(--n1); }
+> label:has(> :is([type=checkbox], [type=radio])) { grid-template-columns: auto 1fr; justify-self: start; align-items: center; gap: var(--space-2); font-weight: var(--weight); }
+&:has(:disabled) > label { color: var(--n); }
 """
 
 @hypelt(sel='[field]', layer='components', css=_field_css)
@@ -378,6 +379,8 @@ def Field(
         control(aria_describedby=' '.join(filter(None, ids)))
     return Div(Label(*([control, label] if boxed else [label, control])), *descriptions, field=True, **attrs)
 
+reg.rule('small[danger] { color: var(--v2); }', layer='components')
+
 
 # %% ../nbs/08_controls.ipynb #48d898b5
 _validity_js = r"""
@@ -394,7 +397,7 @@ Field.rule('validity', on={(_ctl, 'focusout'): _validity_js, (_ctl, 'input'): _v
     doc="When the user leaves a control invalid or tries to submit, the browser's own validation message appears under the field in place of its bubble, listed in the control's `aria-describedby`; both go when the value is valid again.")
 
 # %% ../nbs/08_controls.ipynb #f12ffe76
-reg.rule('form-validation', sel='form', on={('& :is(input, select, textarea)', 'input'): r"for (const m of el.form.querySelectorAll('small[validation]')) if (!m.closest('[field]')) m.remove()"},
+reg.rule(sel='form', on={('& :is(input, select, textarea)', 'input'): r"for (const m of el.form.querySelectorAll('small[validation]')) if (!m.closest('[field]')) m.remove()"},
     layer='components', doc='A validation message a form came back with, a `small` marked `validation` outside any field, clears once the user edits a control, since it described the values that were sent.')
 
 # %% ../nbs/08_controls.ipynb #98f28199
@@ -416,12 +419,10 @@ def _field_example():
 
 
 # %% ../nbs/08_controls.ipynb #f48443b5
-_fieldset_css = r"""
-fieldset { margin: 0; min-inline-size: 0; border: 1px solid var(--n-1); border-radius: var(--radius); padding: var(--space); }
-legend { font-weight: var(--weight1); padding-inline: var(--space-2); }
-"""
-
-Fieldset = hypelt('Fieldset', layer='components', doc='A bordered group of fields under a legend.', css=_fieldset_css)
+Fieldset = hypelt('Fieldset', layer='components', doc='A bordered group of fields under a legend.', css=r'''
+margin: 0; min-inline-size: 0; border: 1px solid var(--n-1); border-radius: var(--radius); padding: var(--space);
+''')
+reg.rule('legend { font-weight: var(--weight1); padding-inline: var(--space-2); }', layer='components')
 
 # %% ../nbs/08_controls.ipynb #883b478c
 @example(Fieldset)
@@ -432,5 +433,5 @@ def _fieldset_example():
         stack=True, style='--gap: var(--space-2)')
 
 # %% ../nbs/08_controls.ipynb #ed615aa5
-reg.rule('reveals', on={('input[reveals]', 'change'): r"document.getElementById(el.getAttribute('reveals')).hidden = !el.checked"}, layer='components',
+reg.rule(on={('input[reveals]', 'change'): r"document.getElementById(el.getAttribute('reveals')).hidden = !el.checked"}, layer='components',
     doc="A checkbox or switch with `reveals='<id>'` shows that element while checked and hides it while not; render the element `hidden` to match the initial state.")

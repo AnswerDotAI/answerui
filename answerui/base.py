@@ -16,7 +16,7 @@ from .registry import reg
 import answerui.tokens  # installs Registry.context
 
 # %% ../nbs/06_base.ipynb #33f584b9
-reg.rule('reset', r"""
+reg.rule(r"""
 *, *::before, *::after { box-sizing: border-box; }
 :where(body, h1, h2, h3, h4, h5, h6, p, ul, ol, dl, dd, blockquote, figure, figcaption, pre, hr, table) { margin: 0; }
 img, picture, video, canvas, svg { max-inline-size: 100%; block-size: auto; }
@@ -25,9 +25,9 @@ button, input, textarea, select { font: inherit; color: inherit; }
 
 # %% ../nbs/06_base.ipynb #7024f5fe
 reg.context('mark', 'var(--hue-warning)')
-reg.rule('document', r"""
+reg.rule(r"""
 :root { accent-color: var(--v); caret-color: var(--v); background: var(--n-3); --ring: 2px solid var(--v-1); }
-html { scrollbar-gutter: stable; scroll-behavior: smooth; }
+html { scrollbar-gutter: stable; scroll-behavior: smooth; @media (prefers-reduced-motion: reduce) { scroll-behavior: auto; } }
 * { scrollbar-color: var(--n1) transparent; }
 body { color: var(--n2); font: var(--weight) var(--text)/var(--leading) var(--font); container-type: inline-size; }
 button, a[button], input:is([type=checkbox], [type=radio], [type=range]) { cursor: pointer; }
@@ -40,8 +40,8 @@ code, kbd, pre, samp { font-family: var(--font-mono); }
 code, kbd { font-size: .875em; padding: .1em .3em; border-radius: var(--radius-1); }
 code { background: var(--n-2); }
 kbd { border: 1px solid var(--n-1); box-shadow: var(--raised); }
-pre { background: var(--n-2); padding: var(--space); border-radius: var(--radius); overflow-x: auto; }
-pre code { font-size: inherit; padding: 0; background: none; }
+pre { background: var(--n-2); padding: var(--space); border-radius: var(--radius); overflow-x: auto;
+  code { font-size: inherit; padding: 0; background: none; } }
 ul, ol { padding-inline-start: var(--space1); }
 blockquote { border-inline-start: 3px solid var(--n-1); padding-inline-start: var(--space); color: var(--n1); }
 hr { border: 0; border-block-start: 1px solid var(--n-1); }
@@ -58,14 +58,13 @@ table {
 }
 :focus-visible { outline: var(--ring); outline-offset: 2px; }
 mark { background: var(--v-3); color: var(--v2); padding: .1em .2em; border-radius: var(--radius-1); }
-@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
 """, layer='base', doc='The page, text, headings, links, code, lists, quotes, tables, rules, marks, focus, and cursors on the tokens.')
 
 # %% ../nbs/06_base.ipynb #ac244267
-reg.rule('hidden', '[hidden]:not([hidden=until-found]) { display: none; }', layer='utilities', doc='The hidden attribute wins over any display a component sets.')
+reg.rule('[hidden]:not([hidden=until-found]) { display: none; }', layer='utilities', doc='The hidden attribute wins over any display a component sets.')
 
 # %% ../nbs/06_base.ipynb #d0d95931
-reg.rule('icons', r'''
+reg.rule(r'''
 svg:is(:has(> use), [icon]) { inline-size: 1.25em; block-size: 1.25em; vertical-align: -.3em; flex: none; }
 ''', layer='base', doc='A sprite icon, or an inline SVG marked `icon`, sized and aligned to the text around it.')
 
@@ -74,10 +73,10 @@ TYPROSE = files('answerui').joinpath('css/typrose.css').read_text()
 TYPROSE = re.sub(r'(/\*[^*]*\*/\n)?\.prose-(slate|zinc|neutral|stone|invert) \{[^}]*\}\n*', '', TYPROSE)
 TYPROSE = re.sub(r'\.prose-(\w+)', r'[prose="\1"]', TYPROSE)
 TYPROSE = re.sub(r'\.prose\b', '[prose]', TYPROSE)
-reg.rule('typrose', TYPROSE, layer='base', doc='Prose typography from typrose, on the `prose` attribute.')
+reg.rule(TYPROSE, layer='base', doc='Prose typography from typrose, on the `prose` attribute.')
 
 # %% ../nbs/06_base.ipynb #369818f2
-reg.rule('prose', r"""
+reg.rule(r"""
 [prose] {
   max-inline-size: 65ch; font-size: calc(var(--text) * var(--prose-font-scale));
   --prose-body: var(--n2); --prose-headings: var(--n2); --prose-bold: var(--n2); --prose-quotes: var(--n2); --prose-code: var(--n2);

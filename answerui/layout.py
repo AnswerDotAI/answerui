@@ -22,7 +22,7 @@ def _layout(*c, props, style='', **attrs):
 
 # %% ../nbs/07_layout.ipynb #30079ba6
 @hypelt(sel='[stack]', layer='layout', css=r"""
-[stack] { --gap: var(--space); display: flex; flex-direction: column; gap: var(--gap); }
+--gap: var(--space); display: flex; flex-direction: column; gap: var(--gap);
 """)
 def Stack(
     *c,       # Children to arrange vertically
@@ -39,7 +39,7 @@ def _stack_example():
 
 # %% ../nbs/07_layout.ipynb #7851b131
 @hypelt(sel='[cluster]', layer='layout', css=r"""
-[cluster] { --gap: var(--space); display: flex; flex-wrap: wrap; align-items: center; gap: var(--gap); }
+--gap: var(--space); display: flex; flex-wrap: wrap; align-items: center; gap: var(--gap);
 """)
 def Cluster(
     *c,       # Children to arrange in a wrapping row
@@ -60,12 +60,10 @@ Cluster.rule('grow', '& > [grow] { flex: 1; min-inline-size: 0; }', layer='layou
 
 # %% ../nbs/07_layout.ipynb #f5f6e17d
 @hypelt(sel='[grid]', layer='layout', css=r"""
-[grid] {
-  --gap: var(--space); --grid-min: 16rem;
-  display: grid; gap: var(--gap);
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--grid-min)), 1fr));
-}
-[grid] > * { min-inline-size: 0; }
+--gap: var(--space); --grid-min: 16rem;
+display: grid; gap: var(--gap);
+grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--grid-min)), 1fr));
+> * { min-inline-size: 0; }
 """)
 def Grid(
     *c,             # Children to arrange in equal-width columns
@@ -88,14 +86,14 @@ def _grid_example():
 Stack.rule('grow', '& > [grow] { flex: 1; }', layer='layout', doc='A child marked `grow` takes the height the others leave, so what follows it sits at the bottom of the stack.')
 
 # %% ../nbs/07_layout.ipynb #8d30542c
-reg.rule('list', ':is(ul, ol):is([stack], [cluster], [grid]) { list-style: none; padding: 0; margin: 0; }', layer='layout',
+reg.rule(':is(ul, ol):is([stack], [cluster], [grid]) { list-style: none; padding: 0; margin: 0; }', layer='layout',
     doc='A list that carries a layout is a layout, not prose: no markers, no indent.')
 
 # %% ../nbs/07_layout.ipynb #8355d595
 @hypelt(sel='[flow]', layer='layout', css=r"""
-[flow] { --flow-space: 1em; }
-[flow] > * + * { margin-block-start: var(--flow-space); }
-[flow] > :is(h1, h2, h3, h4, h5, h6) + * { margin-block-start: calc(var(--flow-space) / 2); }
+--flow-space: 1em;
+> * + * { margin-block-start: var(--flow-space); }
+> :is(h1, h2, h3, h4, h5, h6) + * { margin-block-start: calc(var(--flow-space) / 2); }
 """)
 def Flow(
     *c,       # Children in normal document flow

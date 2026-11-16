@@ -17,14 +17,12 @@ import answerui.base  # the base layer the data table extends
 
 # %% ../nbs/13_data.ipynb #ac5f7b09
 _datatable_css = r'''
-[datatable] {
-  --face: var(--n-3); background: var(--face); overflow-x: auto; contain: inline-size;
-  border: 1px solid var(--n-1); border-radius: var(--radius); box-shadow: var(--raised);
-  > table { inline-size: 100%; }
-  :is(th, td) { white-space: nowrap; }
-  tbody tr:first-child > * { border-block-start: 1px solid var(--n-1); }
-  thead th { background: var(--n-2); color: var(--n1); font: var(--weight) var(--text-1) var(--font-mono); text-transform: uppercase; letter-spacing: .08em; border-block-end: 0; }
-}
+--face: var(--n-3); background: var(--face); overflow-x: auto; contain: inline-size;
+border: 1px solid var(--n-1); border-radius: var(--radius); box-shadow: var(--raised);
+> table { inline-size: 100%; }
+:is(th, td) { white-space: nowrap; }
+tbody tr:first-child > * { border-block-start: 1px solid var(--n-1); }
+thead th { background: var(--n-2); color: var(--n1); font: var(--weight) var(--text-1) var(--font-mono); text-transform: uppercase; letter-spacing: .08em; border-block-end: 0; }
 '''
 
 @hypelt(sel='[datatable]', layer='components', css=_datatable_css)

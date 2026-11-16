@@ -22,10 +22,10 @@ from .demo import example
 import answerui.base  # the reset and tokens this styling is written on
 
 # %% ../nbs/10_status.ipynb #6043392a
-reg.rule('notice', r"""
-:is([alert], [toast]) { display: flex; align-items: flex-start; gap: var(--space); }
-:is([alert], [toast]) > [stack] { flex: 1; min-inline-size: 0; }
-:is([alert], [toast]) > button[dismiss] { flex-shrink: 0; --pad-block: var(--space-3); --pad-inline: var(--space-2); }
+reg.rule(r"""
+:is([alert], [toast]) { display: flex; align-items: flex-start; gap: var(--space);
+  > [stack] { flex: 1; min-inline-size: 0; }
+  > button[dismiss] { flex-shrink: 0; --pad-block: var(--space-3); --pad-inline: var(--space-2); } }
 """, layer='components', doc='The row shared by alerts and toasts: the message beside its dismiss button.')
 
 def _notice(c, dismissible, **attrs):
@@ -35,7 +35,7 @@ def _notice(c, dismissible, **attrs):
 
 # %% ../nbs/10_status.ipynb #9a13ebff
 _alert_css = r"""
-[alert] { background: var(--v-3); color: var(--v2); border-color: var(--v-2); }
+background: var(--v-3); color: var(--v2); border-color: var(--v-2);
 """
 
 @hypelt(sel='[alert]', layer='components', css=_alert_css)
@@ -60,13 +60,13 @@ def _alert_example():
 # %% ../nbs/10_status.ipynb #afc1d55a
 _toasts_on = {('&', 'init'): "if (!el.matches(':popover-open')) el.showPopover()"}
 _toasts_css = r"""
-[toasts][popover] {
+&[popover] {
   position: fixed; inset: auto; inset-block-start: var(--space); inset-inline-end: var(--space); margin: 0;
   padding: var(--space-3); border: 0; background: none; box-shadow: none; overflow: visible; color: inherit; pointer-events: none;
   inline-size: min(22rem, calc(100vw - 2 * var(--space)));
+  &:popover-open { display: grid; gap: var(--space-2); }
 }
-[toasts][popover]:popover-open { display: grid; gap: var(--space-2); }
-[toasts] > [toast] { pointer-events: auto; }
+> [toast] { pointer-events: auto; }
 """
 
 @hypelt(sel='[toasts]', layer='components', on=_toasts_on, css=_toasts_css)
@@ -77,16 +77,13 @@ def Toasts(*c, **attrs):
 
 # %% ../nbs/10_status.ipynb #4b3c797b
 _toast_css = r"""
-[toast] {
-  --face: var(--n-2); background: var(--face); color: var(--n2); border: 1px solid var(--n-1);
-  border-radius: var(--radius); padding: var(--space-2) var(--space); box-shadow: var(--floating);
-  transition: opacity var(--motion) var(--ease), translate var(--motion) var(--ease);
-  @starting-style { opacity: 0; translate: 0 calc(-1 * var(--space-2)); }
-  animation: aui-toast-life var(--life) linear forwards; }
-[toast]:is(:hover, :focus-within) { animation-play-state: paused; }
-/* The lifetime is a timer that ends by hiding the toast. Without --life the shorthand is invalid, and the toast has no animation. */
-@keyframes aui-toast-life { to { display: none; } }
-[toast]:is([success], [warning], [danger], [info]) { --face: var(--v-3); color: var(--v2); border-color: var(--v-2); }
+--face: var(--n-2); background: var(--face); color: var(--n2); border: 1px solid var(--n-1);
+border-radius: var(--radius); padding: var(--space-2) var(--space); box-shadow: var(--floating);
+transition: opacity var(--motion) var(--ease), translate var(--motion) var(--ease);
+@starting-style { opacity: 0; translate: 0 calc(-1 * var(--space-2)); }
+animation: aui-toast-life var(--life) linear forwards;
+&:is(:hover, :focus-within) { animation-play-state: paused; }
+&:is([success], [warning], [danger], [info]) { --face: var(--v-3); color: var(--v2); border-color: var(--v-2); }
 """
 
 @hypelt(sel='[toast]', layer='components', css=_toast_css)
@@ -103,6 +100,11 @@ def Toast(
     return Div(toast, hx_swap_oob='beforeend:[toasts]') if oob else toast
 
 Toast.rule('dismiss', on={('& > button[dismiss]', 'click'): "el.closest('[toast]').remove()"}, layer='components', doc='The dismiss button removes the toast at once.')
+
+reg.rule(r'''
+/* The lifetime is a timer that ends by hiding the toast. Without --life the shorthand is invalid, and the toast has no animation. */
+@keyframes aui-toast-life { to { display: none; } }
+''', layer='components')
 
 # %% ../nbs/10_status.ipynb #09576dea
 @example(Toast)
@@ -142,7 +144,7 @@ def setup_toasts(app):
 
 # %% ../nbs/10_status.ipynb #1061215e
 Progress = hypelt('Progress', layer='components', doc='Native progress; omit value when the amount completed is unknown.', css=r"""
-progress { inline-size: 100%; block-size: .75rem; vertical-align: middle; accent-color: var(--v); }
+inline-size: 100%; block-size: .75rem; vertical-align: middle; accent-color: var(--v);
 """)
 
 # %% ../nbs/10_status.ipynb #28967652
@@ -154,8 +156,8 @@ def _progress_example():
 
 # %% ../nbs/10_status.ipynb #b1b3bb6e
 @hypelt(sel='[spinner]', layer='components', css=r"""
-[spinner] { display: inline-flex; align-items: center; gap: var(--space-2); }
-[spinner]::before {
+display: inline-flex; align-items: center; gap: var(--space-2);
+&::before {
   content: ''; flex-shrink: 0; inline-size: 1em; block-size: 1em;
   border: 2px solid currentColor; border-inline-end-color: transparent; border-radius: var(--radius-full);
   animation: aui-spin calc(var(--motion) * 5) linear infinite;
@@ -172,8 +174,8 @@ def _spinner_example():
 
 # %% ../nbs/10_status.ipynb #064bdcf6
 @hypelt(sel='[skeleton]', layer='components', css=r"""
-[skeleton] { display: block; inline-size: 100%; block-size: 1em;
-  background: var(--n-1); border-radius: var(--radius-1); }
+display: block; inline-size: 100%; block-size: 1em;
+background: var(--n-1); border-radius: var(--radius-1);
 """)
 def Skeleton(**attrs):
     "A decorative placeholder for content that has not loaded"

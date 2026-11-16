@@ -10,7 +10,7 @@ Docs: https://AnswerDotAI.github.io/answerui/registry.html.md"""
 __all__ = ['LAYERS', 'reg', 'hypelt', 'Rule', 'RuleView', 'Registry', 'Hyperelement']
 
 # %% ../nbs/00_registry.ipynb #3b435e1a
-import inspect
+import hashlib, inspect, json
 from collections.abc import Mapping
 from fastcore.utils import *
 import fasthtml.components
@@ -85,8 +85,8 @@ class Registry:
 
     def rule(
         self,
-        key,          # Registry key: a name, or `owner.name` for a hyperelement's rule
         css='',       # Complete CSS, or a no-argument function returning it
+        name=None,    # Registry key; omit for a hash of the CSS, selector, behaviors and layer
         *,
         on=None,      # Mapping of (selector, event[, capture]) to JavaScript handler bodies
         sel=None,     # Root selector substituted for `&` in behaviors; does not scope CSS
@@ -94,8 +94,10 @@ class Registry:
         doc='',       # Description of the rule
         variant=None, # Attribute selecting a declared variant
     ):
-        "Register a rule, replacing an existing definition in place"
-        r = Rule(key, css, on=on, sel=sel, layer=layer, doc=doc, variant=variant)
+        "Register CSS and behaviors, replacing an existing name in place"
+        if name is None and not isinstance(css, str): raise ValueError('Callable CSS requires a name')
+        r = Rule(name or '', css, on=on, sel=sel, layer=layer, doc=doc, variant=variant)
+        if name is None: r.key = hashlib.sha256(json.dumps((css, sel, r.on, layer)).encode()).hexdigest()[:12]
         if r.key in self.rules: self.rules[r.key].__dict__.update(vars(r))
         else: self.rules[r.key] = r
         self.version += 1
@@ -138,7 +140,9 @@ def build_css(self:Registry):
     return '\n\n'.join(out) + '\n'
 
 # %% ../nbs/00_registry.ipynb #3fa0affe
-def _nest(sel, css): return f'{sel} {{\n{css.strip()}\n}}' if css.strip() else ''
+def _nest(sel, css):
+    if callable(css): return lambda: _nest(sel, css())
+    return f'{sel} {{\n{css.strip()}\n}}' if css.strip() else ''
 def _generic(*children, **attrs): ...
 
 class Hyperelement:
@@ -188,7 +192,7 @@ def rule(
     doc='',       # Description of the customization
 ):
     "Register CSS and behaviors scoped to this hyperelement"
-    return self.registry.rule(f'{self.__name__}.{name}', _nest(self.sel, css), on=on, sel=self.sel, layer=layer, doc=doc)
+    return self.registry.rule(_nest(self.sel, css), f'{self.__name__}.{name}', on=on, sel=self.sel, layer=layer, doc=doc)
 
 @patch
 def variant(
@@ -203,7 +207,7 @@ def variant(
     "Declare an attribute variant without changing the constructor"
     if name=='base': raise ValueError('base is reserved for the constructor definition')
     sel = f':is({self.sel})[{name}]'
-    return self.registry.rule(f'{self.__name__}.{name}', _nest(sel, css), on=on, sel=sel, layer=layer, doc=doc, variant=name)
+    return self.registry.rule(_nest(sel, css), f'{self.__name__}.{name}', on=on, sel=sel, layer=layer, doc=doc, variant=name)
 
 # %% ../nbs/00_registry.ipynb #1fa06567
 @patch
@@ -212,7 +216,7 @@ def hypelt(
     name=None,   # FastHTML tag name or a constructor; omit to use as a decorator
     *,
     sel=None,    # Root selector; required for a handwritten constructor
-    css='',      # Complete CSS, or a no-argument function returning it; stored as the base rule
+    css='',      # CSS declarations and nested rules, or a no-argument function returning them
     on=None,     # Mapping of (selector, event[, capture]) to JavaScript handler bodies
     layer='app', # One of LAYERS; built-ins use components, layout, or base
     doc=None,    # Description; defaults to a handwritten constructor's docstring
@@ -229,7 +233,7 @@ def hypelt(
         if doc is None: doc = fn.__doc__
     if name in self.elements and self.elements[name].sel != sel:
         raise ValueError(f'{name} is registered with root selector {self.elements[name].sel!r}, which its rules and variants target; register a new hyperelement for a new root')
-    self.rule(f'{name}.base', css, on=on, sel=sel, layer=layer, doc=doc or '')
+    self.rule(_nest(sel, css), f'{name}.base', on=on, sel=sel, layer=layer, doc=doc or '')
     obj = Hyperelement(self, name, fn, sel, doc or '', generated)
     if name in self.elements: self.elements[name].__dict__.update(vars(obj))
     else: self.elements[name] = obj

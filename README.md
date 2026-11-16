@@ -57,7 +57,7 @@ The image below is that markup rendered with the registry’s stylesheet. In a n
 Register ordinary CSS at the smallest scope that covers the change: a token on the root for the whole app, a rule on a component, or a selector for a region. Because the `app` cascade layer comes after every framework layer except `utilities`, app rules override the framework’s styles with no edit to the framework:
 
 ``` python
-reg.rule('theme', ':root { --hue: 150; --radius: 0; }')
+reg.rule(':root { --hue: 150; --radius: 0; }')
 Button.rule('caps', 'text-transform: uppercase;')
 ```
 
@@ -91,7 +91,7 @@ Declared variants:
 
 Rules:
 - `base` (components)
-- `icon-only` (components): A button whose only child is an svg is square; give it an aria-label.
+- `icon-only` (components): A button with an aria-label whose only child element is an svg is square; a button with an icon and a text label keeps the usual padding.
 - `caps` (app)
 
 ## Previews in notebooks

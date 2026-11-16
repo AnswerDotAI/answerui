@@ -61,17 +61,14 @@ el.style.visibility = '';""",
     ('&', 'cleanup'): _fallback + "if (e.target === el) el._unwatch?.()"}
 
 _popover_css = r"""
-[popover][anchored] {
-  --face: var(--n-2); background: var(--face); color: var(--n2);
-  border: 1px solid var(--n-1); border-radius: var(--radius); padding: var(--space); box-shadow: var(--floating);
-  position: fixed; inset: auto; margin: 0; max-inline-size: calc(100vw - 2 * var(--space)); overflow: auto;
-  position-area: block-end span-inline-end; position-try-fallbacks: flip-block, flip-inline, flip-block flip-inline; position-try-order: most-block-size;
-  margin-block-start: 4px; max-block-size: calc(100% - 12px);
-}
-[anchor] { anchor-name: --anchor; }
-[anchor] [popover][anchored] { inset-block-start: anchor(--anchor bottom); }
+--face: var(--n-2); background: var(--face); color: var(--n2);
+border: 1px solid var(--n-1); border-radius: var(--radius); padding: var(--space); box-shadow: var(--floating);
+position: fixed; inset: auto; margin: 0; max-inline-size: calc(100vw - 2 * var(--space)); overflow: auto;
+position-area: block-end span-inline-end; position-try-fallbacks: flip-block, flip-inline, flip-block flip-inline; position-try-order: most-block-size;
+margin-block-start: 4px; max-block-size: calc(100% - 12px);
+[anchor] & { inset-block-start: anchor(--anchor bottom); }
 @supports not (position-area: center) {
-  [popover][anchored] { margin: 0; max-block-size: var(--_available-height, calc(100dvh - 2 * var(--space))); }
+  & { margin: 0; max-block-size: var(--_available-height, calc(100dvh - 2 * var(--space))); }
 }
 """
 
@@ -80,6 +77,8 @@ def Popover(*c, popover='auto', **attrs):
     "A floating panel positioned beside the button that opens it"
     return Div(*c, popover=popover, anchored=True, **attrs)
 
+reg.rule('[anchor] { anchor-name: --anchor; }', layer='components')
+
 Popover.rule('expanded', on={('[popover]', 'toggle', True): r"""
 if (e.target !== el) return;
 for (const b of document.querySelectorAll(`[popovertarget="${CSS.escape(el.id)}"]:not([popovertargetaction=hide]), [commandfor="${CSS.escape(el.id)}"]:is([command=toggle-popover], [command=show-popover])`)) b.setAttribute('aria-expanded', String(el.matches(':popover-open')));"""},
@@ -87,7 +86,7 @@ for (const b of document.querySelectorAll(`[popovertarget="${CSS.escape(el.id)}"
 Popover.rule('placement', on=_popover_on, layer='components', doc='In an engine without anchor positioning: remembers the button that opened the panel, places the panel beside it within the viewport, and follows scrolling and resizing until it closes.')
 
 # %% ../nbs/11_overlays.ipynb #a924da10
-reg.rule('fade', r'''
+reg.rule(r'''
 :is(dialog, [popover][anchored]), dialog::backdrop {
   opacity: 0;
   transition: opacity var(--motion) var(--ease), translate var(--motion) var(--ease), display var(--motion) allow-discrete, overlay var(--motion) allow-discrete;
@@ -106,20 +105,8 @@ def _popover_example():
 _dropdown_disabled = {('& > [aria-disabled=true]', 'click', True): "e.preventDefault(); e.stopImmediatePropagation()"}
 
 _dropdown_css = r"""
-[popover][dropdown] { min-inline-size: min(12rem, calc(100vw - 2 * var(--space))); padding: var(--space-3); }
-[popover][dropdown]:popover-open { display: grid; align-content: start; block-size: max-content; }
-[dropdown] > :is(a, button) {
-  display: block; inline-size: 100%; text-align: start; padding: var(--space-2) var(--space-1);
-  font: inherit; font-weight: var(--weight); color: inherit; text-decoration: none;
-  background: none; border: 0; border-radius: var(--radius-1); box-shadow: none;
-}
-[dropdown] > :is(a, button):not(:disabled, [aria-disabled=true]):is(:hover, :focus-visible) {
-  background: var(--v-3); color: var(--v2);
-}
-[dropdown] > :is(a, button)[danger]:not(:disabled, [aria-disabled=true]) { color: var(--v); }
-[dropdown] > :is(a, button):is(:disabled, [aria-disabled=true]) { color: var(--n1); cursor: default; }
-[dropdown] > hr { margin-block: var(--space-3); }
-[dropdown] > :not(a, button, hr) { padding-inline: var(--space-1); }
+min-inline-size: min(12rem, calc(100vw - 2 * var(--space))); padding: var(--space-3);
+&:popover-open { display: grid; align-content: start; block-size: max-content; }
 """
 
 @hypelt(sel='[popover][dropdown]', layer='components', css=_dropdown_css)
@@ -143,6 +130,18 @@ Dropdown.rule('disabled', on=_dropdown_disabled, layer='components', doc='An ite
 Dropdown.rule('choose', on={('& > a[href]', 'click'): "el.closest('[popover]').hidePopover()"}, layer='components',
     doc='Following a link closes the dropdown; a button closes it natively through popovertargetaction.')
 
+reg.rule(r'''
+[dropdown] {
+  > :is(a, button) { display: block; inline-size: 100%; text-align: start; padding: var(--space-2) var(--space-1);
+    font: inherit; font-weight: var(--weight); color: inherit; text-decoration: none;
+    background: none; border: 0; border-radius: var(--radius-1); box-shadow: none;
+    &:not(:disabled, [aria-disabled=true]):is(:hover, :focus-visible) { background: var(--v-3); color: var(--v2); }
+    &[danger]:not(:disabled, [aria-disabled=true]) { color: var(--v); }
+    &:is(:disabled, [aria-disabled=true]) { color: var(--n1); cursor: default; } }
+  > hr { margin-block: var(--space-3); }
+  > :not(a, button, hr) { padding-inline: var(--space-1); } }
+''', layer='components')
+
 # %% ../nbs/11_overlays.ipynb #516efdb7
 @example(Dropdown)
 def _dropdown_example():
@@ -154,7 +153,7 @@ def _dropdown_example():
         Hr(), Button('Sign out', type='button')), trigger, panel)
 
 # %% ../nbs/11_overlays.ipynb #ee3e977b
-reg.rule('commands', sel='button[commandfor]', on={('&', 'click'): r"""
+reg.rule(sel='button[commandfor]', on={('&', 'click'): r"""
 if ('commandForElement' in el) return;
 const t = document.getElementById(el.getAttribute('commandfor')), c = el.getAttribute('command');
 if (!t) return;
@@ -167,14 +166,12 @@ else { t._anchor = el; t.togglePopover(); }"""},
 
 # %% ../nbs/11_overlays.ipynb #8b29bffc
 Dialog = hypelt('Dialog', layer='components', doc='A modal panel over an inert page; `drawer` slides it in from an edge.', css=r"""
-dialog {
-  --face: var(--n-2); background: var(--face); color: var(--n2);
-  border: 1px solid var(--n-1); border-radius: var(--radius1); padding: var(--space1); box-shadow: var(--floating);
-  inline-size: min(32rem, calc(100% - 2 * var(--space)));
-  translate: 0 var(--space-2);
-}
-dialog[open] { translate: none; @starting-style { translate: 0 var(--space-2); } }
-dialog::backdrop { background: oklch(from var(--n2) l c h / .4); }
+--face: var(--n-2); background: var(--face); color: var(--n2);
+border: 1px solid var(--n-1); border-radius: var(--radius1); padding: var(--space1); box-shadow: var(--floating);
+inline-size: min(32rem, calc(100% - 2 * var(--space)));
+translate: 0 var(--space-2);
+&[open] { translate: none; @starting-style { translate: 0 var(--space-2); } }
+&::backdrop { background: oklch(from var(--n2) l c h / .4); }
 """)
 Dialog.variant('drawer', r"""
 --_slide: 100%; --drawer-size: 24rem; --face: var(--n-3); inset: 0; inset-inline-start: auto; overflow-y: auto;
@@ -203,8 +200,8 @@ def _dialog_example():
 
 # %% ../nbs/11_overlays.ipynb #7e401e03
 _tooltip_css = r"""
-[tooltip] { display: inline-block; position: relative; }
-[tooltip] > [role=tooltip] {
+display: inline-block; position: relative;
+> [role=tooltip] {
   --face: var(--n2); background: var(--face); color: var(--n-3); border: 0;
   padding: var(--space-3) var(--space-2); border-radius: var(--radius-1);
   inline-size: max-content; max-inline-size: min(20rem, calc(100vw - 2 * var(--space))); overflow-wrap: anywhere;
@@ -213,10 +210,10 @@ _tooltip_css = r"""
   visibility: hidden; opacity: 0;
   transition: opacity var(--motion) var(--ease) 150ms, visibility 0s linear calc(var(--motion) + 150ms);
 }
-[tooltip]:is(:hover, :has(:focus-visible)) > [role=tooltip] { visibility: visible; opacity: 1; transition: none; }
-:root:has([tooltip]:is(:hover, :has(:focus-visible))) [tooltip]:not(:hover, :has(:focus-visible)) > [role=tooltip] { transition: none; }
+&:is(:hover, :has(:focus-visible)) > [role=tooltip] { visibility: visible; opacity: 1; transition: none; }
+:root:has([tooltip]:is(:hover, :has(:focus-visible))) &:not(:hover, :has(:focus-visible)) > [role=tooltip] { transition: none; }
 @supports not (position-area: center) {
-  [tooltip] > [role=tooltip] { position: absolute; inset: auto auto 100% 0; }
+  > [role=tooltip] { position: absolute; inset: auto auto 100% 0; }
 }
 """
 

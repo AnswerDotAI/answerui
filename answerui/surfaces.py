@@ -19,10 +19,8 @@ import answerui.controls  # the button rules the avatar button overrides
 
 # %% ../nbs/09_surfaces.ipynb #f7a346f2
 _card_css = r"""
-[card] {
-  --face: var(--n-2); background: var(--face); border: 1px solid var(--n-1); box-shadow: var(--raised);
-  border-radius: var(--radius); padding: var(--space);
-}
+--face: var(--n-2); background: var(--face); border: 1px solid var(--n-1); box-shadow: var(--raised);
+border-radius: var(--radius); padding: var(--space);
 """
 
 @hypelt(sel='[card]', layer='components', css=_card_css)
@@ -41,11 +39,9 @@ def _card_example():
 
 # %% ../nbs/09_surfaces.ipynb #6e562a01
 _badge_css = r"""
-[badge] {
-  display: inline-block; padding: .125em .5em;
-  font-size: var(--text-1); font-weight: var(--weight1); line-height: var(--leading-1);
-  border-radius: var(--radius-1); background: var(--v-3); color: var(--v2);
-}
+display: inline-block; padding: .125em .5em;
+font-size: var(--text-1); font-weight: var(--weight1); line-height: var(--leading-1);
+border-radius: var(--radius-1); background: var(--v-3); color: var(--v2);
 """
 
 @hypelt(sel='[badge]', layer='components', css=_badge_css)
@@ -64,13 +60,11 @@ def _badge_example():
 
 # %% ../nbs/09_surfaces.ipynb #5250078c
 _avatar_css = r"""
-[avatar] {
-  --avatar-size: 2.5rem;
-  display: inline-grid; place-items: center; vertical-align: middle; flex-shrink: 0;
-  inline-size: var(--avatar-size); block-size: var(--avatar-size); border-radius: var(--radius-full);
-  object-fit: cover; background: var(--v-3); color: var(--v2);
-  font-size: calc(var(--avatar-size) * .4); font-weight: var(--weight1); line-height: 1;
-}
+--avatar-size: 2.5rem;
+display: inline-grid; place-items: center; vertical-align: middle; flex-shrink: 0;
+inline-size: var(--avatar-size); block-size: var(--avatar-size); border-radius: var(--radius-full);
+object-fit: cover; background: var(--v-3); color: var(--v2);
+font-size: calc(var(--avatar-size) * .4); font-weight: var(--weight1); line-height: 1;
 """
 
 @hypelt(sel='[avatar]', layer='components', css=_avatar_css)
@@ -86,7 +80,7 @@ def Avatar(
     if len(parts) > 1: initials += parts[-1][0]
     return Span(initials.upper(), role='img', aria_label=name or 'Unknown', avatar=True, **attrs)
 
-reg.rule('avatar-button', r"""
+reg.rule(r"""
 button:has(> [avatar]:only-child) {
   --pad-block: 1px; --pad-inline: 1px; border-radius: var(--radius-full); --face: var(--n-2); border-color: var(--n-1);
 }

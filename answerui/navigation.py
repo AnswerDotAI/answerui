@@ -23,23 +23,21 @@ import answerui.controls  # the controls the example places in the bar
 
 # %% ../nbs/12_navigation.ipynb #f51b5de9
 _navbar_css = r"""
-[navbar] {
-  display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space);
-  padding: var(--space-2) var(--space);
-  --face: var(--n-3); background: var(--face); color: var(--n2);
-  border-block-end: 1px solid var(--n-1);
-  > a:first-child {
-    display: flex; align-items: center; gap: var(--space-3); flex-shrink: 0; white-space: nowrap;
-    font-weight: var(--weight1); font-size: var(--text1); color: inherit; text-decoration: none;
-  }
-  > [bar-content] { display: contents; }
-  nav { display: flex; flex-wrap: wrap; gap: var(--space-3); }
-  nav a { display: inline-block; padding: var(--space-3) var(--space-2); border-radius: var(--radius-1); color: inherit; text-decoration: none; }
-  nav a:is(:hover, :focus-visible) { background: var(--tint); }
-  nav a[aria-current=page] { background: var(--v-3); color: var(--v2); }
-  > [end] { margin-inline-start: auto; --gap: var(--space-2); }
-  > [burger] { display: none; padding: var(--space-3); }
+display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space);
+padding: var(--space-2) var(--space);
+--face: var(--n-3); background: var(--face); color: var(--n2);
+border-block-end: 1px solid var(--n-1);
+> a:first-child {
+  display: flex; align-items: center; gap: var(--space-3); flex-shrink: 0; white-space: nowrap;
+  font-weight: var(--weight1); font-size: var(--text1); color: inherit; text-decoration: none;
 }
+> [bar-content] { display: contents; }
+nav { display: flex; flex-wrap: wrap; gap: var(--space-3);
+  a { display: inline-block; padding: var(--space-3) var(--space-2); border-radius: var(--radius-1); color: inherit; text-decoration: none;
+    &:is(:hover, :focus-visible) { background: var(--tint); }
+    &[aria-current=page] { background: var(--v-3); color: var(--v2); } } }
+> [end] { margin-inline-start: auto; --gap: var(--space-2); }
+> [burger] { display: none; padding: var(--space-3); }
 """
 
 @hypelt(sel='[navbar]', layer='components', css=_navbar_css)
@@ -65,7 +63,7 @@ NavBar.variant('align', r"""
 NavBar.variant('sticky', 'position: sticky; inset-block-start: 0; z-index: 1;', layer='components', doc='Stays at the top as the page scrolls, and keeps a scrolled-to anchor from landing under it.',
     on={('&', 'init'): r'''const set = () => document.documentElement.style.setProperty('--navbar-size', el.getBoundingClientRect().height + 'px');
 set(); new ResizeObserver(set).observe(el)'''})
-reg.rule('anchors', 'html { scroll-padding-block-start: calc(var(--navbar-size, 0px) + var(--space)); }', layer='components', doc='A scrolled-to anchor stops below the sticky navbar, with a little space.')
+reg.rule('html { scroll-padding-block-start: calc(var(--navbar-size, 0px) + var(--space)); }', layer='components', doc='A scrolled-to anchor stops below the sticky navbar, with a little space.')
 NavBar.variant('vivid', r"""
 --face: var(--v); color: var(--n-3);
 nav a[aria-current=page] { background: oklch(from var(--tint) l c h / calc(alpha * 2)); color: inherit; }

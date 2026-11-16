@@ -14,7 +14,7 @@
 - [answerui.navigation](https://AnswerDotAI.github.io/answerui/navigation.html.md): The navbar
 - [answerui.overlays](https://AnswerDotAI.github.io/answerui/overlays.html.md): Popovers, menus, dialogs, drawers, and tooltips
 - [answerui.registry](https://AnswerDotAI.github.io/answerui/registry.html.md): Defining hyperelements and collecting their styles and behaviors
-- [answerui.skill](https://AnswerDotAI.github.io/answerui/skill.html.md): Style a FastHTML app with answerui: build pages from its components, change how they look through the registry, and check the result
+- `answerui.skill`: Style a FastHTML app with answerui: build pages from its components, change how they look through the registry, and check the result
 - [answerui.status](https://AnswerDotAI.github.io/answerui/status.html.md): Feedback, loading, and empty states
 - [answerui.surfaces](https://AnswerDotAI.github.io/answerui/surfaces.html.md): Containers and small pieces of visual information
 - [answerui.tokens](https://AnswerDotAI.github.io/answerui/tokens.html.md): The styling surface: colour, space, radius, type, motion, and elevation

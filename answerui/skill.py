@@ -1,8 +1,10 @@
-"""Style a FastHTML app with answerui: build pages from its components, change how they look through the registry, and check the result
+# NB: this file is designed for an LLM reader, not a human. Add it to your LLM's context and ask it to explain.
+r"""Style a FastHTML app with answerui: build pages from its components, change how they look through the registry, and check the result
 
-Read this before writing markup for an answerui app, before changing how a page or a component looks, and before adding a component.
+notation: /why
 
-answerui styles semantic HTML. A component is a native tag, or a custom tag where HTML has no element for the concept. A variant or a state is an attribute, and a class does only a utility job. `Button('Save', secondary=True)` renders `<button secondary>`. Every rule, component, and behavior lives in one registry, `reg`. A page includes them through two headers and one footer:
+- semantic HTML: component = native tag, or custom tag where HTML has none; variant, state: attribute; class: utilities only; `Button('Save', secondary=True)` → `<button secondary>`
+- `reg`: registry of every rule, component, behavior; app setup:
 
 ```python
 from fasthtml.common import *
@@ -10,83 +12,48 @@ from answerui.all import *
 app = FastHTML(hdrs=reg.hdrs(), ftrs=reg.ftrs())
 ```
 
-Import answerui after FastHTML. It redefines the constructors it styles, and a later `from fasthtml.common import *` puts FastHTML's plain ones back. The headers render from the registry per response. A rule registered after the app starts is in the next page. `reg.serve(app)` instead serves the same assets from URLs named by a hash of their content, which the browser caches, and a changed rule reaches the next page as a new URL.
+- re-importing `fasthtml.common` after answerui restores unstyled constructors
+- headers: rebuilt each response; `reg.serve(app)`: cached, content-hashed URLs
 
 ## Building a page
 
-A page is native HTML. Headings, paragraphs, lists, code, and links are styled by the base layer with no attribute. Long-form content goes in an element carrying `prose`. Layout is four attributes that go on any element, `stack`, `cluster`, `grid`, and `flow`, and the constructors `Stack`, `Cluster`, `Grid`, and `Flow` add them to a `Div`. A component owns its inner space only, so its parent sets the spacing.
-
-`reg.elements` names every component, `doc(answerui)` lists the modules that define them, and `doc(Button)` describes one. A component's variants are attributes: `Button('Save', secondary=True)`. A link carrying `button` is styled as one: `A('Sign up', href='/signup', button=True)`. A severity is an attribute on any element, and every component inside it takes the colour: `Alert('Saved.', success=True)`, `Badge('3', danger=True)`. A dark island is an element that sets `color-scheme: dark` together with its own `background: var(--n-3)` and `color: var(--n2)`, and the ladders re-derive inside it.
-
-Icons come from fastlucide. Import an icon's constructor from `fastlucide.icons` at module level, and call it where the icon goes: `from fastlucide.icons import Trash_2`, then `Button(Trash_2(), aria_label='Remove')`. The footer from `reg.ftrs()` holds the sprite sheet, with every icon that any module has imported. A sprite icon, or any inline `svg` marked `icon`, takes the colour and size of the text around it, so pass it no size. A button whose only child is an icon is square. Give it an `aria-label`. `Tooltip(control, text)` returns one inline wrapper holding the control and its description.
-
-A toast for the next page is queued in the session: `add_toast(sess, 'Saved.', success=True)`. The page renders the queue in its region, `Toasts(*pop_toasts(sess))`, and `setup_toasts(app)` delivers what a route queued beside a fragment response.
+- native HTML: styled with no attribute; long-form: `prose` attribute on its container
+- layout attributes, any element: `stack` `cluster` `grid` `flow`; `Stack` `Cluster` `Grid` `Flow`: `Div` with one; component owns inner space only: parent spaces children (`gap`)
+- `A('Sign up', href='/signup', button=True)`: link styled as button
+- colour contexts: `[danger]` `[warning]` `[success]` `[info]` on any element, `mark`: re-point `--hue` inside: `Alert('Saved.', success=True)`, `Badge('3', danger=True)`
+- dark island: `color-scheme: dark; background: var(--n-3); color: var(--n2)`; ladders re-derive inside
+- icons: fastlucide, imported at module level, join `reg.ftrs()` sprite sheet: `from fastlucide.icons import Trash_2`; `Button(Trash_2(), aria_label='Remove')`; icon, or `svg` marked `icon`: takes text's colour and size; pass no size; icon-only button: needs `aria-label`
+- `Tooltip(control, text)`: inline wrapper
+- toasts: `add_toast(sess, 'Saved.', success=True)` → next page's `Toasts(*pop_toasts(sess))`; `setup_toasts(app)`: fragment responses deliver them too
 
 ## Reading what is registered
 
-`doc(Button)` shows a component's purpose, root selector, declared variants, and rules. `Button.rules['base'].css` is its CSS text, `Button.variants` its variants, and `Button.behaviors` its handlers. `Button.example()` is the markup its preview renders, and it composes into larger markup.
-
-`reg.elements` maps names to components. `reg.layers['app']` lists one layer's rules, and `reg.rules` every rule by key. `doc(reg)` lists the layers, the components, and the rules that belong to no component. `reg.contexts` maps context selectors to hues. `reg.behaviors()` is the effective handler per key, with the rule that declared it. `reg.build_css()` and `reg.build_js()` are the assets a page ships.
-
-The registry records what was registered and nothing more. Which rules reach an element, and how a state renders, are questions for a browser.
+- `reg.elements`: every component; `doc(Button)`, `doc(reg)`; members: `doc(Hyperelement)`, `doc(Registry)`; also `Button.rules[key].css`, `Button.example()` (composable markup), `reg.layers[name]`, `reg.rules[key]`
 
 ## How the stylesheet is organised
 
-The stylesheet declares cascade layers in the order `reset, tokens, base, layout, components, app, utilities`. A later layer wins over an earlier one for normal declarations, whatever the specificity of the selectors. A rule you register defaults to `app`, so it beats the framework's own rules. The `hidden` attribute is a utility, so it beats any display a component sets.
-
-Colour derives from `--hue`. Two ladders follow it: the neutral ladder from `--n-3`, the page, to `--n2`, body text, and the vivid ladder from `--v-3`, a wash, to `--v2`. Each rung is a `light-dark()` pair, so `color-scheme` alone decides light or dark. A colour context re-points `--hue` inside its scope. The contexts are `[danger]`, `[warning]`, `[success]`, `[info]`, and `mark`. Space, radius, and type each derive a scale from one base value: `--space`, `--radius`, and `--text`. The derived steps are recomputed on every element, so a base value set on a region rescales that region. Depth derives from `--face` and `--relief`. Rims and shadows follow the face colour, and `--relief: 0` flattens a scope. `--ring` is the focus ring, and `--tint` is the layer of its own text colour that a faceless control shows when hovered.
-
-Text is set in IBM Plex. `--font` is the face of body text and headings, and `--font-mono` the face of code. A scope that sets `--font-heading` gives its `h1` to `h6` another face, and `--font-serif` names Plex Serif for that: `reg.rule('reading', 'article { --font-heading: var(--font-serif); }')`. The font files are in the package. `reg.serve(app)` serves them from the app, and inline headers and previews fetch them from jsDelivr. A font of your own is an `@font-face` rule whose file is registered with `reg.file(name, path, url)`.
-
-A component owns its inner space only. Parents space their children with `gap` through the layout containers `stack`, `cluster`, `grid`, and `flow`, and `prose` styles long-form content.
-
-A popover places itself beside the button that opens it with CSS anchor positioning, below the button and flipping above or to the other side at the viewport's edge. An element marked `anchor`, such as the navbar, hangs the popovers inside it from its bottom edge instead.
-
-A behavior is a delegated event handler keyed by `(selector, event[, capture])`. It is installed once per document and runs for every matching element, including elements htmx swaps in later. `&` in a selector stands for the component's root selector, `init` runs when an element arrives in the document and `cleanup` before htmx removes one, under htmx 2 or 4. A leading `:` is short for `htmx:`, in any of htmx's spellings.
+- layers `reset, tokens, base, layout, components, app, utilities`: later wins for normal declarations, whatever specificity; registered rules default to `app` (beat framework); `hidden`: utility (beats component display)
+- colour: `--hue`; neutral ladder `--n-3` (page) to `--n2` (body text); vivid `--v-3` (wash) to `--v2`; rungs `light-dark()`: `color-scheme` picks mode
+- scales, one base each: `--space` `--radius` `--text`; recomputed per element: base set on a region rescales it
+- depth: `--face`, `--relief` (`0`: flat); `--ring`: focus ring; `--tint`: faceless control's hover
+- fonts: IBM Plex; `--font`, `--font-mono`; `--font-heading` on a scope: its headings, e.g. `reg.rule('reading', 'article { --font-heading: var(--font-serif); }')`; own font: `@font-face` + `reg.file(name, path, url)`
+- popover: CSS-anchored below opener, flips at viewport edge; inside `anchor` element (e.g. navbar): hangs from its bottom
+- behavior: delegated handler keyed `(selector, event[, capture])`, installed once per document, covers htmx swaps; `&`: root selector; `init`: on arrival; `cleanup`: before htmx removal (htmx 2, 4); leading `:` = `htmx:`, any spelling
 
 ## Changing the look
 
-Pick the smallest scope that covers the change. Register the rules at import time in the app module, and every response carries them.
-
-A page-wide change is a token set on the root. Every component that reads the token follows:
-
-```python
-reg.rule('theme', ':root { --hue: 150; --radius: 0; }')
-```
-
-One component everywhere is a rule on that component. Its CSS nests under the root selector, and a state nests with `&`:
-
-```python
-Button.rule('corners', 'border-radius: 0;')
-```
-
-A new treatment of a component is a variant. It becomes an attribute the constructor accepts, and `doc(Button)` lists it. Its CSS restates the states it changes, because the base rule's state selectors still apply:
-
-```python
-Button.variant('cta', '--pad-block: var(--space); --pad-inline: var(--space2); font-size: var(--text1);', doc='The landing page call to action.')
-Button('Start free', cta=True)
-```
-
-A change confined to a region is a rule with a selector, or a colour context:
-
-```python
-reg.rule('sidebar', '[sidebar] { --space: .75rem; }')
-reg.context('[project]', 300)
-```
-
-A behavior is replaced by registering the same `(selector, event, capture)` later in registry order. The library's alert removes itself on dismiss. An app that hides it instead registers the same key on the component:
-
-```python
-Alert.rule('hide', on={('& > button[dismiss]', 'click'): "el.closest('[alert]').hidden = true"})
-```
-
-Registering a key that exists replaces its definition in place and keeps its position, so re-running a library definition never outranks an app override. `reg.remove(key)` removes a rule. A component's root selector is fixed by its first registration.
+- smallest scope covering the change; register at import time in app module    /every response carries it
+- page: tokens on root: `reg.rule('theme', ':root { --hue: 150; --radius: 0; }')`
+- one component, everywhere: `Button.rule('corners', 'border-radius: 0;')`: nests under root selector, states via `&`
+- new treatment: `Button.variant('cta', '--pad-block: var(--space); --pad-inline: var(--space2); font-size: var(--text1);', doc='The landing page call to action.')` → `Button('Start free', cta=True)`, listed in `doc(Button)`; restate each state it changes    /base rule's state selectors still apply
+- region: `reg.rule('sidebar', '[sidebar] { --space: .75rem; }')`, or colour context `reg.context('[project]', 300)`
+- key registered again: behavior key: later in registry order wins, e.g. dismissed alert hidden, not removed: `Alert.rule('hide', on={('& > button[dismiss]', 'click'): "el.closest('[alert]').hidden = true"})`; rule key: replaced in place, position kept    /re-run library code never outranks app override
+- `reg.remove(key)`; root selector: fixed at first registration
 
 ## Checking the result
 
-In a notebook, `Button.demo()` renders the component's example with the registry's current stylesheet and script in an isolated iframe, so a change followed by `demo()` shows the change. `demo(markup)` renders any composition. `height=` fixes the frame for dialogs, popovers, and other top-layer content the frame cannot measure. `width=` narrows the frame, which is the viewport of everything in it, so `width='24rem'` previews a phone: a navbar collapses and a popover flips at the frame's edge. The notebook stores the frame as HTML and the markup as Markdown, and a model reading the dialog sees the markup.
-
-For a measured check, put the same document in Chrome with `fastcdp` and read computed values:
+- notebook: `Button.demo()`, `demo(markup)`: current CSS, JS, isolated iframe; `width=` is the viewport: `'24rem'` previews a phone (navbar collapses, popovers flip); stored as HTML frame + Markdown markup: models reading dialog see markup
+- registry knows registrations only; which rules reach an element, how a state renders: same document in headless Chrome:
 
 ```python
 from fastcdp import CDP
@@ -95,22 +62,23 @@ page = await cdp.new_page()
 await page.set_content(demo_html(Button('Save')))
 await page.wait_for_selector('button')
 await page.eval("getComputedStyle(document.querySelector('button')).borderRadius")
-await page.matched_styles('button')
+await page.matched_styles('button')   # every matching rule, cascade order
 await cdp.quit()
 ```
 
-`matched_styles` lists every rule that matches the element, in cascade order. A state renders by forcing it: set `aria-pressed` on the element before reading. The behavior script installs once per document, and a second copy in the same document stacks listeners, so check a behavior in a fresh preview or page.
+- states: force first, e.g. set `aria-pressed`
+- behaviors: fresh preview or page    /second script copy stacks listeners
 
 ## Adding a component
 
-A component is a constructor and its base rule:
+- constructor + base rule; tag name: FastHTML's constructor, tag = root selector:
 
 ```python
 Notice = hypelt('NoticeBox', css='notice-box { display: block; padding: var(--space); }',
     on={('& [dismiss]', 'click'): "el.closest('notice-box').remove()"})
 ```
 
-A tag name takes FastHTML's constructor, and the tag is the root selector. A handwritten constructor goes through the decorator form with `sel=`, and its docstring is the description:
+- handwritten: decorator, `sel=`, docstring = description:
 
 ```python
 @hypelt(sel='aside[banner]')
@@ -119,17 +87,6 @@ def Banner(title, *c, **attrs):
     ...
 ```
 
-`@example(Notice)` attaches the markup `Notice.demo()` renders. Variants and scoped rules attach as above.
-
-Docs: https://AnswerDotAI.github.io/answerui/skill.html.md"""
-
-# AUTOGENERATED! DO NOT EDIT! File to edit: ../nbs/14_skill.ipynb.
-
-# %% auto #0
-__all__ = ['reg', 'hypelt', 'Registry', 'Hyperelement', 'demo', 'demo_html', 'example']
-
-# %% ../nbs/14_skill.ipynb #a5c5bb77
-from .registry import reg, hypelt, Registry, Hyperelement
-from .demo import demo, demo_html, example
-_all_ = ['reg', 'hypelt', 'Registry', 'Hyperelement', 'demo', 'demo_html', 'example']
-
+- `@example(Notice)`: markup `Notice.demo()` renders
+"""
+from .all import *

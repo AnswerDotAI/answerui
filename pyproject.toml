@@ -34,7 +34,7 @@ answerui = "answerui.skill"
 version = {attr = "answerui.__version__"}
 
 [tool.setuptools.packages.find]
-include = ["answerui"]
+include = ["answerui", "answerui.*"]
 
 [tool.setuptools.package-data]
 answerui = ["css/*.css", "css/*.LICENSE", "fonts/*.woff2", "fonts/*.LICENSE"]

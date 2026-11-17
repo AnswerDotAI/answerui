@@ -114,7 +114,7 @@ def _toast_example():
         Toast('The upload failed. Your original file has not changed.', life=None, danger=True),
         hx_swap_oob='beforeend:[toasts]')
     return Div(Button('Deliver notifications', type='button', secondary=True,
-        hx_on_click=f"htmx.swap(this, document.getElementById('{id}').innerHTML, {{swapStyle: 'none'}})"),
+        hx_on_click=f"auiHtmx.swap({{target: this, text: document.getElementById('{id}').innerHTML, swap: 'none'}})"),
         Template(response, id=id), Toasts())
 
 # %% ../nbs/10_status.ipynb #fd43c227

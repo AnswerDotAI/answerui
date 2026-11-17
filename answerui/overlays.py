@@ -185,7 +185,11 @@ border-radius: 0; border-block: 0; border-inline-end: 0; translate: var(--_slide
 """, layer='components', doc='Slides in from the end edge and runs the full height, `--drawer-size` wide, or the whole screen below 40rem, on the page colour, scrolling when its content is taller; `start` slides in from the other edge.')
 
 # %% ../nbs/11_overlays.ipynb #41c6963e
-Dialog.rule('fill', on={('&', ':after-swap'): "if (e.target !== el && !el.open) el.showModal()"}, layer='components',
+Dialog.rule('fill', on={('body', ':after-swap'): r"""
+const target = auiHtmx.target(e);
+const dialog = target?.closest('dialog');
+if (dialog?.isConnected && target !== dialog && !dialog.open) dialog.showModal();
+"""}, layer='components',
     doc='A closed dialog opens when htmx swaps content into it; a swap of the dialog itself leaves it as it is.')
 
 # %% ../nbs/11_overlays.ipynb #8166b428

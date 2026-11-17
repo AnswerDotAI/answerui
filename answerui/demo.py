@@ -31,12 +31,12 @@ def _as_served(o):
     return o
 
 _routes_js = r'''const routes = %s;
-document.addEventListener('htmx:beforeRequest', e => {
-  const r = e.detail.requestConfig, html = routes[`${r.verb.toUpperCase()} ${r.path}`];
+document.addEventListener(auiHtmx.configRequestEvent, e => {
+  const ctx = auiHtmx.context(e), r = ctx.request;
+  const html = routes[`${r.method.toUpperCase()} ${r.action}`];
   if (html == null) return;
   e.preventDefault();
-  const spec = (htmx.closest(e.detail.elt, '[hx-swap]')?.getAttribute('hx-swap') ?? 'innerHTML').split(' ')[0];
-  htmx.swap(e.detail.target, html, {swapStyle: spec});
+  auiHtmx.swap({...ctx, target: auiHtmx.target(e), text: html});
 });'''
 
 # %% ../nbs/02_demo.ipynb #533a2e38
@@ -44,14 +44,12 @@ def demo_html(
     *fts,         # Markup to render
     registry=reg, # Registry whose stylesheet and behavior script the document carries
     css=None,     # Stylesheet for the document; None uses the registry's build_css()
-    htmx4=False,  # Use htmx 4 with FastHTML's config, as `fast_app(htmx4=True)` does, instead of htmx 2
     routes=None,  # Canned responses for the document's htmx requests, `{'GET path': markup}`, standing in for a server
 ):
     "A standalone document containing markup, CSS, behaviors, the sprite sheet, and FastHTML's default headers"
-    head = Head(*def_hdrs(htmx4=htmx4, surreal=False), Style(registry.build_css() if css is None else css), Script(registry.build_js()))
+    head = Head(*def_hdrs(htmx4=registry.htmx4, surreal=False), Style(registry.build_css() if css is None else css), Script(registry.build_js()))
     if routes: head = head(Script(_routes_js % dumps({k: to_xml(_as_served(v)) for k,v in routes.items()})))
     return to_xml(Html(head, Body(*_as_served(fts), spritesheet, style='min-block-size: auto')))
-
 
 # %% ../nbs/02_demo.ipynb #103de975
 _sizer = Script(r"new ResizeObserver(() => frameElement.style.height = document.body.scrollHeight+24+'px').observe(document.body)")
@@ -68,18 +66,16 @@ def demo(
     css=None,     # Stylesheet for the document; None uses the registry's build_css()
     height=None,  # Fixed iframe height, e.g. '10rem', for top-layer content the frame can't measure; None follows the content
     width=None,   # Fixed iframe width, e.g. '24rem', to preview a narrow viewport; None fills the cell
-    htmx4=False,  # Use htmx 4 with FastHTML's config, as `fast_app(htmx4=True)` does, instead of htmx 2
     routes=None,  # Canned responses for the preview's htmx requests, `{'GET path': markup}`, standing in for a server
 ):
     "Render markup in an isolated, replayable notebook preview"
     doc = fts if height is not None else fts + (_sizer,)
     style = f'width:100%;box-sizing:border-box;border:1px solid #e3e3e8;border-radius:8px;height:{height or "auto"};'
-    frame = Iframe(srcdoc=demo_html(*doc, registry=registry, css=css, htmx4=htmx4, routes=routes), title='answerui preview', style=style)
+    frame = Iframe(srcdoc=demo_html(*doc, registry=registry, css=css, routes=routes), title='answerui preview', style=style)
     replay = Button('↻', type='button', aria_label='replay', title='replay',
         onclick=r"const f=this.parentElement.nextElementSibling; f.srcdoc=f.srcdoc",
         style='border:0;background:none;font-size:14px;opacity:.6;cursor:pointer;padding:0 4px')
     return Preview(fts, Div(Div(replay, style='text-align:right'), frame, style=f'width:{width or "100%"}'))
-
 
 # %% ../nbs/02_demo.ipynb #7008abc5
 def example(h):

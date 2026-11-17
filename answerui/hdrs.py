@@ -22,11 +22,11 @@ from starlette.responses import Response
 @patch
 def assets(self:Registry):
     "The stylesheet and script, keyed by extension, built once per registry version"
-    if getattr(self, '_assets_version', None) != self.version:
+    key = self.version, self.htmx4
+    if getattr(self, '_assets_version', None) != key:
         self._assets = {'css': self.build_css(), 'js': self.build_js()}
-        self._assets_version = self.version
+        self._assets_version = key
     return self._assets
-
 
 # %% ../nbs/03_hdrs.ipynb #a8b08b14
 class _Lazy:
@@ -55,6 +55,7 @@ def serve(
     path='/answerui', # URL prefix the assets are served under
 ):
     "Serve the stylesheet and script under content-hashed names, adding their headers and the sprite sheet to `app`; returns the two headers, for an app that builds its own head"
+    self.htmx4 = app.htmx4
     served, names, mimes = {}, {}, {'css': 'text/css', 'js': 'text/javascript'}
     def local(body):
         "`body` with each registered file's URL replaced by the URL of its served copy"
@@ -65,7 +66,7 @@ def serve(
             body = body.replace(url, f'{path}/{fname}')
         return body
     def link(ext):
-        key = ext, self.version
+        key = ext, self.version, self.htmx4
         if key not in names:
             body = local(self.assets()[ext])
             names[key] = name = f'{_hash(body)}.{ext}'

@@ -79,7 +79,8 @@ class RuleView(Mapping):
 
 class Registry:
     "Named rules and hyperelements, from which a page's stylesheet and script are built"
-    def __init__(self):
+    def __init__(self, htmx4=False):
+        self.htmx4 = htmx4
         self.rules, self.elements, self.files, self.version = {}, {}, {}, 0
         self.layers = {name: RuleView(self, layer=name) for name in LAYERS}
 

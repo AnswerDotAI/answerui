@@ -14,6 +14,7 @@ app = FastHTML(hdrs=reg.hdrs(), ftrs=reg.ftrs())
 
 - re-importing `fasthtml.common` after answerui restores unstyled constructors
 - headers: rebuilt each response; `reg.serve(app)`: cached, content-hashed URLs
+- HTMX 4: create the app with `FastHTML(htmx4=True)`, then call `reg.serve(app)`. This adds AnswerUI's headers and provides `auiHtmx`, a shared JavaScript interface for HTMX 2 and 4.
 
 ## Building a page
 

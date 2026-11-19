@@ -85,7 +85,7 @@ button:has(> [avatar]:only-child) {
   --pad-block: 1px; --pad-inline: 1px; border-radius: var(--radius-full); --face: var(--n-2); border-color: var(--n-1);
 }
 button:disabled > [avatar]:only-child { opacity: .5; }
-""", layer='components', doc='A button whose only content is an avatar is round on the neutral surface, and fades its avatar when disabled.')
+""", name='avatar-button', layer='components', doc='A button whose only content is an avatar is round on the neutral surface, and fades its avatar when disabled.')
 
 # %% ../nbs/09_surfaces.ipynb #58f4956e
 @example(Avatar)

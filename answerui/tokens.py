@@ -50,13 +50,14 @@ for name in CONTEXTS: reg.context(f'[{name}]', f'var(--hue-{name})')
 
 # %% ../nbs/05_tokens.ipynb #a9c23b85
 _hues = ' '.join(f'--hue-{name}: {hue};' for name,hue in CONTEXTS.items())
-reg.rule(_hue_css, layer='tokens', doc='The application hue and the supported colour schemes.')
-reg.rule(f':root {{ {_hues} }}', layer='tokens', doc='The severity hues, each independently adjustable.')
+reg.rule(_hue_css, name='hue', layer='tokens', doc='The application hue and the supported colour schemes.')
+reg.rule(f':root {{ {_hues} }}', name='contexts', layer='tokens', doc='The severity hues, each independently adjustable.')
 reg.rule(partial(_palette_css, reg), 'palette', layer='tokens', doc='The neutral and vivid ladders, declared on the root and on every colour context.')
 
 
 # %% ../nbs/05_tokens.ipynb #5b63dfe2
-reg.rule(':root { --tint: oklch(from currentColor l c h / .08); }', layer='tokens', doc='A faint layer of the current text colour, shown by a faceless control when hovered.')
+reg.rule(':root { --tint: oklch(from currentColor l c h / .08); }', name='tint', layer='tokens',
+    doc='A faint layer of the current text colour, shown by a faceless control when hovered.')
 
 # %% ../nbs/05_tokens.ipynb #9667c312
 _type_css = r"""
@@ -77,7 +78,7 @@ _type_css = r"""
 """
 
 # %% ../nbs/05_tokens.ipynb #4c988deb
-reg.rule(_type_css, layer='tokens',
+reg.rule(_type_css, name='type', layer='tokens',
     doc='The three font families, five sizes, regular and semibold weights, and two line heights.')
 
 # %% ../nbs/05_tokens.ipynb #5095a07c
@@ -97,7 +98,8 @@ def font_face(
     return f"@font-face {{ font-family: '{family}'; font-weight: {weight}; font-style: {style}; font-display: swap; src: url('{url}') format('woff2'); }}"
 
 # %% ../nbs/05_tokens.ipynb #fb490969
-reg.rule('\n'.join(font_face(*f) for f in FONTS), layer='tokens', doc='IBM Plex Sans, Serif and Mono, from the package when served and from jsDelivr otherwise.')
+reg.rule('\n'.join(font_face(*f) for f in FONTS), name='fonts', layer='tokens',
+    doc='IBM Plex Sans, Serif and Mono, from the package when served and from jsDelivr otherwise.')
 
 # %% ../nbs/05_tokens.ipynb #d549e429
 reg.rule(r"""
@@ -110,7 +112,7 @@ reg.rule(r"""
   --space2: calc(var(--space) * 2);
   --space3: calc(var(--space) * 3);
 }
-""", layer='tokens', doc='A spacing scale derived from one application-wide base value.')
+""", name='space', layer='tokens', doc='A spacing scale derived from one application-wide base value.')
 
 # %% ../nbs/05_tokens.ipynb #ef78ce6c
 reg.rule(r"""
@@ -119,7 +121,7 @@ reg.rule(r"""
   --radius-1: calc(var(--radius) * .5);
   --radius1: calc(var(--radius) * 2);
 }
-""", layer='tokens', doc='Three corner radii derived from one base value, plus an independent pill radius.')
+""", name='radius', layer='tokens', doc='Three corner radii derived from one base value, plus an independent pill radius.')
 
 # %% ../nbs/05_tokens.ipynb #9703c232
 reg.rule(r"""
@@ -129,7 +131,7 @@ reg.rule(r"""
   @media (prefers-reduced-motion: reduce) { --motion: 0ms; }
 }
 @keyframes aui-spin { to { rotate: 1turn; } }
-""", layer='tokens', doc='A shared duration and easing curve, stilled under reduced motion, and the spin shared by busy controls.')
+""", name='motion', layer='tokens', doc='A shared duration and easing curve, stilled under reduced motion, and the spin shared by busy controls.')
 
 # %% ../nbs/05_tokens.ipynb #92a7c257
 _relief = r"""
@@ -152,4 +154,4 @@ reg.rule(r"""
   --floating: 0 4px 12px var(--_shadow-color), 0 12px 32px var(--_shadow-color);
 }
 """ + relief('*, ::before, ::after'),
-    layer='tokens', doc='Face-derived rims and raised and sunken shadows scaled by relief, with independent floating shadows.')
+    name='elevation', layer='tokens', doc='Face-derived rims and raised and sunken shadows scaled by relief, with independent floating shadows.')

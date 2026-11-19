@@ -21,7 +21,7 @@ reg.rule(r"""
 :where(body, h1, h2, h3, h4, h5, h6, p, ul, ol, dl, dd, blockquote, figure, figcaption, pre, hr, table) { margin: 0; }
 img, picture, video, canvas, svg { max-inline-size: 100%; block-size: auto; }
 button, input, textarea, select { font: inherit; color: inherit; }
-""", layer='reset', doc='Border-box sizing, no block margins, media constrained, controls inheriting text.')
+""", name='reset', layer='reset', doc='Border-box sizing, no block margins, media constrained, controls inheriting text.')
 
 # %% ../nbs/06_base.ipynb #7024f5fe
 reg.context('mark', 'var(--hue-warning)')
@@ -58,22 +58,23 @@ table {
 }
 :focus-visible { outline: var(--ring); outline-offset: 2px; }
 mark { background: var(--v-3); color: var(--v2); padding: .1em .2em; border-radius: var(--radius-1); }
-""", layer='base', doc='The page, text, headings, links, code, lists, quotes, tables, rules, marks, focus, and cursors on the tokens.')
+""", name='document', layer='base', doc='The page, text, headings, links, code, lists, quotes, tables, rules, marks, focus, and cursors on the tokens.')
 
 # %% ../nbs/06_base.ipynb #ac244267
-reg.rule('[hidden]:not([hidden=until-found]) { display: none; }', layer='utilities', doc='The hidden attribute wins over any display a component sets.')
+reg.rule('[hidden]:not([hidden=until-found]) { display: none; }', name='hidden', layer='utilities',
+    doc='The hidden attribute wins over any display a component sets.')
 
 # %% ../nbs/06_base.ipynb #d0d95931
 reg.rule(r'''
 svg:is(:has(> use), [icon]) { inline-size: 1.25em; block-size: 1.25em; vertical-align: -.3em; flex: none; }
-''', layer='base', doc='A sprite icon, or an inline SVG marked `icon`, sized and aligned to the text around it.')
+''', name='icons', layer='base', doc='A sprite icon, or an inline SVG marked `icon`, sized and aligned to the text around it.')
 
 # %% ../nbs/06_base.ipynb #191dab74
 TYPROSE = files('answerui').joinpath('css/typrose.css').read_text()
 TYPROSE = re.sub(r'(/\*[^*]*\*/\n)?\.prose-(slate|zinc|neutral|stone|invert) \{[^}]*\}\n*', '', TYPROSE)
 TYPROSE = re.sub(r'\.prose-(\w+)', r'[prose="\1"]', TYPROSE)
 TYPROSE = re.sub(r'\.prose\b', '[prose]', TYPROSE)
-reg.rule(TYPROSE, layer='base', doc='Prose typography from typrose, on the `prose` attribute.')
+reg.rule(TYPROSE, name='typrose', layer='base', doc='Prose typography from typrose, on the `prose` attribute.')
 
 # %% ../nbs/06_base.ipynb #369818f2
 reg.rule(r"""
@@ -85,4 +86,4 @@ reg.rule(r"""
   --prose-bullets: var(--n-1); --prose-hr: var(--n-1); --prose-quote-borders: var(--n-1);
   --prose-th-borders: var(--n); --prose-td-borders: var(--n-1);
 }
-""", layer='base', doc='typrose colours mapped onto the ladder, its size from `--text`, and the reading measure.')
+""", name='prose', layer='base', doc='typrose colours mapped onto the ladder, its size from `--text`, and the reading measure.')

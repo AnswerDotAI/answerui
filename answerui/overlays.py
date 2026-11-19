@@ -92,7 +92,7 @@ reg.rule(r'''
   transition: opacity var(--motion) var(--ease), translate var(--motion) var(--ease), display var(--motion) allow-discrete, overlay var(--motion) allow-discrete;
 }
 :is(dialog[open], [popover][anchored]:popover-open), dialog[open]::backdrop { opacity: 1; @starting-style { opacity: 0; } }
-''', layer='components', doc='Dialogs, their backdrops, and anchored popovers fade over `--motion`, staying in the top layer until the fade ends.')
+''', name='fade', layer='components', doc='Dialogs, their backdrops, and anchored popovers fade over `--motion`, staying in the top layer until the fade ends.')
 
 # %% ../nbs/11_overlays.ipynb #483c7ce2
 @example(Popover)
@@ -153,7 +153,7 @@ def _dropdown_example():
         Hr(), Button('Sign out', type='button')), trigger, panel)
 
 # %% ../nbs/11_overlays.ipynb #ee3e977b
-reg.rule(sel='button[commandfor]', on={('&', 'click'): r"""
+reg.rule(name='commands', sel='button[commandfor]', on={('&', 'click'): r"""
 if ('commandForElement' in el) return;
 const t = document.getElementById(el.getAttribute('commandfor')), c = el.getAttribute('command');
 if (!t) return;

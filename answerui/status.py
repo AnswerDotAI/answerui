@@ -26,7 +26,7 @@ reg.rule(r"""
 :is([alert], [toast]) { display: flex; align-items: flex-start; gap: var(--space);
   > [stack] { flex: 1; min-inline-size: 0; }
   > button[dismiss] { flex-shrink: 0; --pad-block: var(--space-3); --pad-inline: var(--space-2); } }
-""", layer='components', doc='The row shared by alerts and toasts: the message beside its dismiss button.')
+""", name='notice', layer='components', doc='The row shared by alerts and toasts: the message beside its dismiss button.')
 
 def _notice(c, dismissible, **attrs):
     "A stack of content beside an optional dismiss button"

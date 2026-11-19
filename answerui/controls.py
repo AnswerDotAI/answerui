@@ -102,7 +102,7 @@ reg.rule(r"""
 :is(%(text_sel)s, textarea, select):disabled { --face: var(--n-2); color: var(--n); box-shadow: var(--bevel-in); }
 ::placeholder { color: var(--n1); }
 input[type=number] { appearance: textfield; &::-webkit-inner-spin-button, &::-webkit-outer-spin-button { appearance: none; margin: 0; } }
-""" %dict(text_sel=_text_sel), layer='components', doc='The well shared by text inputs, textareas, selects, and any element marked `well`, taking the danger hue when invalid.')
+""" %dict(text_sel=_text_sel), name='text-controls', layer='components', doc='The well shared by text inputs, textareas, selects, and any element marked `well`, taking the danger hue when invalid.')
 
 Input = hypelt('Input', sel=_text_sel, layer='components', doc='A text-like input, styled as a well by the text-controls rule.')
 Textarea = hypelt('Textarea', layer='components', css='min-block-size: 5rem; resize: vertical; field-sizing: content;',
@@ -134,7 +134,7 @@ const run = () => {
 };
 e.type === 'reset' ? setTimeout(run) : run();"""
 
-reg.rule(on={('form:has(button[enable])', 'input'): _enable_js, ('form:has(button[enable])', 'change'): _enable_js, ('form:has(button[enable])', 'reset'): _enable_js, ('button[enable]', 'init'): _enable_js},
+reg.rule(name='enable', on={('form:has(button[enable])', 'input'): _enable_js, ('form:has(button[enable])', 'change'): _enable_js, ('form:has(button[enable])', 'reset'): _enable_js, ('button[enable]', 'init'): _enable_js},
     layer='components', doc="A submit button rendered disabled with `enable='changed'`, `enable='valid'`, or both comes alive when its form has changed, or is valid, and goes back when it is not.")
 
 # %% ../nbs/08_controls.ipynb #018a9574
@@ -268,7 +268,7 @@ input[type=checkbox]:not([role=switch]), input[type=radio] { appearance: none; -
 input[type=checkbox]:not([role=switch])::before, input[type=radio]::before { content: ''; inline-size: .6em; block-size: .6em; background: var(--n-3); scale: 0; transition: scale var(--motion) var(--ease); }
 :is(input[type=checkbox]:not([role=switch]), input[type=radio]):disabled { --face: var(--n-2); border-color: var(--n-1); }
 """
-reg.rule(_choice_css, layer='components', doc='The small well and the mark shared by checkboxes and radios.')
+reg.rule(_choice_css, name='choice-controls', layer='components', doc='The small well and the mark shared by checkboxes and radios.')
 
 _checkbox_css = r"""
 &::before { clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%); }
@@ -397,7 +397,7 @@ Field.rule('validity', on={(_ctl, 'focusout'): _validity_js, (_ctl, 'input'): _v
     doc="When the user leaves a control invalid or tries to submit, the browser's own validation message appears under the field in place of its bubble, listed in the control's `aria-describedby`; both go when the value is valid again.")
 
 # %% ../nbs/08_controls.ipynb #f12ffe76
-reg.rule(sel='form', on={('& :is(input, select, textarea)', 'input'): r"for (const m of el.form.querySelectorAll('small[validation]')) if (!m.closest('[field]')) m.remove()"},
+reg.rule(name='form-validation', sel='form', on={('& :is(input, select, textarea)', 'input'): r"for (const m of el.form.querySelectorAll('small[validation]')) if (!m.closest('[field]')) m.remove()"},
     layer='components', doc='A validation message a form came back with, a `small` marked `validation` outside any field, clears once the user edits a control, since it described the values that were sent.')
 
 # %% ../nbs/08_controls.ipynb #98f28199
@@ -433,5 +433,5 @@ def _fieldset_example():
         stack=True, style='--gap: var(--space-2)')
 
 # %% ../nbs/08_controls.ipynb #ed615aa5
-reg.rule(on={('input[reveals]', 'change'): r"document.getElementById(el.getAttribute('reveals')).hidden = !el.checked"}, layer='components',
+reg.rule(name='reveals', on={('input[reveals]', 'change'): r"document.getElementById(el.getAttribute('reveals')).hidden = !el.checked"}, layer='components',
     doc="A checkbox or switch with `reveals='<id>'` shows that element while checked and hides it while not; render the element `hidden` to match the initial state.")

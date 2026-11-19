@@ -63,7 +63,7 @@ NavBar.variant('align', r"""
 NavBar.variant('sticky', 'position: sticky; inset-block-start: 0; z-index: 1;', layer='components', doc='Stays at the top as the page scrolls, and keeps a scrolled-to anchor from landing under it.',
     on={('&', 'init'): r'''const set = () => document.documentElement.style.setProperty('--navbar-size', el.getBoundingClientRect().height + 'px');
 set(); new ResizeObserver(set).observe(el)'''})
-reg.rule('html { scroll-padding-block-start: calc(var(--navbar-size, 0px) + var(--space)); }', layer='components', doc='A scrolled-to anchor stops below the sticky navbar, with a little space.')
+reg.rule('html { scroll-padding-block-start: calc(var(--navbar-size, 0px) + var(--space)); }', name='anchors', layer='components', doc='A scrolled-to anchor stops below the sticky navbar, with a little space.')
 NavBar.variant('vivid', r"""
 --face: var(--v); color: var(--n-3);
 nav a[aria-current=page] { background: oklch(from var(--tint) l c h / calc(alpha * 2)); color: inherit; }

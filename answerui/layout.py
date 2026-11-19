@@ -86,7 +86,7 @@ def _grid_example():
 Stack.rule('grow', '& > [grow] { flex: 1; }', layer='layout', doc='A child marked `grow` takes the height the others leave, so what follows it sits at the bottom of the stack.')
 
 # %% ../nbs/07_layout.ipynb #8d30542c
-reg.rule(':is(ul, ol):is([stack], [cluster], [grid]) { list-style: none; padding: 0; margin: 0; }', layer='layout',
+reg.rule(':is(ul, ol):is([stack], [cluster], [grid]) { list-style: none; padding: 0; margin: 0; }', name='list', layer='layout',
     doc='A list that carries a layout is a layout, not prose: no markers, no indent.')
 
 # %% ../nbs/07_layout.ipynb #8355d595

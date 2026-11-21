@@ -4,7 +4,7 @@ project:
 website:
   title: "answerui"
   site-url: "https://AnswerDotAI.github.io/answerui"
-  description: "A semantic HTML UI framework for FastHTML apps"
+  description: "Styles and browser behavior for semantic HTML, with FastHTML components"
   repo-branch: main
   repo-url: "https://github.com/AnswerDotAI/answerui"
 

@@ -1,0 +1,128 @@
+"""Assemble browser stylesheets from the notebooks without running their lessons."""
+
+from ast import literal_eval, parse
+from collections import defaultdict
+from textwrap import dedent, indent
+
+
+class _Assets:
+    def __init__(self, nb): self.parts = defaultdict(list)
+
+    def _asset_(self, cell, name):
+        stmt, = parse(cell.source).body
+        self.parts[name].append(literal_eval(stmt.value).strip())
+
+    def _asset_include_(self, cell, name, filename):
+        from nbdev.config import get_config
+        self.parts[name].append((get_config().nbs_path / filename).read_text(encoding='utf-8').strip())
+
+
+def _css_items(s):
+    "Split CSS into top-level comments, statements, and `{...}` blocks."
+    out, i, n = [], 0, len(s)
+    while i < n:
+        while i < n and s[i].isspace(): i += 1
+        if i >= n: break
+        start = i
+        if s[i:i+2] == '/*':
+            end = s.find('*/', i + 2)
+            i = n if end < 0 else end + 2
+            out.append(('comment', s[start:i]))
+            continue
+        depth = 0
+        while i < n:
+            c = s[i]
+            if s[i:i+2] == '/*':
+                end = s.find('*/', i + 2)
+                i = n if end < 0 else end + 2
+            elif c in ("'", '"'):
+                q, i = c, i + 1
+                while i < n and s[i] != q: i += 2 if s[i] == '\\' else 1
+                i += 1
+            elif c == '{':
+                if depth == 0: hdr, open_pos = s[start:i].strip(), i
+                depth += 1
+                i += 1
+            elif c == '}':
+                depth -= 1
+                i += 1
+                if depth == 0:
+                    body = dedent(s[open_pos + 1 : i - 1]).strip('\n')
+                    out.append(('block', hdr, body, s[start:i].strip()))
+                    break
+            elif c == ';' and depth == 0:
+                i += 1
+                out.append(('stmt', s[start:i].strip()))
+                break
+            else: i += 1
+        else: out.append(('raw', s[start:i].strip()))
+    return out
+
+def _merge_scopes(items):
+    "Merge adjacent identical `@scope` blocks inside one layer."
+    merged, pending = [], []
+    def flush():
+        merged.extend(('raw', c) for c in pending)
+        pending.clear()
+    for it in items:
+        if it[0] == 'comment': pending.append(it[1])
+        elif it[0] == 'block' and it[1].startswith('@scope'):
+            _, hdr, body, _ = it
+            if merged and merged[-1][0] == 'scope' and merged[-1][1] == hdr:
+                merged[-1][2].extend([*pending, body])
+                pending.clear()
+            else:
+                flush()
+                merged.append(('scope', hdr, [body]))
+        else:
+            flush()
+            merged.append(('raw', it[-1]))
+    flush()
+    return '\n\n'.join(
+        f'{m[1]} {{\n' + indent('\n\n'.join(m[2]), '  ') + '\n}' if m[0] == 'scope' else m[1]
+        for m in merged)
+
+def _merge_css(sections):
+    "Collapse repeated named `@layer` blocks and adjacent identical `@scope` blocks."
+    items = [it for sec in sections for it in _css_items(sec)]
+    if not any(it[0] == 'block' and it[1].startswith('@layer ') for it in items): return '\n\n'.join(sections)
+    out, layers, order = [], {}, []
+    for it in items:
+        if it[0] == 'stmt' and it[1].startswith('@layer ') and it[1].endswith(';') and not order:
+            order = [f'@layer {x.strip()}' for x in it[1][7:-1].split(',')]
+            out.append(('raw', it[1]))
+        elif it[0] == 'block' and it[1].startswith('@layer '):
+            hdr, body = it[1], it[2]
+            if hdr not in layers:
+                layers[hdr] = []
+                out.append(('layer', hdr))
+            layers[hdr].extend(_css_items(body))
+        else: out.append(('raw', it[-1]))
+    if order:
+        rank = {h: i for i, h in enumerate(order)}
+        lidxs = [i for i, (k, _) in enumerate(out) if k == 'layer']
+        ordered = sorted((out[i] for i in lidxs), key=lambda x: rank.get(x[1], len(rank)))
+        for i, item in zip(lidxs, ordered): out[i] = item
+    return '\n\n'.join(
+        f'{hdr} {{\n' + indent(_merge_scopes(layers[hdr]), '  ') + '\n}' if kind == 'layer' else hdr
+        for kind, hdr in out)
+
+
+def build_assets_(cell):
+    "Export the notebook stylesheet sections in notebook and cell order."
+    from nbdev.config import get_config
+    from nbdev.process import NBProcessor
+
+    cfg = get_config()
+    parts = defaultdict(list)
+    for nb in sorted(cfg.nbs_path.glob('[0-9]*.ipynb')):
+        proc = NBProcessor(nb, _Assets)
+        proc.process()
+        for name, sections in proc.procs[0].parts.items(): parts[name].extend(sections)
+    dest = cfg.lib_path / 'assets'
+    dest.mkdir(exist_ok=True)
+    for name, sections in parts.items():
+        out = dest / name
+        body = _merge_css(sections) if name.endswith('.css') else '\n\n'.join(sections)
+        css = '/* Generated by nbdev-export. Edit the source notebooks. */\n\n' + body + '\n'
+        if not out.exists() or out.read_text(encoding='utf-8') != css: out.write_text(css, encoding='utf-8')

@@ -2,17 +2,23 @@ website:
   sidebar:
     contents:
       - index.ipynb
-      - 00_registry.ipynb
-      - 01_behaviors.ipynb
-      - 02_demo.ipynb
-      - 03_hdrs.ipynb
-      - 04_palette.ipynb
-      - 05_tokens.ipynb
-      - 06_base.ipynb
-      - 07_layout.ipynb
-      - 08_controls.ipynb
-      - 09_surfaces.ipynb
-      - 10_status.ipynb
-      - 11_overlays.ipynb
-      - 12_navigation.ipynb
-      - 13_data.ipynb
+      - section: Browser foundation
+        contents:
+          - 00_palette.ipynb
+          - 01_typography.ipynb
+          - 02_layout.ipynb
+          - 03_controls.ipynb
+          - 04_interactions.ipynb
+      - section: Python components
+        contents:
+          - 10_registry.ipynb
+          - 11_behaviors.ipynb
+          - 12_demo.ipynb
+          - 13_hdrs.ipynb
+          - 20_layout.ipynb
+          - 21_controls.ipynb
+          - 22_surfaces.ipynb
+          - 23_status.ipynb
+          - 24_overlays.ipynb
+          - 25_navigation.ipynb
+          - 26_data.ipynb

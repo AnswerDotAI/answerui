@@ -1,14 +1,14 @@
 [build-system]
-requires = ["setuptools>=64"]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "answerui-py"
 dynamic = ["version"]
-description = "A semantic HTML UI framework for FastHTML apps"
+description = "Styles and browser behavior for semantic HTML, with FastHTML components"
 readme = "README.md"
 requires-python = ">=3.11"
-license = {text = "Apache-2.0"}
+license = "Apache-2.0"
 authors = [{name = "Jack Hogan", email = "jackhogan4@gmail.com"}]
 keywords = ['nbdev']
 classifiers = [
@@ -37,9 +37,13 @@ version = {attr = "answerui.__version__"}
 include = ["answerui", "answerui.*"]
 
 [tool.setuptools.package-data]
-answerui = ["css/*.css", "css/*.LICENSE", "fonts/*.woff2", "fonts/*.LICENSE"]
+answerui = ["assets/*.css", "assets/*.js", "assets/fonts/*"]
 
 [tool.nbdev]
 exec_all = true
+export_procs = ["answerui._build:build_assets_"]
 lib_path = "answerui"
 
+[tool.fastship]
+release = "tag"
+version-files = ["package.json"]

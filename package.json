@@ -1,0 +1,24 @@
+{
+  "name": "answerui",
+  "version": "0.0.4",
+  "description": "Styles and browser behavior for semantic HTML",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AnswerDotAI/answerui.git"
+  },
+  "type": "module",
+  "files": ["answerui/assets"],
+  "exports": {
+    "./styles.css": "./answerui/assets/styles.css",
+    "./fonts.css": "./answerui/assets/fonts.css",
+    "./fit.js": "./answerui/assets/fit.js",
+    "./floating.js": "./answerui/assets/floating.js",
+    "./interactions.js": "./answerui/assets/interactions.js",
+    "./copy.js": "./answerui/assets/copy.js",
+    "./browser.js": "./answerui/assets/browser.js"
+  },
+  "sideEffects": ["**/*.css", "./answerui/assets/browser.js"],
+  "scripts": {"build": "nbdev-export"},
+  "publishConfig": {"access": "public"}
+}

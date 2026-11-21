@@ -1,0 +1,41 @@
+@layer tokens {
+  @scope (:root, [ui]) to ([unstyle]) {
+    :where(:scope):root {
+      color-scheme: light dark;
+      --hue: 260; --neutral-hue: 260;
+      --hue-danger: 25; --hue-warning: 75; --hue-success: 145; --hue-info: 230;
+    }
+    :where(:scope, *) {
+      &[ui-theme=system] { color-scheme: light dark; }
+      &[ui-theme=light] { color-scheme: light; }
+      &[ui-theme=dark] { color-scheme: dark; }
+      &[ui-tone=danger] { --hue: var(--hue-danger); }
+      &[ui-tone=warning] { --hue: var(--hue-warning); }
+      &[ui-tone=success] { --hue: var(--hue-success); }
+      &[ui-tone=info] { --hue: var(--hue-info); }
+    }
+    [prose] mark { --hue: var(--hue-warning); }
+
+    :where(:scope):is(:root, [ui]), :where(:scope, *)[ui-tone], [prose] mark {
+      --n-3: light-dark(oklch(0.9914 clamp(0, 0.00801 + 0.00551*cos((1*var(--neutral-hue) - 136.63)*1deg) + 0.00329*cos((2*var(--neutral-hue) - 268.97)*1deg) + 0.00139*cos((3*var(--neutral-hue) - 327.76)*1deg) + 0.00123*cos((4*var(--neutral-hue) - 93.61)*1deg) + 0.00125*cos((5*var(--neutral-hue) - 211.17)*1deg) + 0.00034*cos((6*var(--neutral-hue) - 339.8)*1deg) + 0.00023*cos((7*var(--neutral-hue) - 56.25)*1deg) + 0.00038*cos((8*var(--neutral-hue) - 125.04)*1deg) + 0.00015*cos((9*var(--neutral-hue) - 283.35)*1deg) + 7e-05*cos((10*var(--neutral-hue) - 349.22)*1deg) + 0.00021*cos((11*var(--neutral-hue) - 12.11)*1deg) + 0.00015*cos((12*var(--neutral-hue) - 161.94)*1deg), 0.02) var(--neutral-hue)), oklch(0.1026 clamp(0, 0.01959 + 0.00041*cos((1*var(--neutral-hue) - 19.99)*1deg), 0.02) var(--neutral-hue))); /* base: the lightness extreme (the default page) */
+      --n-2: light-dark(oklch(0.9506 0.02 var(--neutral-hue)), oklch(0.1434 0.02 var(--neutral-hue))); /* raised surface: cards, inputs */
+      --n-1: light-dark(oklch(0.7903 0.02 var(--neutral-hue)), oklch(0.3385 0.02 var(--neutral-hue))); /* hairline borders, separators */
+      --n: light-dark(oklch(0.6503 0.02 var(--neutral-hue)), oklch(0.4611 0.02 var(--neutral-hue))); /* disabled text and controls */
+      --n1: light-dark(oklch(0.5247 0.02 var(--neutral-hue)), oklch(0.5812 0.02 var(--neutral-hue))); /* muted and placeholder text */
+      --n2: light-dark(oklch(0.4217 0.02 var(--neutral-hue)), oklch(0.7918 0.02 var(--neutral-hue))); /* body text; body text on surface */
+      --v-3: light-dark(oklch(0.913 0.03581 var(--hue)), oklch(0.1825 clamp(0, 0.05701 + 0.02563*cos((1*var(--hue) - 325.45)*1deg) + 0.01252*cos((2*var(--hue) - 263.8)*1deg) + 0.00819*cos((3*var(--hue) - 96.1)*1deg) + 0.00256*cos((4*var(--hue) - 85.33)*1deg) + 0.0017*cos((5*var(--hue) - 319.1)*1deg) + 0.0034*cos((6*var(--hue) - 157.26)*1deg) + 0.00073*cos((7*var(--hue) - 138.05)*1deg) + 0.00112*cos((8*var(--hue) - 2.43)*1deg) + 0.00177*cos((9*var(--hue) - 237.19)*1deg) + 0.00037*cos((10*var(--hue) - 228.33)*1deg) + 0.00064*cos((11*var(--hue) - 69.15)*1deg), 0.09221) var(--hue))); /* subtle background wash; distinct from raised surface */
+      --v-2: light-dark(oklch(0.7453 clamp(0, 0.12952 + 0.00279*cos((1*var(--hue) - 18.52)*1deg), 0.13231) var(--hue)), oklch(0.3792 clamp(0, 0.11554 + 0.05156*cos((1*var(--hue) - 327.56)*1deg) + 0.02507*cos((2*var(--hue) - 264.93)*1deg) + 0.01578*cos((3*var(--hue) - 92.55)*1deg) + 0.00467*cos((4*var(--hue) - 86.48)*1deg) + 0.00337*cos((5*var(--hue) - 312.62)*1deg) + 0.00706*cos((6*var(--hue) - 156.72)*1deg) + 0.00165*cos((7*var(--hue) - 144.83)*1deg) + 0.00212*cos((8*var(--hue) - 5.61)*1deg) + 0.00327*cos((9*var(--hue) - 233.15)*1deg), 0.18274) var(--hue))); /* wash hover, selected */
+      --v-1: light-dark(oklch(0.6068 clamp(0, 0.15177 + 0.03348*cos((1*var(--hue) - 339.18)*1deg) + 0.01411*cos((2*var(--hue) - 265.25)*1deg) + 0.02027*cos((3*var(--hue) - 71.84)*1deg) + 0.00504*cos((4*var(--hue) - 202.5)*1deg) + 0.00284*cos((5*var(--hue) - 280.18)*1deg) + 0.00522*cos((6*var(--hue) - 138.11)*1deg), 0.18647) var(--hue)), oklch(0.5094 clamp(0, 0.14536 + 0.05279*cos((1*var(--hue) - 334.05)*1deg) + 0.02127*cos((2*var(--hue) - 276.04)*1deg) + 0.02169*cos((3*var(--hue) - 73.93)*1deg) + 0.00271*cos((4*var(--hue) - 80.86)*1deg) + 0.00309*cos((5*var(--hue) - 307.8)*1deg) + 0.00789*cos((6*var(--hue) - 145.12)*1deg) + 0.00091*cos((7*var(--hue) - 251.54)*1deg) + 0.00153*cos((8*var(--hue) - 336.58)*1deg) + 0.00362*cos((9*var(--hue) - 213.73)*1deg), 0.19989) var(--hue))); /* border, focus ring; large accent text */
+      --v: light-dark(oklch(0.5109 clamp(0, 0.14555 + 0.0526*cos((1*var(--hue) - 334.09)*1deg) + 0.02117*cos((2*var(--hue) - 275.99)*1deg) + 0.02172*cos((3*var(--hue) - 73.84)*1deg) + 0.00264*cos((4*var(--hue) - 81.88)*1deg) + 0.00308*cos((5*var(--hue) - 307.72)*1deg) + 0.00788*cos((6*var(--hue) - 144.99)*1deg) + 0.00097*cos((7*var(--hue) - 254.36)*1deg) + 0.00156*cos((8*var(--hue) - 336.36)*1deg) + 0.00359*cos((9*var(--hue) - 214.08)*1deg), 0.19985) var(--hue)), oklch(0.71 clamp(0, 0.13825 + 0.01049*cos((1*var(--hue) - 10.64)*1deg) + 0.00723*cos((2*var(--hue) - 226.95)*1deg), 0.14949) var(--hue))); /* solid fill with base-coloured label; accent text on surface */
+      --v1: light-dark(oklch(0.4609 clamp(0, 0.13622 + 0.05574*cos((1*var(--hue) - 331.36)*1deg) + 0.02464*cos((2*var(--hue) - 272.89)*1deg) + 0.0188*cos((3*var(--hue) - 78.49)*1deg) + 0.00313*cos((4*var(--hue) - 73.47)*1deg) + 0.00393*cos((5*var(--hue) - 301.46)*1deg) + 0.00794*cos((6*var(--hue) - 154.72)*1deg) + 0.00129*cos((7*var(--hue) - 189.47)*1deg) + 0.00145*cos((8*var(--hue) - 338.99)*1deg) + 0.00411*cos((9*var(--hue) - 219.84)*1deg), 0.19816) var(--hue)), oklch(0.7553 clamp(0, 0.12589 + 0.00123*cos((1*var(--hue) - 87.5)*1deg), 0.12713) var(--hue))); /* solid hover */
+      --v2: light-dark(oklch(0.4111 clamp(0, 0.12402 + 0.05381*cos((1*var(--hue) - 328.74)*1deg) + 0.02534*cos((2*var(--hue) - 267.43)*1deg) + 0.01666*cos((3*var(--hue) - 87.73)*1deg) + 0.00394*cos((4*var(--hue) - 85.73)*1deg) + 0.00349*cos((5*var(--hue) - 305.12)*1deg) + 0.00764*cos((6*var(--hue) - 156.18)*1deg) + 0.00167*cos((7*var(--hue) - 153.78)*1deg) + 0.00191*cos((8*var(--hue) - 7.44)*1deg) + 0.00338*cos((9*var(--hue) - 227.69)*1deg), 0.19058) var(--hue)), oklch(0.8024 clamp(0, 0.0999 + 0.00111*cos((1*var(--hue) - 86.68)*1deg), 0.10104) var(--hue))); /* strong accent text on surface; alert text on wash */
+      --color-text: var(--n2); --color-muted: var(--n1);
+      --color-background: var(--n-3); --color-surface: var(--n-2); --color-border: var(--n-1);
+      --color-accent: var(--v); --color-on-accent: var(--n-3);
+      --ring: 2px solid var(--v-1);
+    }
+    :where(:scope, *)[ui-tone=neutral] {
+      --v-3: var(--n-2); --v-2: var(--n-1); --v-1: var(--n); --v: var(--n1); --v1: var(--n2); --v2: var(--n2);
+    }
+  }
+}

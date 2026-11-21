@@ -1,4 +1,6 @@
 include pyproject.toml
 include LICENSE
 include README.md
+include DEV.md package.json
+recursive-include nbs *.ipynb *.css *.yml
 recursive-exclude * __pycache__

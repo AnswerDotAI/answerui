@@ -1,92 +1,49 @@
 # NB: this file is designed for an LLM reader, not a human. Add it to your LLM's context and ask it to explain.
-r"""Style a FastHTML app with answerui: build pages from its components, change how they look through the registry, and check the result
+r"""Build and customise FastHTML interfaces with AnswerUI's shared CSS, native HTML, utilities and browser behavior.
 
 notation: /why
 
-- semantic HTML: component = native tag, or custom tag where HTML has none; variant, state: attribute; class: utilities only; `Button('Save', secondary=True)` → `<button secondary>`
-- `reg`: registry of every rule, component, behavior; app setup:
+## Pieces and where to read more
 
-```python
-from fasthtml.common import *
-from answerui.all import *
-app = FastHTML(hdrs=reg.hdrs(), ftrs=reg.ftrs())
-```
+- model: shared CSS + vanilla JS foundation (`answerui` npm) paired with thin FastHTML constructors (`answerui-py`) and `reg` for app CSS/events; unmarked HTML stays native, opt-in marker attributes (`btn`, `card`, `stack`, `input`, ...) opt elements in
+- Python API: `doc(answerui.<mod>)` and `doc(<Component>)` (signatures, docments, variants, rules, `.example()`); site index: https://AnswerDotAI.github.io/answerui/llms.txt (`<page>.html.md` for every page)
+- CSS/JS foundation: `00_palette`..`04_interactions` docs, or read packaged `answerui.assets / 'styles.css'` and `answerui.assets / '*.js'` directly
 
-- re-importing `fasthtml.common` after answerui restores unstyled constructors
-- headers: rebuilt each response; `reg.serve(app)`: cached, content-hashed URLs
+piece|what it covers|read more
+-|-|-
+palette & tokens|OKLCH neutral/vivid ladders, `--hue`, light/dark, `ui-tone`, `[ui]` scoping|`00_palette`, `styles.css`
+typography & prose|`--text`/`--space`/`--radius` scales, `[prose]`, `[prose-size]`, base `:focus-visible`|`01_typography`, `styles.css`
+layout & utilities|`Stack`, `Cluster`, `Grid`, `Flow`, `[grow]`, `@layer utilities`, `[responsive-layout]`|`doc(answerui.layout)`, `02_layout`
+controls|`Btn`, `Input`, `Textarea`, `Select`, `Group`, `Toolbar`, `Copy`, `Switch`, `Checkbox`, `Radio`, `Range`, `Field`, `Fieldset`|`doc(answerui.controls)`, `03_controls`
+surfaces & data|`Card`, `Badge`, `Avatar`, `DataTable`, `Table(..., table=True)`|`doc(answerui.surfaces, answerui.data)`
+status|`Alert`, `Toaster`, `Toast`, `add_toast`, `setup_toasts`, `Progress`, `Spinner`, `Skeleton`|`doc(answerui.status)`
+overlays & nav|`Popover`, `Dropdown`, `Dialog` (and drawers), `Tooltip`, `NavBar`|`doc(answerui.overlays, answerui.navigation)`, `04_interactions`
+registry, headers, preview|`reg`, `@hypelt`, `reg.serve(app)`/`reg.hdrs()`, delegated JS `on=`, `demo()`, `@example`|`doc(answerui.registry, answerui.hdrs, answerui.behaviors, answerui.demo)`
 
-## Building a page
+## Best practices
 
-- native HTML: styled with no attribute; long-form: `prose` attribute on its container
-- layout attributes, any element: `stack` `cluster` `grid` `flow`; `Stack` `Cluster` `Grid` `Flow`: `Div` with one; component owns inner space only: parent spaces children (`gap`)
-- `A('Sign up', href='/signup', button=True)`: link styled as button
-- colour contexts: `[danger]` `[warning]` `[success]` `[info]` on any element, `mark`: re-point `--hue` inside: `Alert('Saved.', success=True)`, `Badge('3', danger=True)`
-- dark island: `color-scheme: dark; background: var(--n-3); color: var(--n2)`; ladders re-derive inside
-- icons: fastlucide, imported at module level, join `reg.ftrs()` sprite sheet: `from fastlucide.icons import Trash_2`; `Button(Trash_2(), aria_label='Remove')`; icon, or `svg` marked `icon`: takes text's colour and size; pass no size; icon-only button: needs `aria-label`
-- `Tooltip(control, text)`: inline wrapper
-- toasts: `add_toast(sess, 'Saved.', success=True)` → next page's `Toasts(*pop_toasts(sess))`; `setup_toasts(app)`: fragment responses deliver them too
+- setup: `from fasthtml.common import *; from answerui.all import *; app = FastHTML(); reg.serve(app)` for cached content-hashed asset routes + `fastlucide` sprite footer; inline dynamic alternative: `FastHTML(hdrs=reg.hdrs(), ftrs=reg.ftrs())`; bundled IBM Plex faces live in `fonts.css` (optional, select via `--font`/`--font-mono`)
+- semantic tags over wrappers: put layout and surface markers directly on native tags (`Section(..., stack=True)`, `Form(..., stack=True)`, `Article(..., card=True)`, `Article(..., prose=True)`, `Ul(..., stack=True)` clears list markers and padding)
+- parent owns spacing, component owns padding: `Card` is a surface only (no implicit layout), so pair explicitly (`Card(..., stack=True)`); prefer `@layer utilities` (`cls='gap-2'`) over inline `style='--gap: ...'`
+- cascade layers: `reset, tokens, base, layout, components, app, utilities`; register app CSS via `reg.rule` (whole-app tokens or scoped regions), component tweaks via `Btn.rule`, named app variants via `Btn.variant`, custom components via `@hypelt`    /`app` overrides component defaults; `utilities` overrides everything
+- idiomatic CSS: prefer native CSS nesting and semantic tokens (`--color-border`, `--color-muted`, `--color-accent`, `--space*`, `--radius*`) over raw ladder steps or hardcoded sizes
+- form controls & a11y: `Btn` defaults to `type='button'` (pass `type='submit'` on form submits); use `Checkbox`, `Radio` and `Range`, never `Input(type=...)` (`Input` raises `ValueError`); use unmarked FastHTML `Input` (e.g. `fh.Input`) for `type='file'` or submit inputs; wrap labelled controls in `Field`; pass `icon=True` and `aria_label` on icon-only buttons (`fastlucide` SVGs inherit size and colour); name scrollable `DataTable`s (`role='region', tabindex=0, aria_label='...'`)
 
-## Reading what is registered
+## Non-obvious opportunities
 
-- `reg.elements`: every component; `doc(Button)`, `doc(reg)`; members: `doc(Hyperelement)`, `doc(Registry)`; also `Button.rules[key].css`, `Button.example()` (composable markup), `reg.layers[name]`, `reg.rules[key]`
-
-## How the stylesheet is organised
-
-- layers `reset, tokens, base, layout, components, app, utilities`: later wins for normal declarations, whatever specificity; registered rules default to `app` (beat framework); `hidden`: utility (beats component display)
-- colour: `--hue`; neutral ladder `--n-3` (page) to `--n2` (body text); vivid `--v-3` (wash) to `--v2`; rungs `light-dark()`: `color-scheme` picks mode
-- scales, one base each: `--space` `--radius` `--text`; recomputed per element: base set on a region rescales it
-- depth: `--face`, `--relief` (`0`: flat); `--ring`: focus ring; `--tint`: faceless control's hover
-- fonts: IBM Plex; `--font`, `--font-mono`; `--font-heading` on a scope: its headings, e.g. `reg.rule('reading', 'article { --font-heading: var(--font-serif); }')`; own font: `@font-face` + `reg.file(name, path, url)`
-- popover: CSS-anchored below opener, flips at viewport edge; inside `anchor` element (e.g. navbar): hangs from its bottom
-- behavior: delegated handler keyed `(selector, event[, capture])`, installed once per document, covers htmx swaps; `&`: root selector; `init`: on arrival; `cleanup`: before htmx removal (htmx 2, 4); leading `:` = `htmx:`, any spelling
-
-## Changing the look
-
-- smallest scope covering the change; register at import time in app module    /every response carries it
-- page: tokens on root: `reg.rule('theme', ':root { --hue: 150; --radius: 0; }')`
-- one component, everywhere: `Button.rule('corners', 'border-radius: 0;')`: nests under root selector, states via `&`
-- new treatment: `Button.variant('cta', '--pad-block: var(--space); --pad-inline: var(--space2); font-size: var(--text1);', doc='The landing page call to action.')` → `Button('Start free', cta=True)`, listed in `doc(Button)`; restate each state it changes    /base rule's state selectors still apply
-- region: `reg.rule('sidebar', '[sidebar] { --space: .75rem; }')`, or colour context `reg.context('[project]', 300)`
-- key registered again: behavior key: later in registry order wins, e.g. dismissed alert hidden, not removed: `Alert.rule('hide', on={('& > button[dismiss]', 'click'): "el.closest('[alert]').hidden = true"})`; rule key: replaced in place, position kept    /re-run library code never outranks app override
-- `reg.remove(key)`; root selector: fixed at first registration
-
-## Checking the result
-
-- notebook: `Button.demo()`, `demo(markup)`: current CSS, JS, isolated iframe; `width=` is the viewport: `'24rem'` previews a phone (navbar collapses, popovers flip); stored as HTML frame + Markdown markup: models reading dialog see markup
-- registry knows registrations only; which rules reach an element, how a state renders: same document in headless Chrome:
-
-```python
-from fastcdp import CDP
-cdp = await CDP.launch(headless=True)
-page = await cdp.new_page()
-await page.set_content(demo_html(Button('Save')))
-await page.wait_for_selector('button')
-await page.eval("getComputedStyle(document.querySelector('button')).borderRadius")
-await page.matched_styles('button')   # every matching rule, cascade order
-await cdp.quit()
-```
-
-- states: force first, e.g. set `aria-pressed`
-- behaviors: fresh preview or page    /second script copy stacks listeners
-
-## Adding a component
-
-- constructor + base rule; tag name: FastHTML's constructor, tag = root selector:
-
-```python
-Notice = hypelt('NoticeBox', css='notice-box { display: block; padding: var(--space); }',
-    on={('& [dismiss]', 'click'): "el.closest('notice-box').remove()"})
-```
-
-- handwritten: decorator, `sel=`, docstring = description:
-
-```python
-@hypelt(sel='aside[banner]')
-def Banner(title, *c, **attrs):
-    "A notice across the top of a page"
-    ...
-```
-
-- `@example(Notice)`: markup `Notice.demo()` renders
+- `@layer utilities` (last in cascade — overrides `[stack]`/`[cluster]`/`[grid]`, components and `app` rules cleanly):
+  - spacing: `.p-*`, `.px-*`, `.py-*` (`0`, `1`..`4`, `6`), `.gap-*` (`0`, `1`..`4`, `6`, `8`, `12` mapping `0` and `--space-3`..`--space3`), `.mx-auto`
+  - flex: `.flex`, `.flex-col`, `.flex-wrap`, `.flex-nowrap`, `.items-start`, `.items-center`, `.justify-center`, `.justify-between`, `.justify-end`, `.flex-1`, `.flex-none`, `.min-w-0`
+  - text & visibility: `.text-center`, `.text-muted`, `.truncate`, `.tabular-nums`, `.ui-visually-hidden`, `.ui-hidden`
+  - container-query visibility (no viewport breakpoints): `[responsive-layout]` + `.ui-wide-only` or `.ui-compact-only` (`48rem` threshold)
+- `[grow]`: `grow=True` on a child of `[stack]` or `[cluster]` sets `flex: 1; min-inline-size: 0; min-block-size: 0`    /pushes trailing actions to the far edge or aligns card footers without custom CSS
+- `Btn` links & sizes: `Btn('Sign up', href='/signup', variant='secondary', size='lg')` emits `<a>` without `type`; `size='sm'` and `size='lg'` cover compact and CTA buttons without custom variants
+- third-party mounted inputs: `Div(id='card-element', input=True)` styles Stripe Elements or similar containers as an input well
+- `Group(inset=True)`: places action buttons inside the input's well border; joined `[toolbar][group]` resets `gap: 0` automatically
+- tones & dynamic hues: `ui_tone` (`danger`, `warning`, `success`, `info`, `neutral`) keeps neutral hue for `neutral` and tints components plus standalone `small`/`p` for non-neutral tones (form-level errors outside `Field`); `Div(..., ui=True, ui_theme='dark', style='--hue: 300')` scopes a subtree; add `ui=True` on any element whose state CSS overrides `--hue` dynamically so its lightness ladder recomputes
+- declarative browser behaviors (mounted across htmx swaps via `browser.js`): `Btn(..., disabled=True, enable='changed valid')` (form dirty/validity gating), `Checkbox(..., reveals='id')` (show/hide), `Copy(copy=...)` / `Copy(copyfor=...)` (clipboard + feedback), `[btn]` auto-spinner on `aria-busy='true'` or `.htmx-request` (delayed by `--busy-delay`), `Dialog(..., side='start' or 'end')` (slide-over drawers via native `command='show-modal'`/`commandfor`), `Tooltip` (CSS anchor positioning, no JS), `setup_toasts(app)` + `add_toast(sess, ...)` (OOB toasts on htmx fragments too)
+- app event handlers: `reg.rule(..., on={(sel, ev): js})` installs delegated document listeners surviving htmx swaps (`&` = component selector; `init`/`cleanup` = element lifetime; leading `:` = htmx event; see `doc(answerui.behaviors)`)
+- escape hatches & prose sizing: `[unstyle]` stops `@scope` inheritance for third-party embeds; `[prose-size]` (`sm`, `lg`, `xl`, `2xl`) scales prose; `@layer base` provides `:focus-visible` ring globally
+- inspect & preview: `reg.elements`, `Btn.rules`, `Btn.variants`, `Btn.example()`, `demo(markup, width='24rem')` (isolated iframe with current assets/app rules; `nbdev-clean` strips iframe bloat); `reg` describes registrations, not computed layout — inspect real DOM/styles in a browser
 """
 from .all import *

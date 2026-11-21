@@ -15,7 +15,9 @@ Modules:
 - `answerui.status`: Feedback and loading states: alerts, toasts, progress bars, spinners and skeletons
 - `answerui.surfaces`: Cards for grouping content, badges for short labels, and avatars for people and teams"""
 
+__version__ = "0.0.5"
+
+
 from importlib.resources import files
 
-__version__ = "0.0.4"
 assets = files(__package__) / 'assets'

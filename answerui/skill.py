@@ -5,7 +5,7 @@ notation: /why
 
 ## Pieces and where to read more
 
-- model: shared CSS + vanilla JS foundation (`answerui` npm) paired with thin FastHTML constructors (`answerui-py`) and `reg` for app CSS/events; unmarked HTML stays native, opt-in marker attributes (`btn`, `card`, `stack`, `input`, ...) opt elements in
+- model: shared CSS + vanilla JS foundation (`@answerdotai/answerui` npm) paired with thin FastHTML constructors (`answerui-py`) and `reg` for app CSS/events; unmarked HTML stays native, opt-in marker attributes (`btn`, `card`, `stack`, `input`, ...) opt elements in
 - Python API: `doc(answerui.<mod>)` and `doc(<Component>)` (signatures, docments, variants, rules, `.example()`); site index: https://AnswerDotAI.github.io/answerui/llms.txt (`<page>.html.md` for every page)
 - CSS/JS foundation: `00_palette`..`04_interactions` docs, or read packaged `answerui.assets / 'styles.css'` and `answerui.assets / '*.js'` directly
 

@@ -1,6 +1,6 @@
 {
-  "name": "answerui",
-  "version": "0.0.4",
+  "name": "@answerdotai/answerui",
+  "version": "0.0.5",
   "description": "Styles and browser behavior for semantic HTML",
   "license": "Apache-2.0",
   "repository": {

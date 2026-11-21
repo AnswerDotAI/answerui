@@ -143,3 +143,4 @@ exec_all = true
 ## With an LLM
 
 `answerui.skill` is a [pyskill](https://github.com/AnswerDotAI/pyskills) whose module docstring documents how to use AnswerUI in a Python kernel. Run `list_pyskills()` to discover it, `doc(answerui.skill)` to read the guide, and `doc(Btn)` to inspect a component’s signature, declared variants, and CSS rules.
+

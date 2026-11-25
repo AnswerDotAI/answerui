@@ -6,22 +6,53 @@ on:
 
 permissions:
   contents: read
-  id-token: write
 
 jobs:
-  publish:
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-python@v7
         with:
           python-version: '3.13'
+      - run: pip install -e '.[dev]' build
+      - run: nbdev-export
+      - run: python -m build
+      - uses: actions/upload-artifact@v7
+        with:
+          name: dist
+          path: dist
+      - uses: actions/upload-artifact@v7
+        with:
+          name: assets
+          path: answerui/assets
+
+  publish-pypi:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: dist
+          path: dist
+      - uses: pypa/gh-action-pypi-publish@release/v1
+
+  publish-npm:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
+        with:
+          name: assets
+          path: answerui/assets
       - uses: actions/setup-node@v7
         with:
           node-version: 'lts/*'
           registry-url: https://registry.npmjs.org
-      - run: pip install -e '.[dev]' build
-      - run: npm run build
-      - run: python -m build
       - run: npm publish
-      - uses: pypa/gh-action-pypi-publish@release/v1

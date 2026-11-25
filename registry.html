@@ -1,0 +1,1086 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.11.9">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="description" content="Defining hyperelements and collecting their styles and behaviors">
+
+<title>registry – answerui-py</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/scrollable-regions/scrollable-regions.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-63b5708e65d6cd79cd7618c58d0c21e7.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-f803fa4e565d46961d2a1845e6c2e3f5.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="styles.css">
+<meta property="og:title" content="registry – answerui-py">
+<meta property="og:description" content="Defining hyperelements and collecting their styles and behaviors">
+<meta property="og:site_name" content="answerui-py">
+<meta name="twitter:title" content="registry – answerui-py">
+<meta name="twitter:description" content="Defining hyperelements and collecting their styles and behaviors">
+<meta name="twitter:card" content="summary">
+</head>
+
+<body class="nav-sidebar floating nav-fixed quarto-light"><a id="quarto-skip-link" class="visually-hidden-focusable" href="#quarto-document-content">Skip to main content</a>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark" aria-label="Site">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">answerui-py</span>
+    </a>
+  </div>
+        <div class="quarto-navbar-tools tools-end">
+</div>
+          <div id="quarto-search" class="" title="Search"></div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav" aria-label="Toolbar">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="Breadcrumbs"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./registry.html">registry</a></li></ol></nav>
+        <a class="flex-grow-1" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto" aria-label="Section">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">answerui</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./palette.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Palette</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./typography.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Typography and density</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./layout.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Layout</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./controls.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Controls and feedback</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./interactions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Navigation and overlays</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./registry.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">registry</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./behaviors.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">behaviors</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./demo.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">demo</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./hdrs.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">hdrs</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./layout.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">layout</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./controls.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">controls</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./surfaces.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">surfaces</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./status.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">status</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./overlays.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">overlays</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./navigation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">navigation</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">data</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" aria-labelledby="toc-title" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#rules" id="toc-rules" class="nav-link active" data-scroll-target="#rules">Rules</a></li>
+  <li><a href="#building-the-stylesheet" id="toc-building-the-stylesheet" class="nav-link" data-scroll-target="#building-the-stylesheet">Building the stylesheet</a></li>
+  <li><a href="#hyperelements" id="toc-hyperelements" class="nav-link" data-scroll-target="#hyperelements">Hyperelements</a></li>
+  <li><a href="#customization" id="toc-customization" class="nav-link" data-scroll-target="#customization">Customization</a>
+  <ul class="collapse">
+  <li><a href="#overrides" id="toc-overrides" class="nav-link" data-scroll-target="#overrides">Overrides</a></li>
+  <li><a href="#redefinitions" id="toc-redefinitions" class="nav-link" data-scroll-target="#redefinitions">Redefinitions</a></li>
+  </ul></li>
+  </ul>
+<div class="toc-actions"><ul><li><a href="https://github.com/AnswerDotAI/answerui/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li></ul></div><div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="registry.html.md"><i class="bi bi-file-code"></i>Markdown</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content" tabindex="-1">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">registry</h1>
+</div>
+
+<div>
+  <div class="description">
+    Defining hyperelements and collecting their styles and behaviors
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<!-- WARNING: THIS FILE WAS AUTOGENERATED! DO NOT EDIT! -->
+<p>AnswerUI provides built-in components through its shared stylesheet and JavaScript assets. Python constructors render their marked HTML. This registry holds application CSS and event handlers, attaches custom rules to constructors, and assembles those additions for each page. Built-in CSS remains in the shared assets instead of being copied into registry entries.</p>
+<div id="5280df8e" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-25T21:02:25.271584+00:00&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-25T21:02:25.282033+00:00&quot;,&quot;total&quot;:0.010456368999996357}}" data-execution_count="2">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> fasthtml.common <span class="im">import</span> Label, Input, Button, to_xml</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> fastcore.test <span class="im">import</span> <span class="op">*</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<section id="rules" class="level2">
+<h2 class="anchored" data-anchor-id="rules">Rules</h2>
+<p>Both styling and behavior pair a CSS selector with an action: CSS declarations for styling, or an event name and JavaScript handler for behavior. A <code>Rule</code> stores both CSS text and behavior records under a <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/@layer">cascade layer</a> because each page loads one combined stylesheet and one combined script.</p>
+<p>The layer list is fixed and ordered. For normal declarations, each layer overrides earlier layers regardless of specificity. You can restyle a built-in component from the <code>app</code> layer without changing its definition. Component and base CSS do not use <code>!important</code> because <code>!important</code> reverses cascade-layer order (only the hidden-state classes in <code>utilities</code> use it).</p>
+<p>Behaviors are passed as a dict from <code>(selector, event)</code> keys to JavaScript handler bodies. Each handler runs with <code>el</code> bound to the matched element and <code>e</code> to the event. For an event that doesn’t bubble, such as <code>toggle</code>, add a truthy third item to the key to attach the handler in the capture phase. When a rule has a root selector <code>sel</code>, <code>_behaviors</code> replaces each <code>&amp;</code> in its behavior selectors with <code>:is(sel)</code> (raising <code>ValueError</code> if <code>sel</code> is missing).</p>
+<p>A rule’s key is a name, or <code>owner.name</code> when the rule belongs to a hyperelement. <code>Rule</code> checks the layer, expands the behaviors, and derives <code>owner</code> and <code>name</code> from the key. For a variant rule, the variant attribute is stored in <code>variant</code>:</p>
+<div id="97070548" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-25T21:02:25.289590+00:00&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-25T21:02:25.434482+00:00&quot;,&quot;total&quot;:0.14489888399999984}}" data-execution_count="6">
+<hr>
+<section id="rule" class="level3">
+<h3 class="anchored" data-anchor-id="rule">Rule</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> Rule(</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    key, <span class="co"># Registry key: a name, or `owner.name` for a hyperelement's rule</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    css:<span class="bu">str</span><span class="op">=</span><span class="st">''</span>, <span class="co"># Complete CSS, or a no-argument function returning it</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span>, on:NoneType<span class="op">=</span><span class="va">None</span>, <span class="co"># Mapping of (selector, event[, capture]) to JavaScript handler bodies</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    sel:NoneType<span class="op">=</span><span class="va">None</span>, <span class="co"># Root selector substituted for `&amp;` in behaviors</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    layer:<span class="bu">str</span><span class="op">=</span><span class="st">'app'</span>, <span class="co"># One of LAYERS</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    doc:<span class="bu">str</span><span class="op">=</span><span class="st">''</span>, <span class="co"># Description of the rule</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    variant:NoneType<span class="op">=</span><span class="va">None</span>, <span class="co"># Attribute selecting a declared variant</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>):</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><em>A named CSS and behavior definition in a cascade layer</em></p>
+</section>
+</div>
+<p><code>Registry.rule</code> takes CSS first and an optional name second. Without a name, it hashes the CSS, selector, expanded behaviors and layer into a deterministic key. Identical registrations share one entry, including behavior-only rules. Pass an explicit name when <code>css</code> is callable, or when later edits should replace the previous rule rather than add another. A component’s rule uses <code>owner.name</code> as its key.</p>
+<p>Rules are stored in <code>Registry.rules</code>. Registering an existing key updates that <code>Rule</code> object in place, preserving both existing references and its position in the stylesheet. Registering or removing a rule increments <code>version</code>, which <code>Registry.assets</code> checks before rebuilding the stylesheet and script. Each entry of <code>layers</code> is a live <code>RuleView</code> of the rules in that layer:</p>
+<div id="c06808b3" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-25T21:02:25.444540+00:00&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-25T21:02:25.449304+00:00&quot;,&quot;total&quot;:0.004769493000011948}}" data-execution_count="8">
+<hr>
+<section id="registry" class="level3">
+<h3 class="anchored" data-anchor-id="registry">Registry</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> Registry():</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><em>Named rules and hyperelements, from which a page’s stylesheet and script are built</em></p>
+</section>
+</div>
+<div id="db89b924" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-25T21:02:25.449455+00:00&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-25T21:02:25.453674+00:00&quot;,&quot;total&quot;:0.004223662000001127}}" data-execution_count="9">
+<hr>
+<section id="ruleview" class="level3">
+<h3 class="anchored" data-anchor-id="ruleview">RuleView</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> RuleView(</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    registry, <span class="op">*</span>, layer:NoneType<span class="op">=</span><span class="va">None</span>, owner:NoneType<span class="op">=</span><span class="va">None</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>):</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><em>A live, read-only view of one layer or one hyperelement’s rules</em></p>
+</section>
+</div>
+<p>The simplest rule is bare CSS with no constructor, such as a centered page column. Its layer defaults to <code>app</code>. Registering the same name again returns the existing entry:</p>
+<div id="6ca9777c" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-25T21:02:25.453936+00:00&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-25T21:02:25.455880+00:00&quot;,&quot;total&quot;:0.0019477429999881224}}" data-execution_count="10">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>page_css <span class="op">=</span> <span class="st">'main { max-width: 65ch; margin-inline: auto; padding: 1rem; }'</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>page_rule <span class="op">=</span> reg.rule(page_css, <span class="st">'app-page'</span>, doc<span class="op">=</span><span class="st">'A centered single-column page.'</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>test_eq(page_rule.css, page_css)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>test_is(reg.rule(page_css, <span class="st">'app-page'</span>, doc<span class="op">=</span><span class="st">'A centered single-column page.'</span>), page_rule)</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>page_rule</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="10">
+<pre><code>app-page [app]: A centered single-column page.</code></pre>
+</div>
+</div>
+<p>A standalone behavior works the same way. Here we add a <code>select-all</code> attribute that selects an input’s text on focus. Passing <code>sel='input[select-all]'</code> sets the root selector that <code>&amp;</code> expands to in the handler key. The rule stores the expanded behavior record:</p>
+<div id="06e6f2af" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-25T21:02:25.456087+00:00&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-25T21:02:25.458086+00:00&quot;,&quot;total&quot;:0.002003227000002994}}" data-execution_count="11">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>select_all <span class="op">=</span> reg.rule(name<span class="op">=</span><span class="st">'select-all'</span>, sel<span class="op">=</span><span class="st">'input[select-all]'</span>, on<span class="op">=</span>{(<span class="st">'&amp;'</span>, <span class="st">'focusin'</span>): <span class="vs">r"el</span><span class="dv">.</span><span class="vs">select</span><span class="kw">()</span><span class="vs">"</span>},</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    doc<span class="op">=</span><span class="st">'Select the input text when it receives focus.'</span>)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>select_all.on</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="11">
+<pre><code>[{'sel': ':is(input[select-all])',
+  'ev': 'focusin',
+  'js': 'el.select()',
+  'cap': False}]</code></pre>
+</div>
+</div>
+<div id="59cce3e3" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-25T21:02:25.458311+00:00&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-25T21:02:25.459507+00:00&quot;,&quot;total&quot;:0.0011999470000034762}}" data-execution_count="12">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> expect_fail(<span class="pp">ValueError</span>): reg.rule(<span class="st">'a { color: teal; }'</span>, layer<span class="op">=</span><span class="st">'appp'</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> expect_fail(<span class="pp">ValueError</span>): reg.rule(name<span class="op">=</span><span class="st">'paste'</span>, on<span class="op">=</span>{(<span class="st">'&amp;'</span>, <span class="st">'click'</span>): <span class="st">''</span>})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Displaying <code>reg</code> lists each rule that belongs to no component, such as <code>app-page</code> and <code>select-all</code>:</p>
+<div id="e007ba34" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-25T21:02:25.459614+00:00&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-25T21:02:25.460935+00:00&quot;,&quot;total&quot;:0.0013247250000034683}}" data-execution_count="13">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>reg</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display cell-output-markdown" data-execution_count="13">
+<p>Registry(2 rules, 0 elements)</p>
+<p>Layers: - <code>reset</code>: 0 rules - <code>tokens</code>: 0 rules - <code>base</code>: 0 rules - <code>layout</code>: 0 rules - <code>components</code>: 0 rules - <code>app</code>: 2 rules - <code>utilities</code>: 0 rules</p>
+<p>Elements: none</p>
+<p>Rules of no element: - <code>app-page</code> (app): A centered single-column page. - <code>select-all</code> (app): Select the input text when it receives focus.</p>
+</div>
+</div>
+</section>
+<section id="building-the-stylesheet" class="level2">
+<h2 class="anchored" data-anchor-id="building-the-stylesheet">Building the stylesheet</h2>
+<p><code>build_css</code> starts with the shared <code>styles.css</code>, whose opening <code>@layer</code> statement declares the layer order. Registered rules follow as one <code>@layer</code> block per layer in registration order, each preceded by a comment naming its key. Application rules default to <code>app</code>, after the built-in <code>components</code> layer. For CSS that depends on later registrations, pass a zero-argument callable that <code>build_css</code> evaluates during assembly.</p>
+<div id="12cec18a" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-25T21:02:25.463080+00:00&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-25T21:02:25.468108+00:00&quot;,&quot;total&quot;:0.005032880000001683}}" data-execution_count="15">
+<hr>
+<section id="registry.build_css" class="level3">
+<h3 class="anchored" data-anchor-id="registry.build_css">Registry.build_css</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> build_css():</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><em>The shared foundation followed by registered CSS in cascade-layer order</em></p>
+</section>
+</div>
+<div id="4fa8abe6" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-25T21:02:25.468229+00:00&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-25T21:02:25.469804+00:00&quot;,&quot;total&quot;:0.001578187000006892}}" data-execution_count="16">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>reg.layers[<span class="st">'app'</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="16">
+<pre><code>app-page [app]: A centered single-column page.
+select-all [app] input[select-all]: Select the input text when it receives focus.</code></pre>
+</div>
+</div>
+</section>
+<section id="hyperelements" class="level2">
+<h2 class="anchored" data-anchor-id="hyperelements">Hyperelements</h2>
+<p>A component pairs a constructor (a standard FastTag or a Python function combining multiple tags) with registered rules. Calling a <code>Hyperelement</code> invokes that constructor. Its <code>sel</code> attribute holds the root selector. Its <code>rules</code> attribute is a live <code>RuleView</code> of the component’s rules:</p>
+<div id="3f75fbf8" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-25T21:02:25.475758+00:00&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-25T21:02:25.480513+00:00&quot;,&quot;total&quot;:0.00475915799999882}}" data-execution_count="18">
+<hr>
+<section id="hyperelement" class="level3">
+<h3 class="anchored" data-anchor-id="hyperelement">Hyperelement</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> Hyperelement(</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    registry, name, fn, sel, doc:<span class="bu">str</span><span class="op">=</span><span class="st">''</span>, generated:<span class="bu">bool</span><span class="op">=</span><span class="va">False</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>):</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><em>A callable constructor linked to its registered rules and behaviors</em></p>
+</section>
+</div>
+<p>Use <code>Hyperelement.rule</code> to add CSS nested under the root selector, or <code>Hyperelement.variant</code> to add an attribute variant nested under <code>:is(sel)[name]</code>. Both register their rule with the hyperelement as its owner. Calling <code>variant</code> also stores the attribute name on the rule (<code>base</code> is reserved for the constructor’s own rule):</p>
+<div id="ce1d0bf2" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-25T21:02:25.483522+00:00&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-25T21:02:25.488872+00:00&quot;,&quot;total&quot;:0.005355036000011637}}" data-execution_count="20">
+<hr>
+<section id="hyperelement.variant" class="level3">
+<h3 class="anchored" data-anchor-id="hyperelement.variant">Hyperelement.variant</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> variant(</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    name, <span class="co"># Attribute selecting the variant; also its local rule name</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    css:<span class="bu">str</span><span class="op">=</span><span class="st">''</span>, <span class="co"># CSS declarations and nested rules, scoped to the variant</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span>, on:NoneType<span class="op">=</span><span class="va">None</span>, <span class="co"># Mapping of (selector, event[, capture]) to handler bodies; `&amp;` is the variant selector</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    layer:<span class="bu">str</span><span class="op">=</span><span class="st">'app'</span>, <span class="co"># One of LAYERS</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    doc:<span class="bu">str</span><span class="op">=</span><span class="st">''</span>, <span class="co"># Description shown with the variant</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>):</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><em>Declare an attribute variant without changing the constructor</em></p>
+</section>
+</div>
+<div id="8e991ba9" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-25T21:02:25.488993+00:00&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-25T21:02:25.493890+00:00&quot;,&quot;total&quot;:0.004902164000000653}}" data-execution_count="21">
+<hr>
+<section id="hyperelement.rule" class="level3">
+<h3 class="anchored" data-anchor-id="hyperelement.rule">Hyperelement.rule</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> rule(</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    name, <span class="co"># Local rule name; registering it again replaces that rule</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    css:<span class="bu">str</span><span class="op">=</span><span class="st">''</span>, <span class="co"># CSS declarations and nested rules, scoped to the root selector</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span>, on:NoneType<span class="op">=</span><span class="va">None</span>, <span class="co"># Mapping of (selector, event[, capture]) to handler bodies; `&amp;` is the root selector</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>    layer:<span class="bu">str</span><span class="op">=</span><span class="st">'app'</span>, <span class="co"># One of LAYERS</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    doc:<span class="bu">str</span><span class="op">=</span><span class="st">''</span>, <span class="co"># Description of the customization</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>):</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><em>Register CSS and behaviors scoped to this hyperelement</em></p>
+</section>
+</div>
+<p><code>hypelt</code> registers a component from a FastHTML tag name or a handwritten constructor and nests <code>css</code> under its root selector as the <code>base</code> rule, just like <code>Hyperelement.rule</code>. Write declarations for the root, nested selectors for children, and <code>&amp;</code> for states or pseudo-elements on the root. Pass a callable with no parameters when <code>css</code> depends on later registrations. Put global rules such as <code>@keyframes</code> in <code>reg.rule</code>, which accepts complete CSS without wrapping and uses its <code>sel</code> parameter for behaviors only. The module-level <code>hypelt</code> is bound to <code>reg</code>:</p>
+<div id="04c01331" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-25T21:02:25.497809+00:00&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-25T21:02:25.504806+00:00&quot;,&quot;total&quot;:0.007010429000004592}}" data-execution_count="23">
+<hr>
+<section id="registry.hypelt" class="level3">
+<h3 class="anchored" data-anchor-id="registry.hypelt">Registry.hypelt</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> hypelt(</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    name:NoneType<span class="op">=</span><span class="va">None</span>, <span class="co"># FastHTML tag name or a constructor; omit to use as a decorator</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span>, sel:NoneType<span class="op">=</span><span class="va">None</span>, <span class="co"># Root selector; required for a handwritten constructor</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    css:<span class="bu">str</span><span class="op">=</span><span class="st">''</span>, <span class="co"># CSS declarations and nested rules, or a no-argument function returning them</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>    on:NoneType<span class="op">=</span><span class="va">None</span>, <span class="co"># Mapping of (selector, event[, capture]) to JavaScript handler bodies</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>    layer:<span class="bu">str</span><span class="op">=</span><span class="st">'app'</span>, <span class="co"># One of LAYERS; built-ins use components, layout, or base</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>    doc:NoneType<span class="op">=</span><span class="va">None</span>, <span class="co"># Description; defaults to a handwritten constructor's docstring</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>):</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><em>Register a constructor and its base rule, returning a callable hyperelement</em></p>
+</section>
+</div>
+<p>As an example component, let’s build a dismissible notice box with a close button. Because HTML has no built-in notice element, we use the custom tag <code>notice-box</code>. Clicking any child with the <code>dismiss</code> attribute removes the notice:</p>
+<div id="5a29befe" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-25T21:02:25.505090+00:00&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-25T21:02:25.507666+00:00&quot;,&quot;total&quot;:0.002580246999997371}}" data-execution_count="24">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>notice_css <span class="op">=</span> <span class="vs">r"""</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="vs">display: block;</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="vs">padding: </span><span class="dv">.</span><span class="vs">75rem 1rem;</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="vs">background: </span><span class="co">#f4f4f6;</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a><span class="vs">border: 1px solid </span><span class="co">#ccc;</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a><span class="vs">border-radius: 8px;</span></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a><span class="vs">"""</span></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>NoticeBox <span class="op">=</span> hypelt(<span class="st">'NoticeBox'</span>, css<span class="op">=</span>notice_css, on<span class="op">=</span>{(<span class="st">'&amp; [dismiss]'</span>, <span class="st">'click'</span>): <span class="vs">r"el</span><span class="dv">.</span><span class="vs">closest</span><span class="kw">(</span><span class="vs">'notice-box'</span><span class="kw">)</span><span class="dv">.</span><span class="vs">remove</span><span class="kw">()</span><span class="vs">"</span>},</span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>    layer<span class="op">=</span><span class="st">'components'</span>, doc<span class="op">=</span><span class="st">'A dismissible notice.'</span>)</span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>to_xml(NoticeBox(<span class="st">'Changes saved.'</span>, Button(<span class="st">'Dismiss'</span>, dismiss<span class="op">=</span><span class="va">True</span>)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="24">
+<pre><code>'&lt;notice-box&gt;Changes saved.&lt;button dismiss&gt;Dismiss&lt;/button&gt;&lt;/notice-box&gt;'</code></pre>
+</div>
+</div>
+<p>For a string name such as <code>'NoticeBox'</code>, <code>hypelt</code> looks up the constructor on <code>fasthtml.components</code> and calls it with no arguments to get the root selector (<code>notice-box</code>). <code>NoticeBox.rules</code> and <code>reg.rules</code> hold the same <code>Rule</code> object:</p>
+<div id="00b2db59" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-25T21:02:25.507892+00:00&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-25T21:02:25.509904+00:00&quot;,&quot;total&quot;:0.0020174989999901527}}" data-execution_count="25">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>test_eq(NoticeBox().tag, NoticeBox.sel)</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> NoticeBox.rules[<span class="st">'base'</span>] <span class="kw">is</span> reg.rules[<span class="st">'NoticeBox.base'</span>]</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> NoticeBox.rules[<span class="st">'base'</span>].compiled_css.startswith(<span class="st">'notice-box {'</span>)</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>NoticeBox</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<section id="noticeboxchildren-attrs" class="level3 cell-output cell-output-display cell-output-markdown" data-execution_count="25">
+<h3 class="anchored" data-anchor-id="noticeboxchildren-attrs"><code>NoticeBox(*children, **attrs)</code></h3>
+<p>A dismissible notice.</p>
+<p>Root selector: <code>notice-box</code>.</p>
+<p>Rules: - <code>base</code> (components)</p>
+</section>
+</div>
+<p>The second case is a handwritten constructor, such as a labelled field that wraps an <code>input</code> inside its <code>label</code> to associate them without an <code>id</code>. Because <code>Field</code> requires a <code>label</code> argument, <code>hypelt</code> can’t call it with no arguments to infer a root selector. Instead we mark the <code>label</code> with a <code>field</code> attribute and pass <code>sel='label[field]'</code> using the decorator form:</p>
+<div id="d7d3756c" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-25T21:02:25.510183+00:00&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-25T21:02:25.512386+00:00&quot;,&quot;total&quot;:0.002206803000007085}}" data-execution_count="26">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>field_css <span class="op">=</span> <span class="vs">r"""</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="vs">display: grid;</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="vs">gap: </span><span class="dv">.</span><span class="vs">5rem;</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a><span class="vs">"""</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a><span class="at">@hypelt</span>(sel<span class="op">=</span><span class="st">'label[field]'</span>, css<span class="op">=</span>field_css)</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> Field(label, <span class="op">**</span>attrs):</span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">"A labelled input"</span></span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> Label(label, Input(<span class="op">**</span>attrs), field<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>to_xml(Field(<span class="st">'Email'</span>, name<span class="op">=</span><span class="st">'email'</span>, <span class="bu">type</span><span class="op">=</span><span class="st">'email'</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="26">
+<pre><code>'&lt;label field&gt;Email  &lt;input name="email" type="email"&gt;\n&lt;/label&gt;'</code></pre>
+</div>
+</div>
+</section>
+<section id="customization" class="level2">
+<h2 class="anchored" data-anchor-id="customization">Customization</h2>
+<p>There are two ways to change a component’s styling or behavior. To override a component without altering its <code>base</code> rule, register separate rules in the <code>app</code> layer. To redefine it, call <code>hypelt</code> again with the same name to replace its constructor and <code>base</code> rule in place.</p>
+<section id="overrides" class="level3">
+<h3 class="anchored" data-anchor-id="overrides">Overrides</h3>
+<p>Say a developer wants rounder notices in their application. <code>NoticeBox.rule</code> registers a named rule in the <code>app</code> layer by default, where it overrides the component’s CSS in the <code>components</code> layer:</p>
+<div id="db1f61eb" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-25T21:02:25.512542+00:00&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-25T21:02:25.513885+00:00&quot;,&quot;total&quot;:0.0013467679999905613}}" data-execution_count="27">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>NoticeBox.rule(<span class="st">'corners'</span>, <span class="st">'border-radius: 1rem;'</span>, doc<span class="op">=</span><span class="st">'Rounder notices in this application.'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="27">
+<pre><code>NoticeBox.corners [app] notice-box: Rounder notices in this application.</code></pre>
+</div>
+</div>
+<p>To select a style with an attribute, declare it with <code>variant</code>. Its description then appears in the hyperelement’s documentation while the existing constructor accepts the attribute:</p>
+<div id="0ce3e98e" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-25T21:02:25.514028+00:00&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-25T21:02:25.515359+00:00&quot;,&quot;total&quot;:0.001335101000009331}}" data-execution_count="28">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>NoticeBox.variant(<span class="st">'quiet'</span>, <span class="st">'background: transparent; border-color: transparent;'</span>, doc<span class="op">=</span><span class="st">'An unfilled notice without a visible border.'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="28">
+<pre><code>NoticeBox.quiet [app] :is(notice-box)[quiet]: An unfilled notice without a visible border.</code></pre>
+</div>
+</div>
+<div id="d5edfd59" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-25T21:02:25.515527+00:00&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-25T21:02:25.517175+00:00&quot;,&quot;total&quot;:0.0016519879999918885}}" data-execution_count="29">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>test_eq(<span class="bu">list</span>(NoticeBox.variants), [<span class="st">'quiet'</span>])</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>to_xml(NoticeBox(<span class="st">'Saved quietly.'</span>, quiet<span class="op">=</span><span class="va">True</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="29">
+<pre><code>'&lt;notice-box quiet&gt;Saved quietly.&lt;/notice-box&gt;'</code></pre>
+</div>
+</div>
+<p>To change a component only within part of a page, register an application rule scoped to that container. Here <code>reg.rule</code> registers <code>editor-notices</code> to square the corners of every <code>notice-box</code> inside an <code>[editor]</code> element, with an explicit name for later replacement. Because this rule is not registered on <code>NoticeBox</code>, it leaves the component’s definition untouched and appears in <code>reg.layers['app']</code> rather than <code>NoticeBox.rules</code>:</p>
+<div id="e82bba27" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-25T21:02:25.517376+00:00&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-25T21:02:25.519029+00:00&quot;,&quot;total&quot;:0.0016573359999938475}}" data-execution_count="30">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>reg.rule(<span class="st">'[editor] notice-box { border-radius: 0; }'</span>, <span class="st">'editor-notices'</span>, doc<span class="op">=</span><span class="st">'Square notices inside the editor.'</span>)</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>reg.layers[<span class="st">'app'</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="30">
+<pre><code>app-page [app]: A centered single-column page.
+select-all [app] input[select-all]: Select the input text when it receives focus.
+Field.base [app] label[field]: A labelled input
+NoticeBox.corners [app] notice-box: Rounder notices in this application.
+NoticeBox.quiet [app] :is(notice-box)[quiet]: An unfilled notice without a visible border.
+editor-notices [app]: Square notices inside the editor.</code></pre>
+</div>
+</div>
+</section>
+<section id="redefinitions" class="level3">
+<h3 class="anchored" data-anchor-id="redefinitions">Redefinitions</h3>
+<p>Calling <code>hypelt</code> again with the same name updates the hyperelement’s constructor and <code>base</code> rule in place, preserving existing references, application rules, and declared variants. Omitted <code>css</code> or <code>on</code> arguments are cleared rather than merged because the new call replaces the entire <code>base</code> rule. <code>hypelt</code> raises <code>ValueError</code> if <code>sel</code> changes because existing rules and variants are nested under the original root selector. Omitting <code>on</code> here makes <code>NoticeBox</code> persistent:</p>
+<div id="b8682525" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-25T21:02:25.519449+00:00&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-25T21:02:25.523679+00:00&quot;,&quot;total&quot;:0.004234507000006715}}" data-execution_count="31">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>original, base <span class="op">=</span> NoticeBox, NoticeBox.rules[<span class="st">'base'</span>]</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>NoticeBox <span class="op">=</span> hypelt(<span class="st">'NoticeBox'</span>, css<span class="op">=</span><span class="kw">lambda</span>: notice_css.replace(<span class="st">'8px'</span>, <span class="st">'12px'</span>), layer<span class="op">=</span><span class="st">'components'</span>, doc<span class="op">=</span><span class="st">'A persistent notice.'</span>)</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>test_is(NoticeBox, original)</span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>test_is(NoticeBox.rules[<span class="st">'base'</span>], base)</span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="st">'12px'</span> <span class="kw">in</span> base.compiled_css</span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="st">'corners'</span> <span class="kw">in</span> NoticeBox.rules <span class="kw">and</span> <span class="st">'quiet'</span> <span class="kw">in</span> NoticeBox.variants</span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> expect_fail(<span class="pp">ValueError</span>): hypelt(<span class="st">'NoticeBox'</span>, sel<span class="op">=</span><span class="st">'notice-box[persistent]'</span>, css<span class="op">=</span>notice_css, layer<span class="op">=</span><span class="st">'components'</span>)</span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a>NoticeBox</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<section id="noticeboxchildren-attrs-1" class="level3 cell-output cell-output-display cell-output-markdown" data-execution_count="31">
+<h3 class="anchored" data-anchor-id="noticeboxchildren-attrs-1"><code>NoticeBox(*children, **attrs)</code></h3>
+<p>A persistent notice.</p>
+<p>Root selector: <code>notice-box</code>.</p>
+<p>Declared variants: - <code>quiet</code>: An unfilled notice without a visible border.</p>
+<p>Rules: - <code>base</code> (components) - <code>corners</code> (app): Rounder notices in this application.</p>
+</section>
+</div>
+<p>The base rule now has no behaviors. To remove the application override, pass its full key to <code>reg.remove</code>. A layer view taken earlier no longer lists it:</p>
+<div id="1193c3f8" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-25T21:02:25.523882+00:00&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-25T21:02:25.525480+00:00&quot;,&quot;total&quot;:0.001602343000001838}}" data-execution_count="32">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>test_eq(NoticeBox.behaviors, [])</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>app_rules <span class="op">=</span> reg.layers[<span class="st">'app'</span>]</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>v <span class="op">=</span> reg.version</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>reg.remove(<span class="st">'NoticeBox.corners'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="32">
+<pre><code>NoticeBox.corners [app] notice-box: Rounder notices in this application.</code></pre>
+</div>
+</div>
+<div id="d2f8ae4c" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-25T21:02:25.525623+00:00&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-25T21:02:25.527585+00:00&quot;,&quot;total&quot;:0.001966482000000269}}" data-execution_count="33">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="st">'NoticeBox.corners'</span> <span class="kw">not</span> <span class="kw">in</span> app_rules</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>test_eq(reg.version, v<span class="op">+</span><span class="dv">1</span>)</span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>app_rules</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="33">
+<pre><code>app-page [app]: A centered single-column page.
+select-all [app] input[select-all]: Select the input text when it receives focus.
+Field.base [app] label[field]: A labelled input
+NoticeBox.quiet [app] :is(notice-box)[quiet]: An unfilled notice without a visible border.
+editor-notices [app]: Square notices inside the editor.</code></pre>
+</div>
+</div>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/AnswerDotAI\.github\.io\/answerui");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+      window.quartoDecorateExternalLinks = function (root) {
+     var links = (root || window.document).querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+          if (!link.classList.contains('no-external-icon')) {
+          }
+        }
+      }
+      };
+      window.quartoDecorateExternalLinks(window.document);
+    // Esc closes the popup (WCAG 1.4.13) and focus leaving both trigger and
+    // popup closes it (WCAG 2.4.11); tippy handles neither for interactive popups.
+    const hideOnEscAndFocusOut = {
+      name: 'hideOnEscAndFocusOut',
+      defaultValue: true,
+      fn(instance) {
+        const dismiss = () => {
+          // A show scheduled by the trigger delay would otherwise reopen it
+          instance.clearDelayTimeouts();
+          instance.hide();
+        };
+        const onKeyDown = (event) => {
+          if (event.key !== 'Escape') {
+            return;
+          }
+          // Keep Esc from also reaching page handlers (e.g. reveal.js overview),
+          // except an open reveal.js slide menu, which Esc should close too.
+          // The menu handles keys only when its keyboard option is on.
+          const menuHandlesEsc = window.Reveal?.getPlugin?.('menu')?.isOpen() &&
+            window.Reveal.getConfig().menu?.keyboard !== false;
+          if (!menuHandlesEsc) {
+            event.stopPropagation();
+          }
+          if (instance.popper.contains(window.document.activeElement)) {
+            // Disabled while refocusing so the focus trigger does not reopen it
+            instance.disable();
+            instance.reference.focus();
+            instance.enable();
+          }
+          dismiss();
+        };
+        const onFocusOut = (event) => {
+          const target = event.relatedTarget;
+          if (target && !instance.reference.contains(target) &&
+              !instance.popper.contains(target)) {
+            dismiss();
+          }
+        };
+        // On the trigger too: a click trigger (code-annotations: select) has no
+        // blur handling. Attached for the instance's lifetime so leaving the
+        // trigger also cancels a show still pending on the trigger delay.
+        instance.reference.addEventListener('focusout', onFocusOut);
+        return {
+          onShow() {
+            window.document.addEventListener('keydown', onKeyDown, true);
+            instance.popper.addEventListener('focusout', onFocusOut);
+          },
+          onHide() {
+            window.document.removeEventListener('keydown', onKeyDown, true);
+            instance.popper.removeEventListener('focusout', onFocusOut);
+          },
+          onDestroy() {
+            instance.reference.removeEventListener('focusout', onFocusOut);
+          },
+        };
+      },
+    };
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+        plugins: [hideOnEscAndFocusOut],
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          // Each band is positioned against its own containing block, which is
+          // not the offsetParent of the lines, so place it from client rects.
+          const placeBand = (band, firstEl, lastEl, codeBlock) => {
+            const container = band.offsetParent;
+            if (container === null) {
+              return;
+            }
+            const containerRect = container.getBoundingClientRect();
+            // Reveal.js scales slides with a transform, so convert client
+            // pixels back to the CSS pixels of the container.
+            const scale = containerRect.height / container.offsetHeight || 1;
+            const firstRect = firstEl.getBoundingClientRect();
+            const lastRect = lastEl.getBoundingClientRect();
+            const top = (firstRect.top - containerRect.top) / scale - container.clientTop + container.scrollTop;
+            const height = (lastRect.bottom - firstRect.top) / scale;
+            band.style.top = top - 2 + "px";
+            band.style.height = height + 4 + "px";
+            if (codeBlock) {
+              // Without the copy button wrapper, the containing block is wider
+              // than the code block, so span the code block explicitly.
+              const blockRect = codeBlock.getBoundingClientRect();
+              band.style.left = (blockRect.left - containerRect.left) / scale - container.clientLeft + container.scrollLeft + "px";
+              band.style.width = blockRect.width / scale + "px";
+            }
+          };
+          if (lineIds.length > 0) {
+            const el = window.document.getElementById(lineIds[0]);
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const parent = el.parentElement.parentElement;
+            // cook up a div (if necessary) and position it
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            placeBand(div, el, lastEl, parent.closest("div.sourceCode") || parent);
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            placeBand(gutterDiv, el, lastEl);
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+  <script type="application/javascript">
+  window.quartoScrollableRegionsLabels = {"code":"Scrollable code","output":"Scrollable output"};
+  </script>
+</div> <!-- /content -->
+
+
+
+
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/AnswerDotAI/answerui/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>

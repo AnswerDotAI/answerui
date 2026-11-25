@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.11.9">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="description" content="Delegated event-handler runtime (Registry.build_js) and browser.js DOM hookup for AnswerUI’s built-in interactions across htmx swaps.">
+
+<title>behaviors – answerui-py</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/scrollable-regions/scrollable-regions.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-63b5708e65d6cd79cd7618c58d0c21e7.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-f803fa4e565d46961d2a1845e6c2e3f5.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="styles.css">
+<meta property="og:title" content="behaviors – answerui-py">
+<meta property="og:description" content="Delegated event-handler runtime (Registry.build_js) and browser.js DOM hookup for AnswerUI’s built-in interactions across htmx swaps.">
+<meta property="og:site_name" content="answerui-py">
+<meta name="twitter:title" content="behaviors – answerui-py">
+<meta name="twitter:description" content="Delegated event-handler runtime (Registry.build_js) and browser.js DOM hookup for AnswerUI’s built-in interactions across htmx swaps.">
+<meta name="twitter:card" content="summary">
+</head>
+
+<body class="nav-sidebar floating nav-fixed quarto-light"><a id="quarto-skip-link" class="visually-hidden-focusable" href="#quarto-document-content">Skip to main content</a>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark" aria-label="Site">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">answerui-py</span>
+    </a>
+  </div>
+        <div class="quarto-navbar-tools tools-end">
+</div>
+          <div id="quarto-search" class="" title="Search"></div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav" aria-label="Toolbar">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="Breadcrumbs"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./behaviors.html">behaviors</a></li></ol></nav>
+        <a class="flex-grow-1" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto" aria-label="Section">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">answerui</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./palette.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Palette</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./typography.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Typography and density</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./layout.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Layout</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./controls.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Controls and feedback</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./interactions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Navigation and overlays</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./registry.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">registry</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./behaviors.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">behaviors</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./demo.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">demo</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./hdrs.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">hdrs</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./layout.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">layout</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./controls.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">controls</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./surfaces.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">surfaces</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./status.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">status</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./overlays.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">overlays</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./navigation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">navigation</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">data</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" aria-labelledby="toc-title" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#the-runtime" id="toc-the-runtime" class="nav-link active" data-scroll-target="#the-runtime">The runtime</a></li>
+  <li><a href="#entries" id="toc-entries" class="nav-link" data-scroll-target="#entries">Entries</a></li>
+  <li><a href="#building-the-script" id="toc-building-the-script" class="nav-link" data-scroll-target="#building-the-script">Building the script</a></li>
+  <li><a href="#built-in-browser-behavior" id="toc-built-in-browser-behavior" class="nav-link" data-scroll-target="#built-in-browser-behavior">Built-in browser behavior</a></li>
+  </ul>
+<div class="toc-actions"><ul><li><a href="https://github.com/AnswerDotAI/answerui/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li></ul></div><div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="behaviors.html.md"><i class="bi bi-file-code"></i>Markdown</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content" tabindex="-1">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">behaviors</h1>
+</div>
+
+<div>
+  <div class="description">
+    Delegated event-handler runtime (<code>Registry.build_js</code>) and <code>browser.js</code> DOM hookup for AnswerUI’s built-in interactions across htmx swaps.
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<!-- WARNING: THIS FILE WAS AUTOGENERATED! DO NOT EDIT! -->
+<p><code>answerui.behaviors</code> generates the delegated event script (<code>Registry.build_js</code>) for handlers registered in <code>Registry</code> and defines <code>browser.js</code> to wire up AnswerUI’s shared browser modules.</p>
+<p>Application handlers are stored in <code>Registry</code> as records containing a selector, an event name, a capture flag, and a JavaScript handler body. The generated script installs one <code>document</code> listener per event and capture phase, then matches the nearest ancestor for each rule’s selector when an event fires. Elements inserted by htmx work without attaching extra listeners. Built-in interactive controllers with local state are mounted through a <code>MutationObserver</code> in <code>browser.js</code> and disposed when their elements are removed from the document.</p>
+<div id="11f509b5" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-25T21:02:26.840595+00:00&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-25T21:02:26.841972+00:00&quot;,&quot;total&quot;:0.0013802389999995057}}" data-execution_count="2">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> answerui.registry <span class="im">import</span> reg, hypelt</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> fastcore.test <span class="im">import</span> <span class="op">*</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<section id="the-runtime" class="level2">
+<h2 class="anchored" data-anchor-id="the-runtime">The runtime</h2>
+<p><code>_runtime</code> is the entire client script. <code>build_js</code> embeds <code>rules</code> as an array of objects. Each object has <code>sel</code> (selector), <code>evs</code> (DOM event names), <code>cap</code> (capture boolean), <code>init</code> (boolean), and <code>fn</code> (handler). The script groups these objects by event name and capture phase, then installs one <code>document</code> listener per group regardless of how many rules share it. When an event fires on an <code>Element</code> target, that listener calls <code>closest(r.sel)</code> for each rule in the group and runs <code>r.fn(el, e)</code> on any match.</p>
+<p>An <code>init</code> rule runs when matching elements enter the document. When <code>rules</code> includes any <code>init</code> rule, the script registers a callback with <code>htmx.onLoad</code>. htmx calls that callback with <code>document.body</code> on initial load and with the root element of each swapped fragment. The callback checks <code>root</code> itself (<code>root.matches</code>) and its descendants (<code>root.querySelectorAll</code>). Checking ancestors instead would re-run <code>init</code> handlers on outer elements already in the page. Each <code>init</code> call passes a synthetic <code>new Event('init')</code> that is never dispatched. Load htmx before this script whenever you register <code>init</code> rules. FastHTML’s default headers and <code>demo</code> both include htmx first.</p>
+<p>The script executes once per document. FastHTML sends page headers only with full pages, never with htmx fragment responses. When htmx swaps a full page, it discards the incoming <code>&lt;head&gt;</code>.</p>
+<p>Each handler is an <code>async</code> function. If one throws, the returned promise is rejected without stopping other handlers registered for the same event. Capture-phase listening (<code>cap=True</code>) is opt-in for non-bubbling events such as <code>toggle</code> and <code>scroll</code>. A regenerated script takes effect cleanly only in a fresh page or preview. Injecting a second copy into the same document attaches duplicate listeners alongside the existing ones.</p>
+</section>
+<section id="entries" class="level2">
+<h2 class="anchored" data-anchor-id="entries">Entries</h2>
+<p><code>_entry</code> formats each behavior record as one object literal in <code>rules</code>. AnswerUI defines two special event names. <code>init</code> runs when an element enters the document. <code>cleanup</code> runs before an element is removed by htmx. Every other name is a DOM event. A leading <code>:</code> expands to <code>htmx:</code> (for example, <code>':after-request'</code> becomes <code>'htmx:after-request'</code>).</p>
+<p>htmx dispatches events under three naming conventions. htmx 2 dispatches camelCase names such as <code>htmx:afterSwap</code> together with hyphenated aliases such as <code>htmx:after-swap</code>. htmx 4 uses colon-separated names such as <code>htmx:after:swap</code>. FastHTML’s <code>htmx4=True</code> sets <code>metaCharacter</code> to <code>-</code>, turning every colon into a hyphen (<code>htmx-after-swap</code>). <code>_event</code> normalizes these spellings to <code>htmx:</code> followed by the hyphenated name. <code>_spellings</code> expands a canonical htmx event back into all three DOM event names. The script registers listeners for all three because only one fires on a given page.</p>
+<p><code>init</code> and <code>cleanup</code> are handled separately. Because <code>init</code> is not a DOM event, <code>_spellings('init')</code> returns <code>[]</code> and the script invokes <code>init</code> handlers through <code>htmx.onLoad</code> across both htmx versions. For <code>cleanup</code>, <code>_spellings</code> returns <code>_cleanup</code>, which lists htmx 2’s hyphenated alias (<code>htmx:before-cleanup-element</code>), htmx 4’s <code>htmx:before:cleanup</code>, and FastHTML’s <code>htmx-before-cleanup</code>. Under htmx 4, <code>cleanup</code> fires only for elements initialised by htmx (elements with <code>hx-</code> attributes). Each distinct handler body becomes one <code>async</code> function taking <code>(el, e)</code>, declared before <code>rules</code> and referenced by name in each entry:</p>
+<p><code>_event</code> normalizes every htmx event spelling to the same canonical name. <code>_spellings</code> returns the DOM event names registered for it:</p>
+<div id="90732cf7" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-25T21:02:26.847568+00:00&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-25T21:02:26.850577+00:00&quot;,&quot;total&quot;:0.0030140500000044312}}" data-execution_count="5">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> ev <span class="kw">in</span> [<span class="st">':after-swap'</span>, <span class="st">'htmx:afterSwap'</span>, <span class="st">'htmx:after:swap'</span>, <span class="st">'htmx-after-swap'</span>]: test_eq(_event(ev), <span class="st">'htmx:after-swap'</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>_spellings(<span class="st">'htmx:after-swap'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="5">
+<pre><code>['htmx:after-swap', 'htmx:after:swap', 'htmx-after-swap']</code></pre>
+</div>
+</div>
+</section>
+<section id="building-the-script" class="level2">
+<h2 class="anchored" data-anchor-id="building-the-script">Building the script</h2>
+<p>A behavior is identified by <code>(selector, canonical_event, capture)</code>, using <code>_event</code> to canonicalize the event name. Declaring the same identity again replaces the earlier handler. Only the last declaration in registry order appears in the script. Because re-registering a rule preserves its original position in <code>self.rules</code>, re-running a component definition cannot overwrite an application rule registered later. Replacing a handler also keeps the identity’s original position in the output dict to preserve execution order. Because <code>Registry</code> compares selector strings literally without parsing CSS, two distinct selectors matching the same element are separate behaviors. Both handlers run.</p>
+<p><code>behaviors</code> returns the effective handler for each identity along with its declaring <code>rule</code> key. <code>build_js</code> deduplicates identical handler bodies and assembles the script:</p>
+<div id="03c008cf" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-25T21:02:26.853966+00:00&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-25T21:02:27.007048+00:00&quot;,&quot;total&quot;:0.1530908920000087}}" data-execution_count="7">
+<hr>
+<section id="registry.build_js" class="level3">
+<h3 class="anchored" data-anchor-id="registry.build_js">Registry.build_js</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> build_js():</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><em>The behavior script: one function per distinct handler, one entry per effective behavior</em></p>
+</section>
+</div>
+<div id="bf91c26e" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-25T21:02:27.007229+00:00&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-25T21:02:27.012625+00:00&quot;,&quot;total&quot;:0.005400745000002871}}" data-execution_count="8">
+<hr>
+<section id="registry.behaviors" class="level3">
+<h3 class="anchored" data-anchor-id="registry.behaviors">Registry.behaviors</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> behaviors():</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><em>The effective behavior per (selector, event, capture): the last declared in registry order, with the key of the rule that declared it</em></p>
+</section>
+</div>
+<p>This example defines a <code>NoticeBox</code> component with two behaviors: an <code>init</code> handler that removes the element after an <code>autodismiss</code> delay, and a <code>click</code> handler on <code>[dismiss]</code>. Because htmx calls <code>htmx.onLoad</code> only for the initial page and newly swapped fragments, swapping content inside an existing <code>notice-box</code> does not restart its timer:</p>
+<div id="8977502b" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-25T21:02:27.012992+00:00&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-25T21:02:27.014863+00:00&quot;,&quot;total&quot;:0.0018754550000039671}}" data-execution_count="9">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>NoticeBox <span class="op">=</span> hypelt(<span class="st">'NoticeBox'</span>, layer<span class="op">=</span><span class="st">'components'</span>, doc<span class="op">=</span><span class="st">'A notice that dismisses itself.'</span>, on<span class="op">=</span>{</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    (<span class="st">'&amp;[autodismiss]'</span>, <span class="st">'init'</span>): <span class="vs">r"await new Promise</span><span class="kw">(</span><span class="vs">r =&gt; setTimeout</span><span class="kw">(</span><span class="vs">r, </span><span class="op">+</span><span class="vs">el</span><span class="dv">.</span><span class="vs">getAttribute</span><span class="kw">(</span><span class="vs">'autodismiss'</span><span class="kw">)))</span><span class="vs">; el</span><span class="dv">.</span><span class="vs">remove</span><span class="kw">()</span><span class="vs">"</span>,</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    (<span class="st">'&amp; [dismiss]'</span>, <span class="st">'click'</span>): <span class="vs">r"el</span><span class="dv">.</span><span class="vs">closest</span><span class="kw">(</span><span class="vs">'notice-box'</span><span class="kw">)</span><span class="dv">.</span><span class="vs">remove</span><span class="kw">()</span><span class="vs">"</span>})</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'</span><span class="ch">\n</span><span class="st">'</span>.join(l <span class="cf">for</span> l <span class="kw">in</span> reg.build_js().splitlines() <span class="cf">if</span> <span class="st">'notice-box'</span> <span class="kw">in</span> l))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>async function f1(el, e) { el.closest('notice-box').remove() }
+const rules = [{sel: ":is(notice-box)[autodismiss]", evs: [], cap: false, init: true, fn: f0},
+{sel: ":is(notice-box) [dismiss]", evs: ["click"], cap: false, init: false, fn: f1}];</code></pre>
+</div>
+</div>
+<p>The <code>init</code> entry has <code>init: true</code> and <code>evs: []</code> because <code>htmx.onLoad</code> invokes it instead of a <code>document</code> listener. The <code>click</code> entry has <code>init: false</code>. <code>build_js</code> emits the handler functions and <code>rules</code> array. At page load, the script groups those entries into <code>document</code> listeners.</p>
+<p>You can register the same handler body for multiple events in one rule. Here a <code>form</code> is marked <code>dirty</code> on <code>input</code> and on <code>change</code> (a <code>&lt;select&gt;</code> fires only <code>change</code>). Registering the <code>input</code> handler again in an anonymous rule keeps the <code>change</code> handler in place because anonymous rule keys include their behaviors. <code>build_js</code> declares the shared handler function once and references it from both entries:</p>
+<div id="431e5c67" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-25T21:02:27.015215+00:00&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-25T21:02:27.017771+00:00&quot;,&quot;total&quot;:0.002561627999995153}}" data-execution_count="10">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>_dirty <span class="op">=</span> <span class="vs">r"el</span><span class="dv">.</span><span class="vs">toggleAttribute</span><span class="kw">(</span><span class="vs">'dirty', </span><span class="pp">[...el.elements]</span><span class="dv">.</span><span class="vs">some</span><span class="kw">(</span><span class="vs">c =&gt; c</span><span class="dv">.</span><span class="vs">value !== c</span><span class="dv">.</span><span class="vs">defaultValue</span><span class="kw">))</span><span class="vs">"</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>reg.rule(name<span class="op">=</span><span class="st">'dirty'</span>, sel<span class="op">=</span><span class="st">'form'</span>, on<span class="op">=</span>{(<span class="st">'&amp;'</span>, <span class="st">'input'</span>): _dirty, (<span class="st">'&amp;'</span>, <span class="st">'change'</span>): _dirty})</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>reg.rule(sel<span class="op">=</span><span class="st">'form'</span>, on<span class="op">=</span>{(<span class="st">'&amp;'</span>, <span class="st">'input'</span>): _dirty})</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>s <span class="op">=</span> reg.build_js()</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>test_eq(s.count(_dirty), <span class="dv">1</span>)</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>test_eq(s.count(<span class="st">'":is(form)"'</span>), <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>To require confirmation before dismissing a notice, register the same selector and event on <code>NoticeBox</code>. Just as in the component definition, <code>&amp;</code> expands to <code>:is(notice-box)</code>. Because the behavior identity matches, the confirmation handler replaces the original. Each effective behavior’s <code>rule</code> field holds the key of the rule that supplied its active handler:</p>
+<div id="59a09c70" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-25T21:02:27.017992+00:00&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-25T21:02:27.020499+00:00&quot;,&quot;total&quot;:0.0025111019999997097}}" data-execution_count="11">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>NoticeBox.rule(<span class="st">'confirm-dismiss'</span>, on<span class="op">=</span>{(<span class="st">'&amp; [dismiss]'</span>, <span class="st">'click'</span>): <span class="vs">r"if </span><span class="kw">(</span><span class="vs">confirm</span><span class="kw">(</span><span class="vs">'Dismiss this notice</span><span class="op">?</span><span class="vs">'</span><span class="kw">))</span><span class="vs"> el</span><span class="dv">.</span><span class="vs">closest</span><span class="kw">(</span><span class="vs">'notice-box'</span><span class="kw">)</span><span class="dv">.</span><span class="vs">remove</span><span class="kw">()</span><span class="vs">"</span>})</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>{k: b[<span class="st">'rule'</span>] <span class="cf">for</span> k,b <span class="kw">in</span> reg.behaviors().items()}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="11">
+<pre><code>{(':is(notice-box)[autodismiss]', 'init', False): 'NoticeBox.base',
+ (':is(notice-box) [dismiss]', 'click', False): 'NoticeBox.confirm-dismiss',
+ (':is(form)', 'input', False): '858472c34654',
+ (':is(form)', 'change', False): 'dirty'}</code></pre>
+</div>
+</div>
+<p>The generated script contains only the confirmation click handler for <code>[dismiss]</code>. <code>NoticeBox.behaviors</code> still lists both declarations made on the component. <code>reg.behaviors</code> returns only the effective handlers emitted to the script:</p>
+<div id="14865167" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-25T21:02:27.020705+00:00&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-25T21:02:27.023468+00:00&quot;,&quot;total&quot;:0.0027681389999969497}}" data-execution_count="12">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>s <span class="op">=</span> reg.build_js()</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>test_eq(s.count(<span class="st">'":is(notice-box) [dismiss]"'</span>), <span class="dv">1</span>)</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="st">'confirm('</span> <span class="kw">in</span> s</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>NoticeBox.behaviors</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="12">
+<pre><code>[{'sel': ':is(notice-box)[autodismiss]',
+  'ev': 'init',
+  'js': "await new Promise(r =&gt; setTimeout(r, +el.getAttribute('autodismiss'))); el.remove()",
+  'cap': False},
+ {'sel': ':is(notice-box) [dismiss]',
+  'ev': 'click',
+  'js': "el.closest('notice-box').remove()",
+  'cap': False},
+ {'sel': ':is(notice-box) [dismiss]',
+  'ev': 'click',
+  'js': "if (confirm('Dismiss this notice?')) el.closest('notice-box').remove()",
+  'cap': False}]</code></pre>
+</div>
+</div>
+<p>Re-registering the component’s definition does not displace the application’s override:</p>
+<div id="f43ca6f1" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-25T21:02:27.023799+00:00&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-25T21:02:27.026345+00:00&quot;,&quot;total&quot;:0.002550161000002049}}" data-execution_count="13">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>NoticeBox <span class="op">=</span> hypelt(<span class="st">'NoticeBox'</span>, layer<span class="op">=</span><span class="st">'components'</span>, doc<span class="op">=</span><span class="st">'A notice that dismisses itself.'</span>, on<span class="op">=</span>{</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    (<span class="st">'&amp;[autodismiss]'</span>, <span class="st">'init'</span>): <span class="vs">r"await new Promise</span><span class="kw">(</span><span class="vs">r =&gt; setTimeout</span><span class="kw">(</span><span class="vs">r, </span><span class="op">+</span><span class="vs">el</span><span class="dv">.</span><span class="vs">getAttribute</span><span class="kw">(</span><span class="vs">'autodismiss'</span><span class="kw">)))</span><span class="vs">; el</span><span class="dv">.</span><span class="vs">remove</span><span class="kw">()</span><span class="vs">"</span>,</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    (<span class="st">'&amp; [dismiss]'</span>, <span class="st">'click'</span>): <span class="vs">r"el</span><span class="dv">.</span><span class="vs">closest</span><span class="kw">(</span><span class="vs">'notice-box'</span><span class="kw">)</span><span class="dv">.</span><span class="vs">remove</span><span class="kw">()</span><span class="vs">"</span>})</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>test_eq(reg.behaviors()[(<span class="st">':is(notice-box) [dismiss]'</span>, <span class="st">'click'</span>, <span class="va">False</span>)][<span class="st">'rule'</span>], <span class="st">'NoticeBox.confirm-dismiss'</span>)</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>[k <span class="cf">for</span> k <span class="kw">in</span> reg.behaviors() <span class="cf">if</span> k[<span class="dv">1</span>]<span class="op">==</span><span class="st">'init'</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="13">
+<pre><code>[(':is(notice-box)[autodismiss]', 'init', False)]</code></pre>
+</div>
+</div>
+</section>
+<section id="built-in-browser-behavior" class="level2">
+<h2 class="anchored" data-anchor-id="built-in-browser-behavior">Built-in browser behavior</h2>
+<p><code>browser.js</code> connects AnswerUI’s shared JavaScript modules (<code>floating.js</code>, <code>interactions.js</code>, <code>fit.js</code>, and <code>copy.js</code>) to server-rendered HTML, including fragments inserted by htmx. Native controls, CSS tooltips, and static surfaces require no JavaScript.</p>
+<p>Form helpers attach document-level <code>input</code>, <code>change</code>, <code>reset</code>, <code>focusout</code>, and capture-phase <code>invalid</code> listeners:</p>
+<ul>
+<li><code>enable(form)</code> toggles <code>disabled</code> on each <code>button[enable]</code> from its space-separated tokens (<code>changed</code> for modified form values, <code>valid</code> for constraint validity).</li>
+<li><code>range(input)</code> sets <code>--ui-range-fill</code> on <code>input[range]</code> from <code>min</code>, <code>max</code>, and <code>value</code>.</li>
+<li>Changing <code>input[reveals]</code> sets <code>hidden</code> on the element whose <code>id</code> matches the attribute value.</li>
+<li><code>validity(control, event)</code> writes native <code>validationMessage</code> text into a <code>small[validation][ui-tone="danger"]</code> child of <code>[field]</code>, links it via <code>aria-describedby</code>, suppresses the browser popup, and focuses the first invalid control on submit.</li>
+</ul>
+<p>Document-level action handlers cover common UI events:</p>
+<ul>
+<li>Clicking <code>button[dismiss]</code> removes the closest <code>[alert]</code> or <code>[toast]</code>.</li>
+<li>Clicking <code>button[copy]</code> or <code>button[copyfor]</code> copies text with <code>copyText</code>, setting <code>copied</code> (and <code>aria-label="Copied"</code> if an <code>aria-label</code> exists) for 1500 ms.</li>
+<li>Clicking <code>button[commandfor]</code> falls back to <code>showModal()</code> for <code>command="show-modal"</code> and <code>close()</code> for <code>command="close"</code> when <code>commandForElement</code> is unavailable.</li>
+<li>On <code>animationend</code>, <code>browser.js</code> removes <code>[toast]</code> elements when <code>ui-toast-lifetime</code> finishes.</li>
+<li>On htmx swap events (<code>htmx:after-swap</code>, <code>htmx:after:swap</code>, <code>htmx-after-swap</code>), <code>browser.js</code> calls <code>showModal()</code> on a closed <code>dialog[dialog]</code> when content is swapped inside it.</li>
+</ul>
+<p>Stateful controllers are tracked in a <code>WeakMap</code> and managed by a <code>MutationObserver</code> on <code>document.body</code>. On initial load and for every added subtree, <code>mount</code> handles:</p>
+<ul>
+<li><code>[popup][popover]</code> and <code>[popovertarget]</code>: attaches <code>mountPopover</code> (and <code>mountHoverPopover</code> when <code>[hovercard]</code> is present), reading <code>data-side</code>, <code>data-align</code>, and <code>data-side-offset</code> (default <code>6</code>).</li>
+<li><code>[tabs]</code> with <code>[role=tablist]</code>: attaches <code>mountTabs</code> using <code>data-activation-mode</code>.</li>
+<li><code>[toolbar][role=toolbar]</code>: attaches <code>mountToolbar</code>.</li>
+<li><code>[navbar]</code>: attaches <code>mountNavbar</code> when both <code>nav</code> and <code>[navbar-toggle]</code> are present or <code>[navbar-sticky]</code> is set.</li>
+<li><code>[toaster]</code>: opens the popover with <code>showPopover()</code> when not already open.</li>
+<li><code>input[range]</code> and <code>button[enable]</code>: runs their initial state updates.</li>
+</ul>
+<p>Removing a disconnected element calls its disposer and clears any pending copy timer. Moving an element within the document keeps <code>isConnected</code> true and preserves its mounted controller.</p>
+<div id="55fb3b62" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-25T21:02:27.026518+00:00&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-25T21:02:27.027920+00:00&quot;,&quot;total&quot;:0.0014060679999943204}}" data-asset="browser.js" data-execution_count="14">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>_forms <span class="op">=</span> <span class="vs">r'''</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="vs">import {mountPopover} from '</span><span class="dv">.</span><span class="vs">/floating</span><span class="dv">.</span><span class="vs">js';</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="vs">import {mountTabs, mountToolbar, mountHoverPopover} from '</span><span class="dv">.</span><span class="vs">/interactions</span><span class="dv">.</span><span class="vs">js';</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="vs">import {mountNavbar} from '</span><span class="dv">.</span><span class="vs">/fit</span><span class="dv">.</span><span class="vs">js';</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="vs">import {copyText} from '</span><span class="dv">.</span><span class="vs">/copy</span><span class="dv">.</span><span class="vs">js';</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="vs">function enable</span><span class="kw">(</span><span class="vs">form</span><span class="kw">)</span><span class="vs"> {</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a><span class="vs">  if </span><span class="kw">(</span><span class="vs">!form</span><span class="kw">)</span><span class="vs"> return;</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a><span class="vs">  const changed = </span><span class="pp">[...form.elements]</span><span class="dv">.</span><span class="vs">some</span><span class="kw">(</span><span class="vs">control =&gt; control</span><span class="dv">.</span><span class="vs">matches</span><span class="kw">(</span><span class="vs">'input:not</span><span class="kw">(</span><span class="pp">[type=hidden]</span><span class="vs">, </span><span class="pp">[type=submit]</span><span class="vs">, </span><span class="pp">[type=button]</span><span class="vs">, </span><span class="pp">[type=reset]</span><span class="kw">)</span><span class="vs">, select, textarea'</span><span class="kw">)</span><span class="vs"> &amp;&amp;</span></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a><span class="vs">    </span><span class="kw">(</span><span class="vs">control</span><span class="dv">.</span><span class="vs">type === 'checkbox' </span><span class="cf">||</span><span class="vs"> control</span><span class="dv">.</span><span class="vs">type === 'radio' </span><span class="op">?</span><span class="vs"> control</span><span class="dv">.</span><span class="vs">checked !== control</span><span class="dv">.</span><span class="vs">defaultChecked :</span></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a><span class="vs">      control</span><span class="dv">.</span><span class="vs">tagName === 'SELECT' </span><span class="op">?</span><span class="vs"> </span><span class="pp">[...control.options]</span><span class="dv">.</span><span class="vs">some</span><span class="kw">(</span><span class="vs">option =&gt; option</span><span class="dv">.</span><span class="vs">selected !== option</span><span class="dv">.</span><span class="vs">defaultSelected</span><span class="kw">)</span><span class="vs"> : control</span><span class="dv">.</span><span class="vs">value !== control</span><span class="dv">.</span><span class="vs">defaultValue</span><span class="kw">))</span><span class="vs">;</span></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a><span class="vs">  const valid = </span><span class="pp">[...form.elements]</span><span class="dv">.</span><span class="vs">every</span><span class="kw">(</span><span class="vs">control =&gt; control</span><span class="dv">.</span><span class="vs">validity</span><span class="dv">.</span><span class="vs">valid</span><span class="kw">)</span><span class="vs">;</span></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a><span class="vs">  for </span><span class="kw">(</span><span class="vs">const button of form</span><span class="dv">.</span><span class="vs">querySelectorAll</span><span class="kw">(</span><span class="vs">'button</span><span class="pp">[enable]</span><span class="vs">'</span><span class="kw">))</span></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a><span class="vs">    button</span><span class="dv">.</span><span class="vs">disabled = !button</span><span class="dv">.</span><span class="vs">getAttribute</span><span class="kw">(</span><span class="vs">'enable'</span><span class="kw">)</span><span class="dv">.</span><span class="vs">split</span><span class="kw">(</span><span class="vs">' '</span><span class="kw">)</span><span class="dv">.</span><span class="vs">every</span><span class="kw">(</span><span class="vs">want =&gt; want === 'changed' </span><span class="op">?</span><span class="vs"> changed : want === 'valid' </span><span class="op">?</span><span class="vs"> valid : true</span><span class="kw">)</span><span class="vs">;</span></span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a><span class="vs">}</span></span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a><span class="vs">function range</span><span class="kw">(</span><span class="vs">input</span><span class="kw">)</span><span class="vs"> {</span></span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a><span class="vs">  const low = input</span><span class="dv">.</span><span class="vs">min === '' </span><span class="op">?</span><span class="vs"> 0 : </span><span class="op">+</span><span class="vs">input</span><span class="dv">.</span><span class="vs">min, high = input</span><span class="dv">.</span><span class="vs">max === '' </span><span class="op">?</span><span class="vs"> 100 : </span><span class="op">+</span><span class="vs">input</span><span class="dv">.</span><span class="vs">max;</span></span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a><span class="vs">  input</span><span class="dv">.</span><span class="vs">style</span><span class="dv">.</span><span class="vs">setProperty</span><span class="kw">(</span><span class="vs">'--ui-range-fill', `</span><span class="dv">$</span><span class="vs">{high &gt; low </span><span class="op">?</span><span class="vs"> </span><span class="kw">(</span><span class="vs">input</span><span class="dv">.</span><span class="vs">value - low</span><span class="kw">)</span><span class="vs"> / </span><span class="kw">(</span><span class="vs">high - low</span><span class="kw">)</span><span class="vs"> </span><span class="op">*</span><span class="vs"> 100 : 0}%`</span><span class="kw">)</span><span class="vs">;</span></span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a><span class="vs">}</span></span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a><span class="vs">function validity</span><span class="kw">(</span><span class="vs">control, event</span><span class="kw">)</span><span class="vs"> {</span></span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a><span class="vs">  const field = control</span><span class="dv">.</span><span class="vs">closest</span><span class="kw">(</span><span class="vs">'</span><span class="pp">[field]</span><span class="vs">'</span><span class="kw">)</span><span class="vs">;</span></span>
+<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a><span class="vs">  if </span><span class="kw">(</span><span class="vs">!field</span><span class="kw">)</span><span class="vs"> return;</span></span>
+<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a><span class="vs">  let message = field</span><span class="dv">.</span><span class="vs">querySelector</span><span class="kw">(</span><span class="vs">':scope &gt; small</span><span class="pp">[validation]</span><span class="vs">'</span><span class="kw">)</span><span class="vs">;</span></span>
+<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a><span class="vs">  const ids = </span><span class="kw">(</span><span class="vs">control</span><span class="dv">.</span><span class="vs">getAttribute</span><span class="kw">(</span><span class="vs">'aria-describedby'</span><span class="kw">)</span><span class="vs"> </span><span class="cf">||</span><span class="vs"> ''</span><span class="kw">)</span><span class="dv">.</span><span class="vs">split</span><span class="kw">(</span><span class="vs">' '</span><span class="kw">)</span><span class="dv">.</span><span class="vs">filter</span><span class="kw">(</span><span class="vs">id =&gt; id &amp;&amp; id !== message</span><span class="op">?</span><span class="dv">.</span><span class="vs">id</span><span class="kw">)</span><span class="vs">;</span></span>
+<span id="cb15-27"><a href="#cb15-27" aria-hidden="true" tabindex="-1"></a><span class="vs">  const show = event</span><span class="dv">.</span><span class="vs">type === 'invalid' </span><span class="cf">||</span><span class="vs"> </span><span class="kw">(</span><span class="vs">event</span><span class="dv">.</span><span class="vs">type === 'focusout' </span><span class="op">?</span><span class="vs"> control</span><span class="dv">.</span><span class="vs">matches</span><span class="kw">(</span><span class="vs">':user-invalid'</span><span class="kw">)</span><span class="vs"> : message &amp;&amp; !control</span><span class="dv">.</span><span class="vs">validity</span><span class="dv">.</span><span class="vs">valid</span><span class="kw">)</span><span class="vs">;</span></span>
+<span id="cb15-28"><a href="#cb15-28" aria-hidden="true" tabindex="-1"></a><span class="vs">  if </span><span class="kw">(</span><span class="vs">show</span><span class="kw">)</span><span class="vs"> {</span></span>
+<span id="cb15-29"><a href="#cb15-29" aria-hidden="true" tabindex="-1"></a><span class="vs">    if </span><span class="kw">(</span><span class="vs">!message</span><span class="kw">)</span><span class="vs"> {</span></span>
+<span id="cb15-30"><a href="#cb15-30" aria-hidden="true" tabindex="-1"></a><span class="vs">      message = document</span><span class="dv">.</span><span class="vs">createElement</span><span class="kw">(</span><span class="vs">'small'</span><span class="kw">)</span><span class="vs">;</span></span>
+<span id="cb15-31"><a href="#cb15-31" aria-hidden="true" tabindex="-1"></a><span class="vs">      message</span><span class="dv">.</span><span class="vs">setAttribute</span><span class="kw">(</span><span class="vs">'validation', ''</span><span class="kw">)</span><span class="vs">;</span></span>
+<span id="cb15-32"><a href="#cb15-32" aria-hidden="true" tabindex="-1"></a><span class="vs">      message</span><span class="dv">.</span><span class="vs">setAttribute</span><span class="kw">(</span><span class="vs">'ui-tone', 'danger'</span><span class="kw">)</span><span class="vs">;</span></span>
+<span id="cb15-33"><a href="#cb15-33" aria-hidden="true" tabindex="-1"></a><span class="vs">      message</span><span class="dv">.</span><span class="vs">id = `validation-</span><span class="dv">$</span><span class="vs">{Math</span><span class="dv">.</span><span class="vs">random</span><span class="kw">()</span><span class="dv">.</span><span class="vs">toString</span><span class="kw">(</span><span class="vs">36</span><span class="kw">)</span><span class="dv">.</span><span class="vs">slice</span><span class="kw">(</span><span class="vs">2, 10</span><span class="kw">)</span><span class="vs">}`;</span></span>
+<span id="cb15-34"><a href="#cb15-34" aria-hidden="true" tabindex="-1"></a><span class="vs">      field</span><span class="dv">.</span><span class="vs">append</span><span class="kw">(</span><span class="vs">message</span><span class="kw">)</span><span class="vs">;</span></span>
+<span id="cb15-35"><a href="#cb15-35" aria-hidden="true" tabindex="-1"></a><span class="vs">    }</span></span>
+<span id="cb15-36"><a href="#cb15-36" aria-hidden="true" tabindex="-1"></a><span class="vs">    message</span><span class="dv">.</span><span class="vs">textContent = control</span><span class="dv">.</span><span class="vs">validationMessage;</span></span>
+<span id="cb15-37"><a href="#cb15-37" aria-hidden="true" tabindex="-1"></a><span class="vs">    ids</span><span class="dv">.</span><span class="vs">push</span><span class="kw">(</span><span class="vs">message</span><span class="dv">.</span><span class="vs">id</span><span class="kw">)</span><span class="vs">;</span></span>
+<span id="cb15-38"><a href="#cb15-38" aria-hidden="true" tabindex="-1"></a><span class="vs">  } else message</span><span class="op">?</span><span class="dv">.</span><span class="vs">remove</span><span class="kw">()</span><span class="vs">;</span></span>
+<span id="cb15-39"><a href="#cb15-39" aria-hidden="true" tabindex="-1"></a><span class="vs">  if </span><span class="kw">(</span><span class="vs">ids</span><span class="dv">.</span><span class="vs">length</span><span class="kw">)</span><span class="vs"> control</span><span class="dv">.</span><span class="vs">setAttribute</span><span class="kw">(</span><span class="vs">'aria-describedby', ids</span><span class="dv">.</span><span class="vs">join</span><span class="kw">(</span><span class="vs">' '</span><span class="kw">))</span><span class="vs">;</span></span>
+<span id="cb15-40"><a href="#cb15-40" aria-hidden="true" tabindex="-1"></a><span class="vs">  else control</span><span class="dv">.</span><span class="vs">removeAttribute</span><span class="kw">(</span><span class="vs">'aria-describedby'</span><span class="kw">)</span><span class="vs">;</span></span>
+<span id="cb15-41"><a href="#cb15-41" aria-hidden="true" tabindex="-1"></a><span class="vs">  if </span><span class="kw">(</span><span class="vs">event</span><span class="dv">.</span><span class="vs">type === 'invalid'</span><span class="kw">)</span><span class="vs"> {</span></span>
+<span id="cb15-42"><a href="#cb15-42" aria-hidden="true" tabindex="-1"></a><span class="vs">    event</span><span class="dv">.</span><span class="vs">preventDefault</span><span class="kw">()</span><span class="vs">;</span></span>
+<span id="cb15-43"><a href="#cb15-43" aria-hidden="true" tabindex="-1"></a><span class="vs">    if </span><span class="kw">(</span><span class="pp">[...(control.form?.elements ?? [control]</span><span class="kw">)</span><span class="vs">]</span><span class="dv">.</span><span class="vs">find</span><span class="kw">(</span><span class="vs">item =&gt; !item</span><span class="dv">.</span><span class="vs">validity</span><span class="dv">.</span><span class="vs">valid</span><span class="kw">)</span><span class="vs"> === control</span><span class="er">)</span><span class="vs"> control</span><span class="dv">.</span><span class="vs">focus</span><span class="kw">()</span><span class="vs">;</span></span>
+<span id="cb15-44"><a href="#cb15-44" aria-hidden="true" tabindex="-1"></a><span class="vs">  }</span></span>
+<span id="cb15-45"><a href="#cb15-45" aria-hidden="true" tabindex="-1"></a><span class="vs">}</span></span>
+<span id="cb15-46"><a href="#cb15-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-47"><a href="#cb15-47" aria-hidden="true" tabindex="-1"></a><span class="vs">function changed</span><span class="kw">(</span><span class="vs">event</span><span class="kw">)</span><span class="vs"> {</span></span>
+<span id="cb15-48"><a href="#cb15-48" aria-hidden="true" tabindex="-1"></a><span class="vs">  const control = event</span><span class="dv">.</span><span class="vs">target;</span></span>
+<span id="cb15-49"><a href="#cb15-49" aria-hidden="true" tabindex="-1"></a><span class="vs">  if </span><span class="kw">(</span><span class="vs">!</span><span class="kw">(</span><span class="vs">control instanceof Element</span><span class="kw">))</span><span class="vs"> return;</span></span>
+<span id="cb15-50"><a href="#cb15-50" aria-hidden="true" tabindex="-1"></a><span class="vs">  if </span><span class="kw">(</span><span class="vs">control</span><span class="dv">.</span><span class="vs">form</span><span class="op">?</span><span class="dv">.</span><span class="vs">querySelector</span><span class="kw">(</span><span class="vs">'button</span><span class="pp">[enable]</span><span class="vs">'</span><span class="kw">))</span><span class="vs"> enable</span><span class="kw">(</span><span class="vs">control</span><span class="dv">.</span><span class="vs">form</span><span class="kw">)</span><span class="vs">;</span></span>
+<span id="cb15-51"><a href="#cb15-51" aria-hidden="true" tabindex="-1"></a><span class="vs">  if </span><span class="kw">(</span><span class="vs">control</span><span class="dv">.</span><span class="vs">matches</span><span class="kw">(</span><span class="vs">'input</span><span class="pp">[range]</span><span class="vs">'</span><span class="kw">))</span><span class="vs"> range</span><span class="kw">(</span><span class="vs">control</span><span class="kw">)</span><span class="vs">;</span></span>
+<span id="cb15-52"><a href="#cb15-52" aria-hidden="true" tabindex="-1"></a><span class="vs">  if </span><span class="kw">(</span><span class="vs">control</span><span class="dv">.</span><span class="vs">matches</span><span class="kw">(</span><span class="vs">'input</span><span class="pp">[reveals]</span><span class="vs">'</span><span class="kw">))</span><span class="vs"> document</span><span class="dv">.</span><span class="vs">getElementById</span><span class="kw">(</span><span class="vs">control</span><span class="dv">.</span><span class="vs">getAttribute</span><span class="kw">(</span><span class="vs">'reveals'</span><span class="kw">))</span><span class="dv">.</span><span class="vs">hidden = !control</span><span class="dv">.</span><span class="vs">checked;</span></span>
+<span id="cb15-53"><a href="#cb15-53" aria-hidden="true" tabindex="-1"></a><span class="vs">  if </span><span class="kw">(</span><span class="vs">control</span><span class="dv">.</span><span class="vs">matches</span><span class="kw">(</span><span class="vs">'input, select, textarea'</span><span class="kw">))</span><span class="vs"> {</span></span>
+<span id="cb15-54"><a href="#cb15-54" aria-hidden="true" tabindex="-1"></a><span class="vs">    validity</span><span class="kw">(</span><span class="vs">control, event</span><span class="kw">)</span><span class="vs">;</span></span>
+<span id="cb15-55"><a href="#cb15-55" aria-hidden="true" tabindex="-1"></a><span class="vs">    for </span><span class="kw">(</span><span class="vs">const message of control</span><span class="dv">.</span><span class="vs">form</span><span class="op">?</span><span class="dv">.</span><span class="vs">querySelectorAll</span><span class="kw">(</span><span class="vs">'small</span><span class="pp">[validation]</span><span class="vs">'</span><span class="kw">)</span><span class="vs"> </span><span class="op">??</span><span class="vs"> </span><span class="pp">[]) if (!message.closest('[field]</span><span class="vs">'</span><span class="kw">)</span><span class="er">)</span><span class="vs"> message</span><span class="dv">.</span><span class="vs">remove</span><span class="kw">()</span><span class="vs">;</span></span>
+<span id="cb15-56"><a href="#cb15-56" aria-hidden="true" tabindex="-1"></a><span class="vs">  }</span></span>
+<span id="cb15-57"><a href="#cb15-57" aria-hidden="true" tabindex="-1"></a><span class="vs">}</span></span>
+<span id="cb15-58"><a href="#cb15-58" aria-hidden="true" tabindex="-1"></a><span class="vs">document</span><span class="dv">.</span><span class="vs">addEventListener</span><span class="kw">(</span><span class="vs">'input', changed</span><span class="kw">)</span><span class="vs">;</span></span>
+<span id="cb15-59"><a href="#cb15-59" aria-hidden="true" tabindex="-1"></a><span class="vs">document</span><span class="dv">.</span><span class="vs">addEventListener</span><span class="kw">(</span><span class="vs">'change', changed</span><span class="kw">)</span><span class="vs">;</span></span>
+<span id="cb15-60"><a href="#cb15-60" aria-hidden="true" tabindex="-1"></a><span class="vs">document</span><span class="dv">.</span><span class="vs">addEventListener</span><span class="kw">(</span><span class="vs">'reset', event =&gt; setTimeout</span><span class="kw">(()</span><span class="vs"> =&gt; {</span></span>
+<span id="cb15-61"><a href="#cb15-61" aria-hidden="true" tabindex="-1"></a><span class="vs">  enable</span><span class="kw">(</span><span class="vs">event</span><span class="dv">.</span><span class="vs">target</span><span class="kw">)</span><span class="vs">;</span></span>
+<span id="cb15-62"><a href="#cb15-62" aria-hidden="true" tabindex="-1"></a><span class="vs">  for </span><span class="kw">(</span><span class="vs">const input of event</span><span class="dv">.</span><span class="vs">target</span><span class="dv">.</span><span class="vs">querySelectorAll</span><span class="kw">(</span><span class="vs">'input</span><span class="pp">[range]</span><span class="vs">'</span><span class="kw">))</span><span class="vs"> range</span><span class="kw">(</span><span class="vs">input</span><span class="kw">)</span><span class="vs">;</span></span>
+<span id="cb15-63"><a href="#cb15-63" aria-hidden="true" tabindex="-1"></a><span class="vs">}</span><span class="kw">))</span><span class="vs">;</span></span>
+<span id="cb15-64"><a href="#cb15-64" aria-hidden="true" tabindex="-1"></a><span class="vs">for </span><span class="kw">(</span><span class="vs">const type of </span><span class="pp">['focusout', 'invalid']</span><span class="kw">)</span><span class="vs"> document</span><span class="dv">.</span><span class="vs">addEventListener</span><span class="kw">(</span><span class="vs">type, event =&gt; {</span></span>
+<span id="cb15-65"><a href="#cb15-65" aria-hidden="true" tabindex="-1"></a><span class="vs">  if </span><span class="kw">(</span><span class="vs">event</span><span class="dv">.</span><span class="vs">target</span><span class="dv">.</span><span class="vs">matches</span><span class="kw">(</span><span class="vs">'input, select, textarea'</span><span class="kw">))</span><span class="vs"> validity</span><span class="kw">(</span><span class="vs">event</span><span class="dv">.</span><span class="vs">target, event</span><span class="kw">)</span><span class="vs">;</span></span>
+<span id="cb15-66"><a href="#cb15-66" aria-hidden="true" tabindex="-1"></a><span class="vs">}, {capture: type === 'invalid'}</span><span class="kw">)</span><span class="vs">;</span></span>
+<span id="cb15-67"><a href="#cb15-67" aria-hidden="true" tabindex="-1"></a><span class="vs">'''</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="d98f5466" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-25T21:02:27.028032+00:00&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-25T21:02:27.029023+00:00&quot;,&quot;total&quot;:0.0009959709999947108}}" data-asset="browser.js" data-execution_count="15">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>_actions <span class="op">=</span> <span class="vs">r'''</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="vs">document</span><span class="dv">.</span><span class="vs">addEventListener</span><span class="kw">(</span><span class="vs">'click', async event =&gt; {</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="vs">  const button = event</span><span class="dv">.</span><span class="vs">target</span><span class="dv">.</span><span class="vs">closest</span><span class="kw">(</span><span class="vs">'button'</span><span class="kw">)</span><span class="vs">;</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="vs">  if </span><span class="kw">(</span><span class="vs">!button</span><span class="kw">)</span><span class="vs"> return;</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="vs">  if </span><span class="kw">(</span><span class="vs">button</span><span class="dv">.</span><span class="vs">hasAttribute</span><span class="kw">(</span><span class="vs">'dismiss'</span><span class="kw">))</span><span class="vs"> button</span><span class="dv">.</span><span class="vs">closest</span><span class="kw">(</span><span class="vs">'</span><span class="pp">[alert]</span><span class="vs">, </span><span class="pp">[toast]</span><span class="vs">'</span><span class="kw">)</span><span class="op">?</span><span class="dv">.</span><span class="vs">remove</span><span class="kw">()</span><span class="vs">;</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a><span class="vs">  if </span><span class="kw">(</span><span class="vs">button</span><span class="dv">.</span><span class="vs">matches</span><span class="kw">(</span><span class="vs">'</span><span class="pp">[copy]</span><span class="vs">, </span><span class="pp">[copyfor]</span><span class="vs">'</span><span class="kw">))</span><span class="vs"> {</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="vs">    const target = document</span><span class="dv">.</span><span class="vs">getElementById</span><span class="kw">(</span><span class="vs">button</span><span class="dv">.</span><span class="vs">getAttribute</span><span class="kw">(</span><span class="vs">'copyfor'</span><span class="kw">))</span><span class="vs">;</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a><span class="vs">    const text = button</span><span class="dv">.</span><span class="vs">hasAttribute</span><span class="kw">(</span><span class="vs">'copy'</span><span class="kw">)</span><span class="vs"> </span><span class="op">?</span><span class="vs"> button</span><span class="dv">.</span><span class="vs">getAttribute</span><span class="kw">(</span><span class="vs">'copy'</span><span class="kw">)</span><span class="vs"> : target</span><span class="op">?</span><span class="dv">.</span><span class="vs">matches</span><span class="kw">(</span><span class="vs">'input, textarea, select'</span><span class="kw">)</span><span class="vs"> </span><span class="op">?</span><span class="vs"> target</span><span class="dv">.</span><span class="vs">value : target</span><span class="op">?</span><span class="dv">.</span><span class="vs">textContent;</span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a><span class="vs">    if </span><span class="kw">(</span><span class="vs">text == null</span><span class="kw">)</span><span class="vs"> return;</span></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a><span class="vs">    await copyText</span><span class="kw">(</span><span class="vs">text</span><span class="kw">)</span><span class="vs">;</span></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a><span class="vs">    if </span><span class="kw">(</span><span class="vs">!button</span><span class="dv">.</span><span class="vs">isConnected</span><span class="kw">)</span><span class="vs"> return;</span></span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a><span class="vs">    button</span><span class="dv">.</span><span class="vs">_label </span><span class="op">??</span><span class="vs">= button</span><span class="dv">.</span><span class="vs">getAttribute</span><span class="kw">(</span><span class="vs">'aria-label'</span><span class="kw">)</span><span class="vs"> </span><span class="op">??</span><span class="vs"> '';</span></span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a><span class="vs">    button</span><span class="dv">.</span><span class="vs">toggleAttribute</span><span class="kw">(</span><span class="vs">'copied', true</span><span class="kw">)</span><span class="vs">;</span></span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a><span class="vs">    if </span><span class="kw">(</span><span class="vs">button</span><span class="dv">.</span><span class="vs">_label</span><span class="kw">)</span><span class="vs"> button</span><span class="dv">.</span><span class="vs">setAttribute</span><span class="kw">(</span><span class="vs">'aria-label', 'Copied'</span><span class="kw">)</span><span class="vs">;</span></span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a><span class="vs">    clearTimeout</span><span class="kw">(</span><span class="vs">button</span><span class="dv">.</span><span class="vs">_copied</span><span class="kw">)</span><span class="vs">;</span></span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a><span class="vs">    button</span><span class="dv">.</span><span class="vs">_copied = setTimeout</span><span class="kw">(()</span><span class="vs"> =&gt; {</span></span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a><span class="vs">      button</span><span class="dv">.</span><span class="vs">removeAttribute</span><span class="kw">(</span><span class="vs">'copied'</span><span class="kw">)</span><span class="vs">;</span></span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a><span class="vs">      if </span><span class="kw">(</span><span class="vs">button</span><span class="dv">.</span><span class="vs">_label</span><span class="kw">)</span><span class="vs"> button</span><span class="dv">.</span><span class="vs">setAttribute</span><span class="kw">(</span><span class="vs">'aria-label', button</span><span class="dv">.</span><span class="vs">_label</span><span class="kw">)</span><span class="vs">;</span></span>
+<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a><span class="vs">    }, 1500</span><span class="kw">)</span><span class="vs">;</span></span>
+<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a><span class="vs">  }</span></span>
+<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a><span class="vs">  if </span><span class="kw">(</span><span class="vs">button</span><span class="dv">.</span><span class="vs">hasAttribute</span><span class="kw">(</span><span class="vs">'commandfor'</span><span class="kw">)</span><span class="vs"> &amp;&amp; !</span><span class="kw">(</span><span class="vs">'commandForElement' in button</span><span class="kw">))</span><span class="vs"> {</span></span>
+<span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a><span class="vs">    const target = document</span><span class="dv">.</span><span class="vs">getElementById</span><span class="kw">(</span><span class="vs">button</span><span class="dv">.</span><span class="vs">getAttribute</span><span class="kw">(</span><span class="vs">'commandfor'</span><span class="kw">))</span><span class="vs">, command = button</span><span class="dv">.</span><span class="vs">getAttribute</span><span class="kw">(</span><span class="vs">'command'</span><span class="kw">)</span><span class="vs">;</span></span>
+<span id="cb16-23"><a href="#cb16-23" aria-hidden="true" tabindex="-1"></a><span class="vs">    if </span><span class="kw">(</span><span class="vs">command === 'show-modal'</span><span class="kw">)</span><span class="vs"> target</span><span class="dv">.</span><span class="vs">showModal</span><span class="kw">()</span><span class="vs">;</span></span>
+<span id="cb16-24"><a href="#cb16-24" aria-hidden="true" tabindex="-1"></a><span class="vs">    else if </span><span class="kw">(</span><span class="vs">command === 'close'</span><span class="kw">)</span><span class="vs"> target</span><span class="dv">.</span><span class="vs">close</span><span class="kw">()</span><span class="vs">;</span></span>
+<span id="cb16-25"><a href="#cb16-25" aria-hidden="true" tabindex="-1"></a><span class="vs">  }</span></span>
+<span id="cb16-26"><a href="#cb16-26" aria-hidden="true" tabindex="-1"></a><span class="vs">}</span><span class="kw">)</span><span class="vs">;</span></span>
+<span id="cb16-27"><a href="#cb16-27" aria-hidden="true" tabindex="-1"></a><span class="vs">document</span><span class="dv">.</span><span class="vs">addEventListener</span><span class="kw">(</span><span class="vs">'animationend', event =&gt; {</span></span>
+<span id="cb16-28"><a href="#cb16-28" aria-hidden="true" tabindex="-1"></a><span class="vs">  if </span><span class="kw">(</span><span class="vs">event</span><span class="dv">.</span><span class="vs">animationName === 'ui-toast-lifetime' &amp;&amp; event</span><span class="dv">.</span><span class="vs">target</span><span class="dv">.</span><span class="vs">matches</span><span class="kw">(</span><span class="vs">'</span><span class="pp">[toast]</span><span class="vs">'</span><span class="kw">))</span><span class="vs"> event</span><span class="dv">.</span><span class="vs">target</span><span class="dv">.</span><span class="vs">remove</span><span class="kw">()</span><span class="vs">;</span></span>
+<span id="cb16-29"><a href="#cb16-29" aria-hidden="true" tabindex="-1"></a><span class="vs">}</span><span class="kw">)</span><span class="vs">;</span></span>
+<span id="cb16-30"><a href="#cb16-30" aria-hidden="true" tabindex="-1"></a><span class="vs">for </span><span class="kw">(</span><span class="vs">const type of </span><span class="pp">['htmx:after-swap', 'htmx:after:swap', 'htmx-after-swap']</span><span class="kw">)</span><span class="vs"> document</span><span class="dv">.</span><span class="vs">addEventListener</span><span class="kw">(</span><span class="vs">type, event =&gt; {</span></span>
+<span id="cb16-31"><a href="#cb16-31" aria-hidden="true" tabindex="-1"></a><span class="vs">  const dialog = event</span><span class="dv">.</span><span class="vs">target</span><span class="dv">.</span><span class="vs">closest</span><span class="kw">(</span><span class="vs">'dialog</span><span class="pp">[dialog]</span><span class="vs">'</span><span class="kw">)</span><span class="vs">;</span></span>
+<span id="cb16-32"><a href="#cb16-32" aria-hidden="true" tabindex="-1"></a><span class="vs">  if </span><span class="kw">(</span><span class="vs">dialog &amp;&amp; event</span><span class="dv">.</span><span class="vs">target !== dialog &amp;&amp; !dialog</span><span class="dv">.</span><span class="vs">open</span><span class="kw">)</span><span class="vs"> dialog</span><span class="dv">.</span><span class="vs">showModal</span><span class="kw">()</span><span class="vs">;</span></span>
+<span id="cb16-33"><a href="#cb16-33" aria-hidden="true" tabindex="-1"></a><span class="vs">}</span><span class="kw">)</span><span class="vs">;</span></span>
+<span id="cb16-34"><a href="#cb16-34" aria-hidden="true" tabindex="-1"></a><span class="vs">'''</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="1ff808cb" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-25T21:02:27.029142+00:00&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-25T21:02:27.030386+00:00&quot;,&quot;total&quot;:0.0012474990000015396}}" data-asset="browser.js" data-execution_count="16">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>_mounts <span class="op">=</span> <span class="vs">r'''</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="vs">const mounted = new WeakMap</span><span class="kw">()</span><span class="vs">;</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="vs">const tabs = '</span><span class="pp">[tabs]</span><span class="vs">, </span><span class="pp">[tabs]</span><span class="vs"> </span><span class="pp">[role=tablist]</span><span class="vs">';</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="vs">const navbar = '</span><span class="pp">[navbar]</span><span class="vs">, </span><span class="pp">[navbar]</span><span class="vs"> &gt; </span><span class="pp">[navbar-row]</span><span class="vs">, </span><span class="pp">[navbar-row]</span><span class="vs"> &gt; nav, </span><span class="pp">[navbar-row]</span><span class="vs"> &gt; </span><span class="pp">[navbar-toggle]</span><span class="vs">';</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="vs">const selector = `</span><span class="dv">$</span><span class="vs">{tabs}, </span><span class="dv">$</span><span class="vs">{navbar}, </span><span class="pp">[popup][popover]</span><span class="vs">, </span><span class="pp">[popovertarget]</span><span class="vs">, </span><span class="pp">[toolbar][role=toolbar]</span><span class="vs">, </span><span class="pp">[toaster]</span><span class="vs">, input</span><span class="pp">[range]</span><span class="vs">, button</span><span class="pp">[enable]</span><span class="vs">, </span><span class="pp">[copy]</span><span class="vs">, </span><span class="pp">[copyfor]</span><span class="vs">`;</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="vs">function own</span><span class="kw">(</span><span class="vs">elements, dispose</span><span class="kw">)</span><span class="vs"> {</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a><span class="vs">  const stop = </span><span class="kw">()</span><span class="vs"> =&gt; { dispose</span><span class="kw">()</span><span class="vs">; for </span><span class="kw">(</span><span class="vs">const element of elements</span><span class="kw">)</span><span class="vs"> mounted</span><span class="dv">.</span><span class="vs">delete</span><span class="kw">(</span><span class="vs">element</span><span class="kw">)</span><span class="vs">; };</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a><span class="vs">  for </span><span class="kw">(</span><span class="vs">const element of elements</span><span class="kw">)</span><span class="vs"> mounted</span><span class="dv">.</span><span class="vs">set</span><span class="kw">(</span><span class="vs">element, stop</span><span class="kw">)</span><span class="vs">;</span></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a><span class="vs">}</span></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a><span class="vs">function mount</span><span class="kw">(</span><span class="vs">element</span><span class="kw">)</span><span class="vs"> {</span></span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a><span class="vs">  if </span><span class="kw">(</span><span class="vs">mounted</span><span class="dv">.</span><span class="vs">has</span><span class="kw">(</span><span class="vs">element</span><span class="kw">))</span><span class="vs"> return;</span></span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a><span class="vs">  if </span><span class="kw">(</span><span class="vs">element</span><span class="dv">.</span><span class="vs">matches</span><span class="kw">(</span><span class="vs">'</span><span class="pp">[popovertarget]</span><span class="vs">'</span><span class="kw">))</span><span class="vs"> {</span></span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a><span class="vs">    const panel = element</span><span class="dv">.</span><span class="vs">popoverTargetElement;</span></span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a><span class="vs">    if </span><span class="kw">(</span><span class="vs">panel</span><span class="op">?</span><span class="dv">.</span><span class="vs">matches</span><span class="kw">(</span><span class="vs">'</span><span class="pp">[popup]</span><span class="vs">'</span><span class="kw">))</span><span class="vs"> mount</span><span class="kw">(</span><span class="vs">panel</span><span class="kw">)</span><span class="vs">;</span></span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a><span class="vs">  } else if </span><span class="kw">(</span><span class="vs">element</span><span class="dv">.</span><span class="vs">matches</span><span class="kw">(</span><span class="vs">'</span><span class="pp">[popup][popover]</span><span class="vs">'</span><span class="kw">))</span><span class="vs"> {</span></span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a><span class="vs">    const trigger = document</span><span class="dv">.</span><span class="vs">querySelector</span><span class="kw">(</span><span class="vs">`</span><span class="pp">[popovertarget="${CSS.escape(element.id)}"]</span><span class="vs">`</span><span class="kw">)</span><span class="vs">;</span></span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a><span class="vs">    if </span><span class="kw">(</span><span class="vs">!trigger</span><span class="kw">)</span><span class="vs"> return;</span></span>
+<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a><span class="vs">    const stop = mountPopover</span><span class="kw">(</span><span class="vs">trigger, element, {side: element</span><span class="dv">.</span><span class="vs">dataset</span><span class="dv">.</span><span class="vs">side, align: element</span><span class="dv">.</span><span class="vs">dataset</span><span class="dv">.</span><span class="vs">align, sideOffset: </span><span class="op">+</span><span class="kw">(</span><span class="vs">element</span><span class="dv">.</span><span class="vs">dataset</span><span class="dv">.</span><span class="vs">sideOffset </span><span class="op">??</span><span class="vs"> 6</span><span class="kw">)</span><span class="vs">}</span><span class="kw">)</span><span class="vs">;</span></span>
+<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a><span class="vs">    const hover = element</span><span class="dv">.</span><span class="vs">hasAttribute</span><span class="kw">(</span><span class="vs">'hovercard'</span><span class="kw">)</span><span class="vs"> </span><span class="op">?</span><span class="vs"> mountHoverPopover</span><span class="kw">(</span><span class="vs">trigger, element</span><span class="kw">)</span><span class="vs"> : undefined;</span></span>
+<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a><span class="vs">    own</span><span class="kw">(</span><span class="pp">[element, trigger]</span><span class="vs">, </span><span class="kw">()</span><span class="vs"> =&gt; { hover</span><span class="op">?</span><span class="dv">.</span><span class="kw">()</span><span class="vs">; stop</span><span class="kw">()</span><span class="vs">; }</span><span class="kw">)</span><span class="vs">;</span></span>
+<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a><span class="vs">  } else if </span><span class="kw">(</span><span class="vs">element</span><span class="dv">.</span><span class="vs">matches</span><span class="kw">(</span><span class="vs">tabs</span><span class="kw">))</span><span class="vs"> {</span></span>
+<span id="cb17-22"><a href="#cb17-22" aria-hidden="true" tabindex="-1"></a><span class="vs">    const root = element</span><span class="dv">.</span><span class="vs">closest</span><span class="kw">(</span><span class="vs">'</span><span class="pp">[tabs]</span><span class="vs">'</span><span class="kw">)</span><span class="vs">, list = root</span><span class="op">?</span><span class="dv">.</span><span class="vs">querySelector</span><span class="kw">(</span><span class="vs">'</span><span class="pp">[role=tablist]</span><span class="vs">'</span><span class="kw">)</span><span class="vs">;</span></span>
+<span id="cb17-23"><a href="#cb17-23" aria-hidden="true" tabindex="-1"></a><span class="vs">    if </span><span class="kw">(</span><span class="vs">list &amp;&amp; !mounted</span><span class="dv">.</span><span class="vs">has</span><span class="kw">(</span><span class="vs">root</span><span class="kw">))</span><span class="vs"> own</span><span class="kw">(</span><span class="pp">[root, list]</span><span class="vs">, mountTabs</span><span class="kw">(</span><span class="vs">root, {activationMode: root</span><span class="dv">.</span><span class="vs">dataset</span><span class="dv">.</span><span class="vs">activationMode}</span><span class="kw">)</span><span class="dv">.</span><span class="vs">dispose</span><span class="kw">)</span><span class="vs">;</span></span>
+<span id="cb17-24"><a href="#cb17-24" aria-hidden="true" tabindex="-1"></a><span class="vs">  } else if </span><span class="kw">(</span><span class="vs">element</span><span class="dv">.</span><span class="vs">matches</span><span class="kw">(</span><span class="vs">'</span><span class="pp">[toolbar][role=toolbar]</span><span class="vs">'</span><span class="kw">))</span><span class="vs"> own</span><span class="kw">(</span><span class="pp">[element]</span><span class="vs">, mountToolbar</span><span class="kw">(</span><span class="vs">element</span><span class="kw">))</span><span class="vs">;</span></span>
+<span id="cb17-25"><a href="#cb17-25" aria-hidden="true" tabindex="-1"></a><span class="vs">  else if </span><span class="kw">(</span><span class="vs">element</span><span class="dv">.</span><span class="vs">matches</span><span class="kw">(</span><span class="vs">navbar</span><span class="kw">))</span><span class="vs"> {</span></span>
+<span id="cb17-26"><a href="#cb17-26" aria-hidden="true" tabindex="-1"></a><span class="vs">    const root = element</span><span class="dv">.</span><span class="vs">closest</span><span class="kw">(</span><span class="vs">'</span><span class="pp">[navbar]</span><span class="vs">'</span><span class="kw">)</span><span class="vs">, row = root</span><span class="op">?</span><span class="dv">.</span><span class="vs">querySelector</span><span class="kw">(</span><span class="vs">':scope &gt; </span><span class="pp">[navbar-row]</span><span class="vs">'</span><span class="kw">)</span><span class="vs">;</span></span>
+<span id="cb17-27"><a href="#cb17-27" aria-hidden="true" tabindex="-1"></a><span class="vs">    const nav = row</span><span class="op">?</span><span class="dv">.</span><span class="vs">querySelector</span><span class="kw">(</span><span class="vs">':scope &gt; nav'</span><span class="kw">)</span><span class="vs">, toggle = row</span><span class="op">?</span><span class="dv">.</span><span class="vs">querySelector</span><span class="kw">(</span><span class="vs">':scope &gt; </span><span class="pp">[navbar-toggle]</span><span class="vs">'</span><span class="kw">)</span><span class="vs">;</span></span>
+<span id="cb17-28"><a href="#cb17-28" aria-hidden="true" tabindex="-1"></a><span class="vs">    if </span><span class="kw">(</span><span class="vs">nav &amp;&amp; toggle </span><span class="cf">||</span><span class="vs"> root</span><span class="op">?</span><span class="dv">.</span><span class="vs">hasAttribute</span><span class="kw">(</span><span class="vs">'navbar-sticky'</span><span class="kw">))</span><span class="vs"> {</span></span>
+<span id="cb17-29"><a href="#cb17-29" aria-hidden="true" tabindex="-1"></a><span class="vs">      mounted</span><span class="dv">.</span><span class="vs">get</span><span class="kw">(</span><span class="vs">root</span><span class="kw">)</span><span class="op">?</span><span class="dv">.</span><span class="kw">()</span><span class="vs">;</span></span>
+<span id="cb17-30"><a href="#cb17-30" aria-hidden="true" tabindex="-1"></a><span class="vs">      own</span><span class="kw">(</span><span class="pp">[root, row, nav, toggle]</span><span class="dv">.</span><span class="vs">filter</span><span class="kw">(</span><span class="vs">Boolean</span><span class="kw">)</span><span class="vs">, mountNavbar</span><span class="kw">(</span><span class="vs">root</span><span class="kw">)</span><span class="dv">.</span><span class="vs">dispose</span><span class="kw">)</span><span class="vs">;</span></span>
+<span id="cb17-31"><a href="#cb17-31" aria-hidden="true" tabindex="-1"></a><span class="vs">    }</span></span>
+<span id="cb17-32"><a href="#cb17-32" aria-hidden="true" tabindex="-1"></a><span class="vs">  } else if </span><span class="kw">(</span><span class="vs">element</span><span class="dv">.</span><span class="vs">matches</span><span class="kw">(</span><span class="vs">'</span><span class="pp">[toaster]</span><span class="vs">'</span><span class="kw">))</span><span class="vs"> { if </span><span class="kw">(</span><span class="vs">!element</span><span class="dv">.</span><span class="vs">matches</span><span class="kw">(</span><span class="vs">':popover-open'</span><span class="kw">))</span><span class="vs"> element</span><span class="dv">.</span><span class="vs">showPopover</span><span class="kw">()</span><span class="vs">; }</span></span>
+<span id="cb17-33"><a href="#cb17-33" aria-hidden="true" tabindex="-1"></a><span class="vs">  else if </span><span class="kw">(</span><span class="vs">element</span><span class="dv">.</span><span class="vs">matches</span><span class="kw">(</span><span class="vs">'input</span><span class="pp">[range]</span><span class="vs">'</span><span class="kw">))</span><span class="vs"> range</span><span class="kw">(</span><span class="vs">element</span><span class="kw">)</span><span class="vs">;</span></span>
+<span id="cb17-34"><a href="#cb17-34" aria-hidden="true" tabindex="-1"></a><span class="vs">  else if </span><span class="kw">(</span><span class="vs">element</span><span class="dv">.</span><span class="vs">matches</span><span class="kw">(</span><span class="vs">'button</span><span class="pp">[enable]</span><span class="vs">'</span><span class="kw">))</span><span class="vs"> enable</span><span class="kw">(</span><span class="vs">element</span><span class="dv">.</span><span class="vs">form</span><span class="kw">)</span><span class="vs">;</span></span>
+<span id="cb17-35"><a href="#cb17-35" aria-hidden="true" tabindex="-1"></a><span class="vs">}</span></span>
+<span id="cb17-36"><a href="#cb17-36" aria-hidden="true" tabindex="-1"></a><span class="vs">function cleanup</span><span class="kw">(</span><span class="vs">element</span><span class="kw">)</span><span class="vs"> {</span></span>
+<span id="cb17-37"><a href="#cb17-37" aria-hidden="true" tabindex="-1"></a><span class="vs">  mounted</span><span class="dv">.</span><span class="vs">get</span><span class="kw">(</span><span class="vs">element</span><span class="kw">)</span><span class="op">?</span><span class="dv">.</span><span class="kw">()</span><span class="vs">;</span></span>
+<span id="cb17-38"><a href="#cb17-38" aria-hidden="true" tabindex="-1"></a><span class="vs">  mounted</span><span class="dv">.</span><span class="vs">delete</span><span class="kw">(</span><span class="vs">element</span><span class="kw">)</span><span class="vs">;</span></span>
+<span id="cb17-39"><a href="#cb17-39" aria-hidden="true" tabindex="-1"></a><span class="vs">  clearTimeout</span><span class="kw">(</span><span class="vs">element</span><span class="dv">.</span><span class="vs">_copied</span><span class="kw">)</span><span class="vs">;</span></span>
+<span id="cb17-40"><a href="#cb17-40" aria-hidden="true" tabindex="-1"></a><span class="vs">}</span></span>
+<span id="cb17-41"><a href="#cb17-41" aria-hidden="true" tabindex="-1"></a><span class="vs">function visit</span><span class="kw">(</span><span class="vs">root, action, match = selector</span><span class="kw">)</span><span class="vs"> {</span></span>
+<span id="cb17-42"><a href="#cb17-42" aria-hidden="true" tabindex="-1"></a><span class="vs">  if </span><span class="kw">(</span><span class="vs">!</span><span class="kw">(</span><span class="vs">root instanceof Element</span><span class="kw">))</span><span class="vs"> return;</span></span>
+<span id="cb17-43"><a href="#cb17-43" aria-hidden="true" tabindex="-1"></a><span class="vs">  if </span><span class="kw">(</span><span class="vs">root</span><span class="dv">.</span><span class="vs">matches</span><span class="kw">(</span><span class="vs">match</span><span class="kw">))</span><span class="vs"> action</span><span class="kw">(</span><span class="vs">root</span><span class="kw">)</span><span class="vs">;</span></span>
+<span id="cb17-44"><a href="#cb17-44" aria-hidden="true" tabindex="-1"></a><span class="vs">  root</span><span class="dv">.</span><span class="vs">querySelectorAll</span><span class="kw">(</span><span class="vs">match</span><span class="kw">)</span><span class="dv">.</span><span class="vs">forEach</span><span class="kw">(</span><span class="vs">action</span><span class="kw">)</span><span class="vs">;</span></span>
+<span id="cb17-45"><a href="#cb17-45" aria-hidden="true" tabindex="-1"></a><span class="vs">}</span></span>
+<span id="cb17-46"><a href="#cb17-46" aria-hidden="true" tabindex="-1"></a><span class="vs">visit</span><span class="kw">(</span><span class="vs">document</span><span class="dv">.</span><span class="vs">body, mount</span><span class="kw">)</span><span class="vs">;</span></span>
+<span id="cb17-47"><a href="#cb17-47" aria-hidden="true" tabindex="-1"></a><span class="vs">new MutationObserver</span><span class="kw">(</span><span class="vs">records =&gt; {</span></span>
+<span id="cb17-48"><a href="#cb17-48" aria-hidden="true" tabindex="-1"></a><span class="vs">  for </span><span class="kw">(</span><span class="vs">const record of records</span><span class="kw">)</span><span class="vs"> for </span><span class="kw">(</span><span class="vs">const node of record</span><span class="dv">.</span><span class="vs">removedNodes</span><span class="kw">)</span><span class="vs"> if </span><span class="kw">(</span><span class="vs">!node</span><span class="dv">.</span><span class="vs">isConnected</span><span class="kw">)</span><span class="vs"> visit</span><span class="kw">(</span><span class="vs">node, cleanup, '</span><span class="op">*</span><span class="vs">'</span><span class="kw">)</span><span class="vs">;</span></span>
+<span id="cb17-49"><a href="#cb17-49" aria-hidden="true" tabindex="-1"></a><span class="vs">  for </span><span class="kw">(</span><span class="vs">const record of records</span><span class="kw">)</span><span class="vs"> for </span><span class="kw">(</span><span class="vs">const node of record</span><span class="dv">.</span><span class="vs">addedNodes</span><span class="kw">)</span><span class="vs"> if </span><span class="kw">(</span><span class="vs">node</span><span class="dv">.</span><span class="vs">isConnected</span><span class="kw">)</span><span class="vs"> visit</span><span class="kw">(</span><span class="vs">node, mount</span><span class="kw">)</span><span class="vs">;</span></span>
+<span id="cb17-50"><a href="#cb17-50" aria-hidden="true" tabindex="-1"></a><span class="vs">}</span><span class="kw">)</span><span class="dv">.</span><span class="vs">observe</span><span class="kw">(</span><span class="vs">document</span><span class="dv">.</span><span class="vs">body, {childList: true, subtree: true}</span><span class="kw">)</span><span class="vs">;</span></span>
+<span id="cb17-51"><a href="#cb17-51" aria-hidden="true" tabindex="-1"></a><span class="vs">'''</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/AnswerDotAI\.github\.io\/answerui");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+      window.quartoDecorateExternalLinks = function (root) {
+     var links = (root || window.document).querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+          if (!link.classList.contains('no-external-icon')) {
+          }
+        }
+      }
+      };
+      window.quartoDecorateExternalLinks(window.document);
+    // Esc closes the popup (WCAG 1.4.13) and focus leaving both trigger and
+    // popup closes it (WCAG 2.4.11); tippy handles neither for interactive popups.
+    const hideOnEscAndFocusOut = {
+      name: 'hideOnEscAndFocusOut',
+      defaultValue: true,
+      fn(instance) {
+        const dismiss = () => {
+          // A show scheduled by the trigger delay would otherwise reopen it
+          instance.clearDelayTimeouts();
+          instance.hide();
+        };
+        const onKeyDown = (event) => {
+          if (event.key !== 'Escape') {
+            return;
+          }
+          // Keep Esc from also reaching page handlers (e.g. reveal.js overview),
+          // except an open reveal.js slide menu, which Esc should close too.
+          // The menu handles keys only when its keyboard option is on.
+          const menuHandlesEsc = window.Reveal?.getPlugin?.('menu')?.isOpen() &&
+            window.Reveal.getConfig().menu?.keyboard !== false;
+          if (!menuHandlesEsc) {
+            event.stopPropagation();
+          }
+          if (instance.popper.contains(window.document.activeElement)) {
+            // Disabled while refocusing so the focus trigger does not reopen it
+            instance.disable();
+            instance.reference.focus();
+            instance.enable();
+          }
+          dismiss();
+        };
+        const onFocusOut = (event) => {
+          const target = event.relatedTarget;
+          if (target && !instance.reference.contains(target) &&
+              !instance.popper.contains(target)) {
+            dismiss();
+          }
+        };
+        // On the trigger too: a click trigger (code-annotations: select) has no
+        // blur handling. Attached for the instance's lifetime so leaving the
+        // trigger also cancels a show still pending on the trigger delay.
+        instance.reference.addEventListener('focusout', onFocusOut);
+        return {
+          onShow() {
+            window.document.addEventListener('keydown', onKeyDown, true);
+            instance.popper.addEventListener('focusout', onFocusOut);
+          },
+          onHide() {
+            window.document.removeEventListener('keydown', onKeyDown, true);
+            instance.popper.removeEventListener('focusout', onFocusOut);
+          },
+          onDestroy() {
+            instance.reference.removeEventListener('focusout', onFocusOut);
+          },
+        };
+      },
+    };
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+        plugins: [hideOnEscAndFocusOut],
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          // Each band is positioned against its own containing block, which is
+          // not the offsetParent of the lines, so place it from client rects.
+          const placeBand = (band, firstEl, lastEl, codeBlock) => {
+            const container = band.offsetParent;
+            if (container === null) {
+              return;
+            }
+            const containerRect = container.getBoundingClientRect();
+            // Reveal.js scales slides with a transform, so convert client
+            // pixels back to the CSS pixels of the container.
+            const scale = containerRect.height / container.offsetHeight || 1;
+            const firstRect = firstEl.getBoundingClientRect();
+            const lastRect = lastEl.getBoundingClientRect();
+            const top = (firstRect.top - containerRect.top) / scale - container.clientTop + container.scrollTop;
+            const height = (lastRect.bottom - firstRect.top) / scale;
+            band.style.top = top - 2 + "px";
+            band.style.height = height + 4 + "px";
+            if (codeBlock) {
+              // Without the copy button wrapper, the containing block is wider
+              // than the code block, so span the code block explicitly.
+              const blockRect = codeBlock.getBoundingClientRect();
+              band.style.left = (blockRect.left - containerRect.left) / scale - container.clientLeft + container.scrollLeft + "px";
+              band.style.width = blockRect.width / scale + "px";
+            }
+          };
+          if (lineIds.length > 0) {
+            const el = window.document.getElementById(lineIds[0]);
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const parent = el.parentElement.parentElement;
+            // cook up a div (if necessary) and position it
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            placeBand(div, el, lastEl, parent.closest("div.sourceCode") || parent);
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            placeBand(gutterDiv, el, lastEl);
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+  <script type="application/javascript">
+  window.quartoScrollableRegionsLabels = {"code":"Scrollable code","output":"Scrollable output"};
+  </script>
+</div> <!-- /content -->
+
+
+
+
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/AnswerDotAI/answerui/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>

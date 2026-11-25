@@ -17,7 +17,6 @@ import answerui.behaviors  # installs Registry.build_js
 from fastlucide.icons import spritesheet
 import hashlib, mimetypes
 from starlette.responses import Response
-from base64 import b64encode
 from functools import cache
 from . import assets as shared_assets
 
@@ -40,7 +39,7 @@ class _Lazy:
 def _inline_browser():
     body = (shared_assets/'browser.js').read_text()
     for name in ('floating.js', 'interactions.js', 'fit.js', 'copy.js'):
-        url = 'data:text/javascript;base64,' + b64encode((shared_assets/name).read_bytes()).decode()
+        url = to_data_url((shared_assets/name).read_bytes(), 'text/javascript')
         body = body.replace(f"'./{name}'", repr(url))
     return body
 
